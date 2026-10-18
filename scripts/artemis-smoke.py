@@ -145,6 +145,13 @@ async def main():
                 await locate("Download",attempts=5)
         await locate("BailaCue-ARTEMIS",attempts=8)
         await field("Video title","ARTEMIS practice")
+        await locate("Choose labels",scrolls=3)
+        await field("Search labels","ARTEMIS Artist")
+        await locate("Create “ARTEMIS Artist”",scrolls=3)
+        elements = await observe("label-created")
+        if not any("Remove label ARTEMIS Artist" in label(e) for e in elements):
+            raise AssertionError("Created artist label was not selected")
+        await locate("Done choosing labels",scrolls=2)
         await locate("Add to my library",scrolls=10)
         for _ in range(20):
             elements = await observe("imported-video")
@@ -199,6 +206,16 @@ async def main():
             await asyncio.sleep(1)
         if not saved: raise AssertionError("Native Photos save was not confirmed")
         report["checks"].append({"check":"Explicit native Save new clip to Photos", "result":"passed"})
+        await locate("Remove label ARTEMIS Artist",scrolls=12)
+        await locate("Choose labels",scrolls=2)
+        await field("Search labels","artemis artist")
+        elements = await observe("label-existing")
+        if any("Create “artemis artist”" in label(e) for e in elements):
+            raise AssertionError("Existing artist label incorrectly offered as new")
+        await locate("Select ARTEMIS Artist",scrolls=3)
+        await locate("Done choosing labels",scrolls=2)
+        await locate("Save details",scrolls=3)
+        report["checks"].append({"check":"Native artist label creation, saved reuse and case-insensitive selection", "result":"passed"})
     report["status"] = "passed"
 
 try:

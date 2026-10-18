@@ -48,8 +48,19 @@ test("import → label → loop → note → daily pick → persisted local vide
     .getByRole("textbox", { name: "Video title", exact: true })
     .fill("Bachata turn practice");
   await page
-    .getByRole("textbox", { name: "Labels, separated by commas", exact: true })
-    .fill("Footwork, Beginner");
+    .getByRole("button", { name: "Choose labels", exact: true })
+    .click();
+  for (const label of ["Footwork", "Beginner"]) {
+    await page
+      .getByRole("textbox", { name: "Search labels", exact: true })
+      .fill(label);
+    await page
+      .getByRole("button", { name: `Create “${label}”`, exact: true })
+      .click();
+  }
+  await page
+    .getByRole("button", { name: "Done choosing labels", exact: true })
+    .click();
   await page.getByRole("button", { name: "Add to my library" }).click();
   await expect(
     page
@@ -209,4 +220,96 @@ test("dark theme and collection creation", async ({ page }) => {
   await expect(page.getByText("Sunday basics")).toBeVisible();
   await page.getByRole("button", { name: "Open", exact: true }).click();
   await expect(page.getByText("A fresh collection")).toBeVisible();
+});
+
+test("artist and video-type labels can be created, reused, edited and retained after reload", async ({
+  page,
+}) => {
+  await page.goto("/upload");
+  const importVideo = async (title: string) => {
+    const chooser = page.waitForEvent("filechooser");
+    await page
+      .getByRole("button", { name: "Choose a video", exact: true })
+      .click();
+    await (await chooser).setFiles(fixture);
+    await page
+      .getByRole("textbox", { name: "Video title", exact: true })
+      .fill(title);
+    await page
+      .getByRole("button", { name: "Choose labels", exact: true })
+      .click();
+  };
+  await importVideo("Artist demo");
+  for (const label of ["Partnerwork", "Daniel & Désirée"]) {
+    await page
+      .getByRole("textbox", { name: "Search labels", exact: true })
+      .fill(label);
+    await page
+      .getByRole("button", { name: `Create “${label}”`, exact: true })
+      .click();
+  }
+  await page
+    .getByRole("button", { name: "Done choosing labels", exact: true })
+    .click();
+  await page
+    .getByRole("button", { name: "Add to my library", exact: true })
+    .click();
+  await page.waitForURL(/\/video\//);
+  await expect(
+    page.getByRole("button", {
+      name: "Remove label Daniel & Désirée",
+      exact: true,
+    }),
+  ).toBeVisible();
+  await page.reload();
+  await expect(
+    page.getByRole("button", { name: "Remove label Partnerwork", exact: true }),
+  ).toBeVisible();
+  await page
+    .getByRole("button", { name: "Remove label Partnerwork", exact: true })
+    .click();
+  await page.getByRole("button", { name: "Save details", exact: true }).click();
+  await page.reload();
+  await expect(
+    page.getByRole("button", {
+      name: "Remove label Daniel & Désirée",
+      exact: true,
+    }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Remove label Partnerwork", exact: true }),
+  ).toHaveCount(0);
+  await page.goto("/upload");
+  await importVideo("Second artist demo");
+  await page
+    .getByRole("textbox", { name: "Search labels", exact: true })
+    .fill("daniel & désirée");
+  await expect(page.getByRole("button", { name: /^Create / })).toHaveCount(0);
+  await page.screenshot({
+    path: "artifacts/screenshots/label-picker.png",
+    fullPage: true,
+  });
+  await page
+    .getByRole("button", { name: "Select Daniel & Désirée", exact: true })
+    .click();
+  await expect(
+    page.getByRole("button", {
+      name: "Remove label Daniel & Désirée",
+      exact: true,
+    }),
+  ).toBeVisible();
+  await page
+    .getByRole("button", { name: "Done choosing labels", exact: true })
+    .click();
+  await page
+    .getByRole("button", { name: "Add to my library", exact: true })
+    .click();
+  await page.waitForURL(/\/video\//);
+  await page.reload();
+  await expect(
+    page.getByRole("button", {
+      name: "Remove label Daniel & Désirée",
+      exact: true,
+    }),
+  ).toBeVisible();
 });

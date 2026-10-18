@@ -1,3 +1,5 @@
+import { LabelPicker } from "../components/LabelPicker";
+import { libraryLabels } from "../core/labels";
 import { useState } from "react";
 import { View, Switch } from "react-native";
 import { router } from "expo-router";
@@ -33,7 +35,7 @@ export default function Storage() {
   const [folder, setFolder] = useState("");
   const [name, setName] = useState("");
   const [style, setStyle] = useState<DanceStyle>("Bachata");
-  const [labels, setLabels] = useState("");
+  const [labels, setLabels] = useState<string[]>([]);
   const [folders, setFolders] = useState<{ id: string; name: string }[]>([]);
   const [editId, setEditId] = useState("");
   const [confirmDisconnect, setConfirmDisconnect] = useState("");
@@ -88,7 +90,7 @@ export default function Storage() {
     setFolder(source.folderId);
     setName(source.name);
     setStyle(source.defaultStyle);
-    setLabels(source.defaultLabels.join(", "));
+    setLabels(source.defaultLabels);
     setEditId(source.id);
   }
   async function saveSource() {
@@ -114,14 +116,7 @@ export default function Storage() {
       folderId,
       name: name.trim() || info.name,
       defaultStyle: style,
-      defaultLabels: [
-        ...new Set(
-          labels
-            .split(",")
-            .map((s) => s.trim())
-            .filter(Boolean),
-        ),
-      ],
+      defaultLabels: labels,
       writable: info.writable,
     };
     if (editId) {
@@ -392,11 +387,11 @@ export default function Storage() {
               </Chip>
             ))}
           </View>
-          <Field
+          <LabelPicker
             label="Default labels for new videos"
-            placeholder="Footwork, Beginner"
             value={labels}
-            onChangeText={setLabels}
+            options={libraryLabels(library)}
+            onChange={setLabels}
           />
           <Txt size={12} color={t.muted}>
             New videos start with these labels and importance 3 ★. Your own

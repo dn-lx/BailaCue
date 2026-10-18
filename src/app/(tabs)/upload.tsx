@@ -1,3 +1,5 @@
+import { LabelPicker } from "../../components/LabelPicker";
+import { libraryLabels } from "../../core/labels";
 import { useRef, useState } from "react";
 import { View } from "react-native";
 import { router } from "expo-router";
@@ -21,13 +23,13 @@ import { uid, type DanceStyle } from "../../core/types";
 import { formatTime } from "../../core/practice";
 export default function Upload() {
   const t = useTheme();
-  const { update } = useLibrary();
+  const { library, update } = useLibrary();
   const [media, setMedia] = useState<ImportedMedia | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [title, setTitle] = useState("");
   const [style, setStyle] = useState<DanceStyle>("Bachata");
-  const [labels, setLabels] = useState("");
+  const [labels, setLabels] = useState<string[]>([]);
   const [teacher, setTeacher] = useState("");
   const [className, setClassName] = useState("");
   const [location, setLocation] = useState("");
@@ -70,14 +72,7 @@ export default function Upload() {
           title: title.trim(),
           ...media,
           style,
-          labels: [
-            ...new Set(
-              labels
-                .split(",")
-                .map((x) => x.trim())
-                .filter(Boolean),
-            ),
-          ],
+          labels,
           importance,
           status: "To learn",
           teacher,
@@ -161,11 +156,10 @@ export default function Upload() {
               </Chip>
             ))}
           </View>
-          <Field
-            label="Labels, separated by commas"
-            placeholder="Footwork, Beginner, Musicality"
+          <LabelPicker
             value={labels}
-            onChangeText={setLabels}
+            options={libraryLabels(library)}
+            onChange={setLabels}
           />
           <Txt weight="bold">Importance</Txt>
           <Row>

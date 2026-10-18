@@ -1,3 +1,5 @@
+import { LabelPicker } from "../../components/LabelPicker";
+import { libraryLabels } from "../../core/labels";
 import { useEffect, useRef, useState } from "react";
 import { useEvent } from "expo";
 import {
@@ -39,7 +41,7 @@ import { formatTime, parseTime, validateSegment } from "../../core/practice";
 import { uid, type Video } from "../../core/types";
 import { removeVideo, videoFromExport } from "../../core/library";
 function Player({ video, uri }: { video: Video; uri: VideoSource }) {
-  const { update, updateVideo } = useLibrary();
+  const { library, update, updateVideo } = useLibrary();
   const t = useTheme();
   const [fullscreen, setFullscreen] = useState(false);
   const [error, setError] = useState("");
@@ -59,7 +61,7 @@ function Player({ video, uri }: { video: Video; uri: VideoSource }) {
   const [exportedId, setExportedId] = useState<string>();
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [title, setTitle] = useState(video.title);
-  const [labels, setLabels] = useState(video.labels.join(", "));
+  const [labels, setLabels] = useState(video.labels);
   const [countOn, setCountOn] = useState(false);
   const [bpm, setBpm] = useState("100");
   const [offset, setOffset] = useState("0");
@@ -734,10 +736,10 @@ function Player({ video, uri }: { video: Video; uri: VideoSource }) {
               The little details
             </Txt>
             <Field label="Title" value={title} onChangeText={setTitle} />
-            <Field
-              label="Labels, separated by commas"
+            <LabelPicker
               value={labels}
-              onChangeText={setLabels}
+              options={libraryLabels(library)}
+              onChange={setLabels}
             />
             <Button
               variant="soft"
@@ -745,14 +747,7 @@ function Player({ video, uri }: { video: Video; uri: VideoSource }) {
               onPress={() =>
                 updateVideo(video.id, {
                   title: title.trim(),
-                  labels: [
-                    ...new Set(
-                      labels
-                        .split(",")
-                        .map((s) => s.trim())
-                        .filter(Boolean),
-                    ),
-                  ],
+                  labels,
                 })
               }
             >

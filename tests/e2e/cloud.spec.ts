@@ -141,11 +141,17 @@ test("user connects Dropbox → selects folder → streams → edits rating → 
     .fill("Tuesday class");
   await page.getByRole("button", { name: "Salsa", exact: true }).click();
   await page
-    .getByRole("textbox", {
-      name: "Default labels for new videos",
-      exact: true,
-    })
+    .getByRole("button", { name: "Choose labels", exact: true })
+    .click();
+  await page
+    .getByRole("textbox", { name: "Search labels", exact: true })
     .fill("Musicality");
+  await page
+    .getByRole("button", { name: "Create “Musicality”", exact: true })
+    .click();
+  await page
+    .getByRole("button", { name: "Done choosing labels", exact: true })
+    .click();
   await page
     .getByRole("button", { name: "Connect folder & find videos", exact: true })
     .click();
