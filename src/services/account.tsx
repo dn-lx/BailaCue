@@ -1,6 +1,11 @@
+import { Platform } from "react-native";
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { vault } from "./cloud/vault";
-const endpoint = process.env.EXPO_PUBLIC_BAILACUE_API_URL ?? "";
+const endpoint =
+  process.env.EXPO_PUBLIC_BAILACUE_API_URL ??
+  (Platform.OS === "web"
+    ? ""
+    : "https://wbqnctrvxohxwiaignhg.supabase.co/functions/v1/bailacue-api");
 type Session = {
   token: string;
   expiresAt: string;
@@ -22,7 +27,7 @@ export async function accountRequest(
 ) {
   if (!endpoint)
     throw new Error(
-      "BailaCue account sync needs the prepared API deployed to Me+. Local videos and storage connections work without an app account.",
+      "Account access is not enabled in this browser preview. Use the mobile app to sign in and sync your library.",
     );
   const response = await fetch(endpoint, {
     method: "POST",

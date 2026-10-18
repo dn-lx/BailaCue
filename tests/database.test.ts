@@ -1,6 +1,6 @@
 import { beforeAll, beforeEach, afterAll, describe, expect, it } from "vitest";
 import { PGlite } from "@electric-sql/pglite";
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 const db = new PGlite();
 const alice = "10000000-0000-0000-0000-000000000001",
   bob = "10000000-0000-0000-0000-000000000002";
@@ -16,16 +16,18 @@ beforeAll(async () => {
       "utf8",
     ),
   );
-  // Supabase's managed service role has table privileges; emulate that baseline.
-  await db.exec(
-    "grant usage on schema public,auth to service_role; grant all on all tables in schema public to service_role;",
-  );
+  // Shared Me+ grants no automatic service-table privileges. Test the explicit migration.
+  await db.exec("grant usage on schema public,auth to service_role; ");
   await db.exec(
     readFileSync(
-      "supabase/migrations/20261018040818_bailacue_scoped_sessions_sync.sql",
+      "supabase/migrations/20261018043447_bailacue_scoped_sessions_sync.sql",
       "utf8",
     ),
   );
+  const serviceGrants = readdirSync("supabase/migrations").find((name) =>
+    name.endsWith("_bailacue_gateway_service_grants.sql"),
+  )!;
+  await db.exec(readFileSync(`supabase/migrations/${serviceGrants}`, "utf8"));
   await db.exec(
     `insert into public.bailacue_connections(id,user_id,provider,account_ref,display_name) values('${connection}','${alice}','google-drive','account','Alice'); insert into public.bailacue_videos(id,user_id,connection_id,provider_file_id,original_name,mime_type,duration_seconds) values('${video}','${alice}','${connection}','file','Dance','video/mp4',30); set role authenticated; set request.jwt.claim.sub='${alice}';`,
   );

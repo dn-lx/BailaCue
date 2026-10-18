@@ -9,6 +9,8 @@ import asyncio
 import base64
 import json
 import os
+import subprocess
+import hashlib
 import re
 from pathlib import Path
 from artemis.mcp.adb_server import _get_controller
@@ -34,7 +36,7 @@ async def main():
             if not bounds:
                 continue
             x1,y1,x2,y2 = map(int,bounds.groups())
-            if x2>x1 and y2>y1:
+            if x2>x1 and y2>y1 and y1>=0 and y2<=controller.ctx.device.device_height:
                 result = await asyncio.wait_for(controller.tap_at((x1+x2)//2,(y1+y2)//2),timeout=30)
                 if getattr(result,"error",None):
                     raise AssertionError(result.error)
@@ -62,6 +64,73 @@ async def main():
     if not any("Your dance library" in label(e) for e in elements):
         raise AssertionError("Library page did not open")
     report["checks"].append({"check":"Native tab navigation to Library", "result":"passed"})
+    if os.environ.get("BAILACUE_ARTEMIS_VIDEO") == "1":
+        fixture = Path(os.environ["BAILACUE_ARTEMIS_FIXTURE"])
+        async def locate(text, scrolls=0, attempts=12):
+            for attempt in range(attempts):
+                elements = await observe("video-step")
+                if any(text.lower() in label(e).lower() for e in elements):
+                    try:
+                        await tap(text)
+                        return
+                    except AssertionError:
+                        pass
+                if attempt < scrolls:
+                    screen = await controller.get_screen_data()
+                    await controller.swipe_coords(screen.width//2,int(screen.height*.78),screen.width//2,int(screen.height*.28),400)
+                await asyncio.sleep(1)
+            raise AssertionError(f"Native journey could not locate {text}")
+        async def field(text,value):
+            await locate(text,scrolls=6)
+            if not await controller.type_text(value,clear_existing=True):
+                raise AssertionError(f"Could not edit {text}")
+            await controller.go_back()
+        await locate("Add video")
+        await locate("Choose a video")
+        # Android's document provider lists the synthetic fixture in Recents after scanning.
+        elements = await observe("file-picker")
+        if not any("BailaCue-ARTEMIS" in label(e) for e in elements):
+            await locate("Show roots",attempts=3)
+            await locate("Downloads",attempts=3)
+        await locate("BailaCue-ARTEMIS",attempts=8)
+        await field("Video title","ARTEMIS practice")
+        await locate("Add to my library",scrolls=10)
+        for _ in range(20):
+            elements = await observe("imported-video")
+            if any("ARTEMIS practice" in label(e) for e in elements): break
+            await asyncio.sleep(1)
+        else: raise AssertionError("Imported native video did not open")
+        report["checks"].append({"check":"Native document import and video detail", "result":"passed"})
+        def adb(*args):
+            return subprocess.run(["adb","-s",os.environ.get("ARTEMIS_DEVICE_ID","emulator-5554"),*args],check=True,capture_output=True,text=True,timeout=30).stdout.strip()
+        original = adb("shell","ls","/data/user/0/app.bailacue.mobile/files/bailacue-library/*.mp4").splitlines()[0]
+        adb("pull",original,str(OUT/"original-before.mp4"))
+        before = hashlib.sha256((OUT/"original-before.mp4").read_bytes()).hexdigest()
+        if before != hashlib.sha256(fixture.read_bytes()).hexdigest(): raise AssertionError("Imported copy differs from fixture")
+        await field("Start (m:ss or seconds)","1")
+        await field("End (m:ss or seconds)","4")
+        await field("Section name","ARTEMIS loop")
+        await locate("Save practice section",scrolls=3)
+        await locate("Loop section",scrolls=3)
+        elements = await observe("loop-enabled")
+        if not any("Loop on" in label(e) for e in elements): raise AssertionError("Loop did not enable")
+        report["checks"].append({"check":"Native named section and loop control", "result":"passed"})
+        await locate("Export new trimmed video",scrolls=3)
+        for _ in range(90):
+            elements = await observe("export")
+            if any("NEW CLIP READY" in label(e) for e in elements): break
+            await asyncio.sleep(1)
+        else: raise AssertionError("Native export did not complete")
+        clip = adb("shell","ls","/data/user/0/app.bailacue.mobile/files/bailacue-exports/*.mp4").splitlines()[0]
+        if original == clip: raise AssertionError("Export overwrote original path")
+        adb("pull",clip,str(OUT/"exported-clip.mp4"))
+        adb("pull",original,str(OUT/"original-after.mp4"))
+        after = hashlib.sha256((OUT/"original-after.mp4").read_bytes()).hexdigest()
+        if after != before: raise AssertionError("Original changed during export")
+        duration = float(subprocess.run(["ffprobe","-v","error","-show_entries","format=duration","-of","default=noprint_wrappers=1:nokey=1",str(OUT/"exported-clip.mp4")],check=True,capture_output=True,text=True).stdout.strip())
+        if abs(duration-3)>0.25: raise AssertionError(f"Unexpected trim duration {duration}")
+        report["checks"].append({"check":"Native Media3 new-file export, original checksum preserved", "result":"passed", "duration":duration, "original_sha256":before})
+        await observe("new-clip-ready")
     report["status"] = "passed"
 
 try:

@@ -10,7 +10,7 @@ device lock, and prepared scoped account/sync/sharing server + UI.
 
 Read README, CLOUD-STORAGE.md, ACCOUNT-API.md, VERIFICATION.md and ARTEMIS.md before
 claiming availability. Live OAuth requires app registration independent of user
-accounts. New API production deployment has not been performed. New-video remote push,
+accounts. New API version 1 and private-table migrations are live after explicit approval. Mobile build 3 enables the deployed scoped API. New-video remote push,
 automatic sync/merge, server-generated picks and WebDAV/S3 remain pending.
 
 Never send broad shared Me+ Supabase Auth tokens to BailaCue. Do not read health data,

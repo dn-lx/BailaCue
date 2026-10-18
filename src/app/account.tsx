@@ -86,12 +86,10 @@ export default function AccountScreen() {
     >
       {!account.configured ? (
         <Card>
-          <Badge tone="soft">BACKEND SETUP REQUIRED</Badge>
+          <Badge tone="soft">MOBILE ACCOUNT ACCESS</Badge>
           <Txt>
-            The BailaCue-only account API and migration are prepared in GitHub.
-            Deployment approval and configuration are needed to enable sign-in
-            and metadata sync. Your local library and personal storage
-            connections work without an app account.
+            Sign in and sync from the mobile app. This browser preview keeps
+            your local library available without an account.
           </Txt>
         </Card>
       ) : null}

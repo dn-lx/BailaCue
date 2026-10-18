@@ -11,7 +11,7 @@ Implemented: Drive/Dropbox account and folder UI, native credentials/PKCE, pagin
 scans, defaults/deduplication/reconnect preservation, source filters, streaming,
 selective phone copies, recoverable uploads, Photos/file saves, comparison, reminders,
 quiet hours and device lock. The scoped account/sync/sharing API and additive migration
-are implemented and locally tested; production deployment is pending. See
+are implemented and locally tested; production deployment is live after explicit owner approval. See
 [CLOUD-STORAGE.md](CLOUD-STORAGE.md) and [ACCOUNT-API.md](ACCOUNT-API.md).
 
 The unchecked milestone acceptance below remains unchecked where live registration,

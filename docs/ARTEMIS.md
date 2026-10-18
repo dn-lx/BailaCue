@@ -39,3 +39,13 @@ These are environment failures, not passed application tests.
 ARTEMIS's actual controller/observation API. This mode does not invoke Gemini.
 It requires a fully booted device and working helper and does not substitute for
 the autonomous runner or video-editing acceptance journey.
+
+The isolated emulator eventually finished booting. A manual helper install and APK
+installation succeeded; ARTEMIS attached its helper and UIAutomator2 fallback.
+Observation repeatedly timed out during screenshot/XML capture under forced TCG.
+The 180-second controller run ended without a completed app assertion report.
+The preview publication workflow now includes a separate hardware-accelerated
+Android/ARTEMIS job. It uses the published APK and synthetic video, with deterministic
+controller assertions for import, saved section/loop controls and new-file export.
+Gemini is not invoked by that job and no model API key is bundled. Its actual result
+will be recorded separately; configuring a test job is not a passing test.

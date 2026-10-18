@@ -1,9 +1,10 @@
 # Scoped Me+ integration
 
 The existing production Me+ project is the user-approved database target. The
-original 23-table migration is live. The new migration and `bailacue-api` function
-are prepared and tested locally; they have NOT been deployed as part of this change.
-The build brief requires separate permission before production deployment.
+original 23-table migration is live. After the owner explicitly approved production deployment on 2026-10-18, the new
+private tables and `bailacue-api` version 1 were deployed to the shared Me+ project.
+Live verification confirms client denial on private tables/RPCs and rejection of
+missing sessions and invalid credentials. Real two-user login/sync acceptance remains pending.
 
 `supabase/functions/bailacue-api` accepts username/password against Supabase Auth,
 then issues a random BailaCue-only opaque session (SHA-256 hash stored server-side,
@@ -21,10 +22,13 @@ The Edge Function alone uses its automatic service-role runtime credential.
 Rate limits are atomic database operations. A new BailaCue cleanup RPC removes only
 BailaCue data and sessions. It never deletes `auth.users` or other Me+ application data.
 
-## Deployment after owner authorisation
+## Deployed configuration and reproduction
 
-1. Apply `20261018040818_bailacue_scoped_sessions_sync.sql` to Me+
+1. Apply `20261018043447_bailacue_scoped_sessions_sync.sql` to Me+
    (`wbqnctrvxohxwiaignhg`) after reviewing the exact migration.
+   Also apply `20261018043638_bailacue_gateway_service_grants.sql`: Me+ does not grant
+   service access to new tables by default. This grants only BailaCue SELECT/DELETE
+   and profile INSERT needed by the gateway; no Me+ grants change.
 2. Deploy only the new function, with gateway JWT validation disabled because it
    validates its own scoped opaque tokens:
 
@@ -38,7 +42,8 @@ BailaCue data and sessions. It never deletes `auth.users` or other Me+ applicati
 3. Server runtime provides SUPABASE_URL, SUPABASE_ANON_KEY and SUPABASE_SERVICE_ROLE_KEY.
    If enabling browser use, set server-only BAILACUE_WEB_ORIGIN to one exact origin.
    Do not add service keys to app config, GitHub source or EXPO_PUBLIC variables.
-4. Set EXPO_PUBLIC_BAILACUE_API_URL to the deployed function URL and rebuild the app.
+4. Build 3 uses the deployed URL by default on mobile. EXPO_PUBLIC_BAILACUE_API_URL
+   can override it. Browser access needs a separately configured exact CORS origin.
 5. Verify register/confirm/login/recovery, two real accounts, incorrect passwords,
    owner isolation, revocation, stale-revision conflicts and BailaCue-only deletion.
    Local PostgreSQL and transport-mock results do not replace this live acceptance.

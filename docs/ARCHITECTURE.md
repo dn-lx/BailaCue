@@ -1,4 +1,4 @@
-# BailaCue architecture · 0.2.0
+# BailaCue architecture · 0.2.1
 
 Expo SDK 58 / React Native 0.88 / TypeScript, Expo Router and a shared Android/iOS UI.
 Routes in `src/app` use `LibraryProvider`, domain functions and platform services.
@@ -35,7 +35,7 @@ speed, mirror and count are not baked into output. iOS source has not been compi
 
 The original 23-table owner-isolated migration is live in the explicitly approved Me+
 project. The new service-only sessions/snapshots/rate-limits/collection-grants migration
-and `bailacue-api` function are prepared, not deployed. See ACCOUNT-API.md.
+and `bailacue-api` function are deployed after explicit owner approval. See ACCOUNT-API.md.
 
 The gateway verifies credentials through Supabase Auth and returns only a custom
 random BailaCue session. Me+ Auth JWT/refresh tokens stay server-side. Owner IDs derive

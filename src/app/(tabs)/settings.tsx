@@ -318,7 +318,7 @@ export default function Settings() {
             BailaCue.
           </Txt>
           <Txt size={12} color={t.muted}>
-            Watch. Practise. Repeat. · v0.2.0 (2)
+            Watch. Practise. Repeat. · v0.2.1 (3)
           </Txt>
         </View>
       </Row>
