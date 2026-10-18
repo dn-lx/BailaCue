@@ -1,0 +1,52 @@
+name: Publish Android preview
+on:
+  push:
+    tags: ["v*-preview.*"]
+permissions:
+  contents: write
+concurrency:
+  group: publish-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - uses: gradle/actions/setup-gradle@v4
+      - uses: android-actions/setup-android@v3
+        with:
+          cmdline-tools-version: "13114758"
+          packages: platform-tools
+          log-accepted-android-sdk-licenses: false
+      - run: npm ci
+      - run: npm run typecheck && npm run lint && npm test
+      - run: npm run build:android
+        env:
+          BAILACUE_ARCHS: arm64-v8a,x86_64
+      - name: Verify APK and publish prerelease
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          apk_assets=(artifacts/*.apk)
+          "$ANDROID_HOME/build-tools/37.0.0/apksigner" verify --verbose "${apk_assets[0]}"
+          cp "docs/releases/$GITHUB_REF_NAME.md" /tmp/bailacue-release-notes.md
+          printf '\nActual uploaded APK SHA-256:\n\n```text\n' >> /tmp/bailacue-release-notes.md
+          cat artifacts/*.sha256 >> /tmp/bailacue-release-notes.md
+          printf '```\n' >> /tmp/bailacue-release-notes.md
+          gh release create "$GITHUB_REF_NAME" artifacts/*.apk artifacts/*.sha256 --verify-tag --target "$GITHUB_SHA" --title 'BailaCue 0.2.0 (2) — Android preview' --prerelease --notes-file /tmp/bailacue-release-notes.md
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: BailaCue-published-preview
+          path: artifacts/

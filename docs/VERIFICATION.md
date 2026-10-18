@@ -48,3 +48,10 @@ instead of completion of the new OAuth flow. The assertion now waits for the
 selected-account folder browser before navigating away; targeted and combined reruns passed.
 Expo Doctor: 20/20. GitHub Checks on 198385e passed; newer evidence commits have
 separate CI status visible in the PR.
+
+Direct release upload from the cloud session failed with GitHub HTTP 401 on
+uploads.github.com despite successful repository API/git access. A tag-triggered
+GitHub Actions workflow now builds/verifies/publishes the prerelease using the
+repository's own GITHUB_TOKEN. Its uploaded APK is a separate CI build and may
+have a different binary checksum from the local APK above; the release includes
+its actual matching SHA-256 file. No credentials were copied or exposed.
