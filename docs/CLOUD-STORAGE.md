@@ -7,6 +7,31 @@ a ChatGPT Drive/Dropbox plugin does not register the mobile app with that provid
 The shipped preview has no invented client IDs; live sign-in requires this setup.
 Local import through the phone's Files picker also works with installed cloud apps.
 
+## Separate Salsa and Bachata folders
+
+You can connect two or more folders. Both folders can belong to the same Drive or
+Dropbox account, or you can combine sources from different providers.
+
+1. Open **Settings → Manage video storage**, connect your account and choose the
+   Salsa folder. Name it **Salsa**, select the **Salsa** style and choose its default
+   labels, then press **Connect folder & find videos**.
+2. The add-folder form stays available for the same account. Enter or browse to
+   your Bachata folder, name it **Bachata**, set the **Bachata** style and its own
+   default labels, then connect it. This adds a source alongside Salsa.
+3. To put the other folder on a different provider, connect that account and add
+   its folder there. Existing sources remain listed.
+4. In Library, choose the **Salsa** or **Bachata** source chip, or **All storage**
+   to see both. Online playback and phone-copy choices remain per video.
+
+Each folder has independent style/label defaults and refresh controls. Refreshing
+one preserves the other folder and your edited labels/ratings. These capabilities
+are already in Android0.2.4/build7; no app update is needed for two folders.
+
+Follow-up verification covers both folders on Google Drive, both on Dropbox and
+a mixed Drive/Dropbox library in unit tests. The mocked browser journey connects
+two Dropbox folders through the UI, filters them and confirms both survive refresh.
+This verifies app behavior; live provider sign-in still needs OAuth registration.
+
 ## Google Drive registration
 
 1. Enable the Drive API in your Google Cloud project. Configure OAuth consent,

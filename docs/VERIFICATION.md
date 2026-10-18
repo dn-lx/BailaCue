@@ -21,6 +21,13 @@ change the APK. [Previous build5 verification](VERIFICATION-0.2.3.md) is histori
 [Successful build, native tests and publication](https://github.com/dn-lx/BailaCue/actions/runs/39111878471).
 [Source checks](https://github.com/dn-lx/BailaCue/actions/runs/39111879404).
 
+Follow-up test-only verification: **83 tests** now pass, adding Salsa/Bachata folder
+isolation for Google Drive, Dropbox and a mixed-provider library. The four browser
+journeys pass with the cloud journey extended to connect both folders to the same
+account, check source filtering and retain both after refresh. TypeScript and lint
+also pass. Application code and the published build7 APK are unchanged; the release
+run above tested the original80-test suite.
+
 ## Published APK and exact-byte evidence
 
 [Download Android](https://github.com/dn-lx/BailaCue/releases/download/v0.2.4-preview.7/BailaCue-v0.2.4-build7-preview.apk)

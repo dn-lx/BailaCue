@@ -35,6 +35,8 @@ verified separately.
   overlays are practice controls and are not baked into exported trims.
 - User-selected **Drive and Dropbox accounts/folders**, defaults, folder refresh,
   stable file identities, online streaming and selective phone downloads.
+- Separate **Salsa and Bachata folder sources**, including two folders on one
+  account or a mix of providers; independent defaults and Library source filters.
 - Wi-Fi preference, download progress/cancel/delete, explicit online/phone choice,
   and recoverable chunked uploads with stable destinations and no original overwrite.
 - Side-by-side reference/self comparison with manual offset, speed, mirror and mute;

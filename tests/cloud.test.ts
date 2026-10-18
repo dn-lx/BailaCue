@@ -63,6 +63,89 @@ const pending: PendingUpload = {
   keepCopy: true,
 };
 describe("user-selected sources", () => {
+  it.each(["google-drive", "dropbox", "mixed"] as const)(
+    "keeps Salsa and Bachata folders independent with %s storage",
+    (kind) => {
+      const salsaConnection: Connection = {
+        ...connection,
+        provider: kind === "mixed" ? "google-drive" : kind,
+      };
+      const bachataConnection: Connection =
+        kind === "mixed"
+          ? { ...connection, id: "dropbox-account", provider: "dropbox" }
+          : salsaConnection;
+      const salsa: CloudFolder = {
+        ...source,
+        provider: salsaConnection.provider,
+        defaultLabels: ["Salsa class"],
+      };
+      const bachata: CloudFolder = {
+        ...source,
+        id: "bachata",
+        name: "Bachata",
+        folderId: "bachata-folder",
+        connectionId: bachataConnection.id,
+        provider: bachataConnection.provider,
+        defaultStyle: "Bachata",
+        defaultLabels: ["Bachata class"],
+      };
+      let library = {
+        ...emptyLibrary(),
+        connections:
+          kind === "mixed"
+            ? [salsaConnection, bachataConnection]
+            : [salsaConnection],
+        sources: [salsa, bachata],
+      };
+      library = reconcileSource(library, salsa, [
+        { ...file, fileId: "salsa-video" },
+      ]);
+      library = reconcileSource(library, bachata, [
+        { ...file, fileId: "bachata-video" },
+      ]);
+      expect(library.sources).toHaveLength(2);
+      expect(
+        library.videos.map((video) => [
+          video.style,
+          video.labels,
+          video.remote?.sourceIds,
+        ]),
+      ).toEqual([
+        ["Salsa", ["Salsa class"], [salsa.id]],
+        ["Bachata", ["Bachata class"], [bachata.id]],
+      ]);
+      library.videos[0] = {
+        ...library.videos[0],
+        labels: ["Artist A"],
+        importance: 5,
+      };
+      library = reconcileSource(library, salsa, []);
+      expect(library.videos[0].available).toBe(false);
+      expect(library.videos[1].available).toBe(true);
+      library = reconcileSource(library, salsa, [
+        { ...file, fileId: "salsa-video" },
+      ]);
+      expect(library.videos[0]).toMatchObject({
+        labels: ["Artist A"],
+        importance: 5,
+        available: true,
+      });
+      const restored = restoreSnapshot(
+        metadataSnapshot(library),
+        emptyLibrary(),
+      );
+      expect(
+        restored.sources.map((folder) => [
+          folder.name,
+          folder.defaultStyle,
+          folder.defaultLabels,
+        ]),
+      ).toEqual([
+        ["Salsa", "Salsa", ["Salsa class"]],
+        ["Bachata", "Bachata", ["Bachata class"]],
+      ]);
+    },
+  );
   it("deduplicates a file across folders and preserves all user edits after rename/reconnect", () => {
     let library = {
       ...emptyLibrary(),

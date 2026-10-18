@@ -21,7 +21,7 @@ test.beforeAll(() =>
     { stdio: "ignore" },
   ),
 );
-test("user connects Dropbox → selects folder → streams → edits rating → refresh preserves edits (mock provider)", async ({
+test("user connects Salsa and Bachata folders → streams → edits → refresh preserves both sources (mock provider)", async ({
   page,
   context,
 }) => {
@@ -60,15 +60,19 @@ test("user connects Dropbox → selects folder → streams → edits rating → 
         },
       }),
   );
-  await context.route("https://api.dropboxapi.com/2/files/get_metadata", (r) =>
-    r.fulfill({
-      json: {
-        ".tag": "folder",
-        id: "id:folder",
-        name: "My Salsa",
-        path_lower: "/salsa",
-      },
-    }),
+  await context.route(
+    "https://api.dropboxapi.com/2/files/get_metadata",
+    (r) => {
+      const bachata = r.request().postDataJSON().path === "/bachata";
+      return r.fulfill({
+        json: {
+          ".tag": "folder",
+          id: bachata ? "id:bachata-folder" : "id:salsa-folder",
+          name: bachata ? "My Bachata" : "My Salsa",
+          path_lower: bachata ? "/bachata" : "/salsa",
+        },
+      });
+    },
   );
   await context.route(
     "https://api.dropboxapi.com/2/files/list_folder",
@@ -85,12 +89,24 @@ test("user connects Dropbox → selects folder → streams → edits rating → 
                     name: "My Salsa",
                     path_lower: "/salsa",
                   },
+                  {
+                    ".tag": "folder",
+                    id: "id:bachata-folder",
+                    name: "My Bachata",
+                    path_lower: "/bachata",
+                  },
                 ]
               : [
                   {
                     ".tag": "file",
-                    id: "id:video",
-                    name: "Cloud turn.mp4",
+                    id:
+                      data.path === "/bachata"
+                        ? "id:bachata-video"
+                        : "id:video",
+                    name:
+                      data.path === "/bachata"
+                        ? "Bachata basics.mp4"
+                        : "Cloud turn.mp4",
                     size: 1234,
                     media_info: {
                       ".tag": "metadata",
@@ -158,12 +174,57 @@ test("user connects Dropbox → selects folder → streams → edits rating → 
   await expect(
     page.getByText("Tuesday class", { exact: true }).first(),
   ).toBeVisible();
+  // Add the second folder to the same account without replacing Salsa.
+  await page
+    .getByRole("textbox", { name: "Dropbox folder path", exact: true })
+    .fill("/bachata");
+  await page
+    .getByRole("textbox", { name: "Folder name in BailaCue", exact: true })
+    .fill("Bachata class");
+  await page.getByRole("button", { name: "Bachata", exact: true }).click();
+  await page
+    .getByRole("button", { name: "Remove label Musicality", exact: true })
+    .click();
+  await page
+    .getByRole("button", { name: "Choose labels", exact: true })
+    .click();
+  await page
+    .getByRole("textbox", { name: "Search labels", exact: true })
+    .fill("Sensual");
+  await page
+    .getByRole("button", { name: "Create “Sensual”", exact: true })
+    .click();
+  await page
+    .getByRole("button", { name: "Done choosing labels", exact: true })
+    .click();
+  await page
+    .getByRole("button", { name: "Connect folder & find videos", exact: true })
+    .click();
+  await expect(
+    page.getByText("Bachata class", { exact: true }).first(),
+  ).toBeVisible();
+  await expect(
+    page.getByText("Tuesday class", { exact: true }).first(),
+  ).toBeVisible();
   await page.goto("/library");
   // Credentials are intentionally memory-only on web; SPA navigation retains this test connection.
   // Reloading the browser requires reconnecting. Return through in-app navigation below.
   await expect(
     page.getByRole("button", { name: "Play Cloud turn", exact: true }),
   ).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Play Bachata basics", exact: true }),
+  ).toBeVisible();
+  await page
+    .getByRole("button", { name: "Bachata class", exact: true })
+    .click();
+  await expect(
+    page.getByRole("button", { name: "Play Bachata basics", exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Play Cloud turn", exact: true }),
+  ).toHaveCount(0);
+  await page.getByRole("button", { name: "All storage", exact: true }).click();
   // Reconnect after this explicit full navigation; real phone credentials use SecureStore.
   await page
     .getByRole("button", { name: "Connect storage", exact: true })
@@ -207,10 +268,14 @@ test("user connects Dropbox → selects folder → streams → edits rating → 
     .click();
   await page
     .getByRole("button", { name: "Refresh videos", exact: true })
+    .first()
     .click();
   await page.getByRole("button", { name: "Done", exact: true }).click();
   await expect(
     page.getByRole("button", { name: "Play My cloud turn", exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Play Bachata basics", exact: true }),
   ).toBeVisible();
   expect(errors).toEqual([]);
 });
