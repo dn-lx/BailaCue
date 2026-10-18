@@ -1,8 +1,15 @@
 # Current handoff · BailaCue 0.2.5 (build8)
 
 Source branch `feat/bailacue-mobile-foundation`, draft PR#1. Build8 release tag
-`v0.2.5-preview.8`; compilation/native publication checks pending.
-Previous public build7 remains available until the new gated release succeeds.
+`v0.2.5-preview.8` points to `95a088b8d776eb5017862ebbc7c52992315c9fcc`.
+Later commits update only documentation/evidence. Build8 is published:
+https://github.com/dn-lx/BailaCue/releases/tag/v0.2.5-preview.8
+APK68,528,909 bytes; SHA256
+`1a7c65aca5c0c7097b7af0b30746a9980a1915989408417443dbe44ebe7a1bba`.
+Public bytes were re-downloaded, matched to the passing native report, signature and
+version verified. Same preview signing certificate as build7, for in-place upgrades.
+Run39115739082 passed native acceptance on retry and published. The first emulator's
+ADB connection closed before installing the app; retry reused the same built APK.
 
 ## Implemented for the latest request
 
@@ -18,10 +25,12 @@ and separate-file export remain. Video has a vertical resize grip and three pres
 with aspect ratio preserved. Clip saves from an online source default to its sole
 folder; ambiguous membership requires a choice. Local saves remain separate.
 
-100 unit/database tests and four browser journeys pass locally; type/lint pass.
-Native ARTEMIS harness now additionally asserts real grip and both handle gestures,
-then existing import/labels/loop/export/original-hash/Photos behavior. Publication
-requires native acceptance. See VERIFICATION.md for actual results/limits.
+100 unit/database tests, four browser journeys, type/lint, Deno and Doctor20/20
+pass in Actions. Native ARTEMIS passed all ten checks, including real grip and both
+handle gestures, import/labels/loop/export/original-hash/Photos. Precision1–4s export
+measured3.017075s; before/after original hashes match. Public APK hash matches the
+passing report. See VERIFICATION.md and verification/android-build8 for evidence.
+The controller is real Google ARTEMIS with helper1.2.0, not autonomous Gemini.
 
 ## Google setup progress
 

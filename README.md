@@ -16,11 +16,12 @@ Play Store release. Version **0.2.5 (8)**; minimum Android 7/API 24.
 No Metro server or Expo Go is needed for the APK. iOS needs a separate signed build
 with an Apple Developer account; an Android APK cannot be installed on an iPhone.
 
-The preview publication is gated on Google ARTEMIS native checks, including actual
+The published APK passed ten Google ARTEMIS native checks, including actual
 resize/trim-handle gestures, real import, new-file trimming, original-byte preservation,
 saving to Photos and artist-label creation/reuse.
 [Verification and screenshots](docs/VERIFICATION.md) record exact scope and remaining
-live-provider/iOS setup. Exact public APK verification is recorded there after publication.
+live-provider/iOS setup. The public download exactly matches the passing native report; its signature and
+version were also checked.
 
 ## What is implemented
 
@@ -31,7 +32,7 @@ live-provider/iOS setup. Exact public APK verification is recorded there after p
   notes/bookmarks, ordered collections, Daily Picks and practice timer/history/goals.
 - Native player with draggable resize grip/presets, speed/pitch, mirror, full screen,
   seeking, timeline trim handles and named A–B loops.
-- **New trimmed MP4 files** as separate library entries: choose phone storage or an
+- **[New trimmed MP4 files](docs/VIDEO-EDITING.md)** as separate library entries: choose phone storage or an
   exact cloud folder before saving; Save to Photos / Share / Save file for phone clips. Originals are preserved. Speed/mirror/count
   overlays are practice controls and are not baked into exported trims.
 - User-selected **Drive and Dropbox accounts/folders**, defaults, folder refresh,

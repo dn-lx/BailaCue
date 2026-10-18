@@ -1,9 +1,22 @@
 # Google ARTEMIS · build8 acceptance
 
-Build8 adds real native video resize-grip and start/end trim-handle gesture assertions.
-The existing import/labels/loop/native-export/original-byte/Photos checks remain.
-Publication is gated on these checks; build8 results are pending. See
-[verification](VERIFICATION.md) for the current evidence and boundaries.
+[Build8 run39115739082](https://github.com/dn-lx/BailaCue/actions/runs/39115739082)
+passed **all ten native checks** and published the tested APK. Real native resize-grip
+and both start/end trim-handle gestures pass, alongside import/labels/loop/new-file
+export/original-byte/Photos assertions. Compact170px became220px after dragging;
+the selected range became0.89–5.11s. Precision1–4s export measured3.017075s, with
+unchanged originals. This is the real controller/helper1.2.0, not autonomous Gemini.
+
+[Report](verification/android-build8/report.json) ·
+[Timeline trim](verification/android-build8/timeline-trim.jpg) ·
+[Resized player](verification/android-build8/player-resized.jpg) ·
+[Photos saved](verification/android-build8/photos-saved.jpg).
+
+Public APK bytes exactly match the built artifact and passing report:
+SHA256`1a7c65aca5c0c7097b7af0b30746a9980a1915989408417443dbe44ebe7a1bba`. Signature and
+version were independently verified. First attempt lost ADB before app installation;
+retry tested the same APK without rebuilding or skipping an app assertion.
+See [verification](VERIFICATION.md) for scope and live-provider/iOS boundaries.
 
 ## Historical build7 result
 
@@ -32,7 +45,7 @@ The label-only build6 also passed eight native checks in run39112241526, but was
 superseded before publication by build7's Drive error recovery. Its first native
 job was intentionally cancelled after a successful build, so the updated harness
 could dismiss the Photos confirmation before continuing to label controls.
-Build6 remains a draft; use build7 for installation.
+Build6 remains a draft. Build7 is superseded by build8 for installation.
 
 ## Earlier build5 evidence
 
