@@ -34,11 +34,15 @@ async def main():
         return screen.elements
     def label(element):
         return " ".join(str(element.get(k, "")) for k in ["text", "content-desc", "contentDescription", "label"])
-    async def tap(text):
+    async def tap(text, exact=False):
         elements = await observe("before-tap")
         # DocumentsUI exposes a separate accessible "Preview the file ..."
         # button. Selecting it opens a player instead of returning the file.
-        matches = [e for e in elements if text.lower() in label(e).lower()
+        def matches_text(element):
+            if exact:
+                return "EditText" not in element.get("class", "") and any(str(element.get(k, "")).strip().lower() == text.lower() for k in ["text", "content-desc", "contentDescription", "label"])
+            return text.lower() in label(element).lower()
+        matches = [e for e in elements if matches_text(e)
                    and not label(e).strip().lower().startswith("preview the file")]
         for element in sorted(matches, key=lambda e: (not (e.get("focusable") in (True,"true") or e.get("clickable") in (True,"true")),len(label(e)))):
             bounds = re.fullmatch(r"\[(-?\d+),(-?\d+)\]\[(-?\d+),(-?\d+)\]", str(element.get("bounds", "")))
@@ -94,12 +98,12 @@ async def main():
     report["checks"].append({"check":"Native tab navigation to Library", "result":"passed"})
     if os.environ.get("BAILACUE_ARTEMIS_VIDEO") == "1":
         fixture = Path(os.environ["BAILACUE_ARTEMIS_FIXTURE"])
-        async def locate(text, scrolls=0, attempts=12):
+        async def locate(text, scrolls=0, attempts=12, exact=False):
             for attempt in range(attempts):
                 elements = await observe("video-step")
                 if any(text.lower() in label(e).lower() for e in elements):
                     try:
-                        await tap(text)
+                        await tap(text, exact=exact)
                         return
                     except AssertionError:
                         pass
@@ -272,8 +276,8 @@ async def main():
                 await asyncio.sleep(1)
             await locate("BailaCue-ARTEMIS",attempts=8)
             await field("Video title",title)
-            await locate(style,scrolls=3)
-            await locate(f"{stars} ★",scrolls=5)
+            await locate(style,scrolls=5,exact=True)
+            await locate(f"{stars} ★",scrolls=5,exact=True)
             await locate("Add to my library",scrolls=12)
             for _ in range(20):
                 elements = await observe("daily-imported")
