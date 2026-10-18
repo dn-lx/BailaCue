@@ -1,36 +1,40 @@
-# Current handoff · BailaCue 0.2.5 (build8)
+# Current handoff · BailaCue 0.2.6 (build9)
 
-Source branch `feat/bailacue-mobile-foundation`, draft PR#1. Build8 release tag
-`v0.2.5-preview.8` points to `95a088b8d776eb5017862ebbc7c52992315c9fcc`.
-Later commits update only documentation/evidence. Build8 is published:
-https://github.com/dn-lx/BailaCue/releases/tag/v0.2.5-preview.8
-APK68,528,909 bytes; SHA256
-`1a7c65aca5c0c7097b7af0b30746a9980a1915989408417443dbe44ebe7a1bba`.
-Public bytes were re-downloaded, matched to the passing native report, signature and
-version verified. Same preview signing certificate as build7, for in-place upgrades.
-Run39115739082 passed native acceptance on retry and published. The first emulator's
-ADB connection closed before installing the app; retry reused the same built APK.
+Source `feat/bailacue-mobile-foundation`, draft PR#1. New release tag
+`v0.2.6-preview.9`; compilation/native acceptance/publication pending.
+Previous build8 remains published. See VERIFICATION-0.2.5.md for its exact evidence.
 
-## Implemented for the latest request
+## Latest owner requests
 
-Imports/recordings and native trimmed-clip saves offer explicit phone/cloud destination,
-separate Salsa/Bachata folders (including one account), and keep-phone-copy selection.
-Online saves start uploading to the chosen source. Failure retains the owned local
-file; online-only cleanup follows successful transfer confirmation. Resume pins
-source/folder/account/provider. Upload registration retains latest metadata and
-all library references. Drive token refresh respects writable account permission.
+The owner chose to **keep BailaCue**, requested a more modern dance app icon and
+rating-led daily viewing with one Salsa and one Bachata. New source implements
+one per selected style, strict minimum stars, independent cooldown fallback,
+rating-first tie policy, saved-day stability, explicit Update today’s picks and
+migration of older daily choices. See DAILY-PICKS.md. Ratings now have clearer labels.
 
-Playback timeline has draggable, accessible trim start/end handles; numeric timing
-and separate-file export remain. Video has a vertical resize grip and three presets,
-with aspect ratio preserved. Clip saves from an online source default to its sole
-folder; ambiguous membership requires a choice. Local saves remain separate.
+The icon is a modern abstract dancing-partner mark in coral/cream on plum.
+It updates launcher/adaptive/splash/favicon/in-app mark. The opaque selected master
+is assets/brand/dance-icon-source.png; scripts/brand.mjs packages sizes without
+redrawing it. Unsuccessful transparent drafts are not included. Name, IDs, data,
+OAuth and backend are unchanged. No native dependency changes or generated-root edits.
 
-100 unit/database tests, four browser journeys, type/lint, Deno and Doctor20/20
-pass in Actions. Native ARTEMIS passed all ten checks, including real grip and both
-handle gestures, import/labels/loop/export/original-hash/Photos. Precision1–4s export
-measured3.017075s; before/after original hashes match. Public APK hash matches the
-passing report. See VERIFICATION.md and verification/android-build8 for evidence.
-The controller is real Google ARTEMIS with helper1.2.0, not autonomous Gemini.
+110 unit/database tests, five browser journeys, type/lint and web export passed
+after final asset integration. Android native release pending. ARTEMIS harness now also imports rated Salsa
+and Bachata videos through UI and verifies both daily picks. Its root-bootstrap script
+handles adbd transport restarts with bounded checks rather than rebuilding the app.
+
+## Audit scope
+
+Source/UX audit in docs/audits/2026-10-18.html and .json. Highest open items: cloud
+restore drops local-only references; cleanup errors can prevent logout; online-only
+cleanup can precede durable metadata commit. First two behaviors were reproduced
+using real functions with synthetic metadata/injected errors, with no production or
+private media access. No broad fixes were authorized or silently implemented.
+Other findings cover snapshot validation, auth-expiry/cache behavior, scaling,
+thumbnails, onboarding, player density, labels, accessibility, timer recovery,
+app-switcher privacy and dependency triage. Actual npm audit reported29 affected
+entries rooted in three advisories, mostly propagated tooling; no exploit was run.
+Do not apply force downgrades that break Expo58 compatibility.
 
 ## Google setup progress
 

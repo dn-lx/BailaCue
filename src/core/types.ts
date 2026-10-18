@@ -51,11 +51,18 @@ export type PracticeSession = {
   videoId?: string;
 };
 export type Playlist = { id: string; name: string; videoIds: string[] };
-export type Pick = { day: string; videoIds: string[]; skipped: boolean };
+export type Pick = {
+  day: string;
+  videoIds: string[];
+  skipped: boolean;
+  selectionKey?: string;
+};
 export type Preferences = {
   styles: DanceStyle[];
   labels: string[];
   picksEnabled: boolean;
+  onePerStyle?: boolean;
+  minPickRating?: number;
   weeklyMinutes: number;
   theme: "system" | "light" | "dark";
   cooldownDays: number;
@@ -115,6 +122,8 @@ export const emptyLibrary = (): Library => ({
     styles: ["Bachata", "Salsa"],
     labels: ["Footwork"],
     picksEnabled: true,
+    onePerStyle: true,
+    minPickRating: 1,
     weeklyMinutes: 60,
     theme: "system",
     cooldownDays: 3,

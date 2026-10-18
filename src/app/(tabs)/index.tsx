@@ -17,7 +17,12 @@ import { useTheme } from "../../components/theme";
 import { VideoCard } from "../../components/VideoCard";
 import { useLibrary } from "../../services/store";
 import { localDay, weekStart } from "../../core/practice";
-import { ensureDailyPick, rankCandidates } from "../../core/recommendations";
+import {
+  ensureDailyPick,
+  rankCandidates,
+  refreshDailyPicks,
+  minimumPickRating,
+} from "../../core/recommendations";
 export default function Today() {
   const { library, update } = useLibrary();
   const t = useTheme();
@@ -128,14 +133,43 @@ export default function Today() {
       <Row style={{ justifyContent: "space-between" }}>
         <View>
           <Txt size={24} weight="display">
-            Your Daily Pick
+            Your Daily Picks
           </Txt>
           <Txt size={13} color={t.muted}>
-            A nudge in the right direction
+            {library.preferences.onePerStyle !== false
+              ? "One for each selected style, led by your ratings"
+              : "Your highest-rated eligible videos"}
           </Txt>
         </View>
         <Icon name="spark" color={t.primary} />
       </Row>
+      {library.preferences.picksEnabled &&
+      !pick?.skipped &&
+      library.preferences.onePerStyle !== false
+        ? [...new Set(library.preferences.styles)]
+            .filter((style) => !videos.some((v) => v.style === style))
+            .map((style) => (
+              <Card key={style}>
+                <Txt weight="bold">Your {style} pick is waiting</Txt>
+                <Txt size={13} color={t.muted}>
+                  Add an available {style} video rated{" "}
+                  {minimumPickRating(library)}★ or higher to complete your daily
+                  mix.
+                </Txt>
+                <Button variant="soft" onPress={() => router.push("/upload")}>
+                  Add a {style} video
+                </Button>
+              </Card>
+            ))
+        : null}
+      {library.preferences.picksEnabled ? (
+        <Button
+          variant="soft"
+          onPress={() => update((l) => refreshDailyPicks(l))}
+        >
+          Update today’s picks
+        </Button>
+      ) : null}
       {!library.preferences.picksEnabled ? (
         <Empty
           title="Picks are taking a break"

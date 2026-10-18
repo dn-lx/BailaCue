@@ -846,7 +846,7 @@ function Player({ video, uri }: { video: Video; uri: VideoSource }) {
               ))}
             </View>
             <Txt size={13} weight="bold">
-              Importance
+              Your rating · Daily Picks priority
             </Txt>
             <Row>
               {[1, 2, 3, 4, 5].map((importance) => (

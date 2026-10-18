@@ -4,7 +4,7 @@ on:
     inputs:
       tag:
         description: Published Android preview tag
-        default: v0.2.5-preview.8
+        default: v0.2.6-preview.9
       build_run:
         description: Optional build run artifact to test before publication
         required: false
@@ -32,7 +32,7 @@ jobs:
       - name: Download preview and create synthetic video
         env:
           GH_TOKEN: ${{ github.token }}
-          PREVIEW_TAG: ${{ inputs.tag || 'v0.2.5-preview.8' }}
+          PREVIEW_TAG: ${{ inputs.tag || 'v0.2.6-preview.9' }}
           BUILD_RUN: ${{ inputs.build_run }}
         run: |
           mkdir -p artifacts
@@ -58,7 +58,7 @@ jobs:
           disable-animations: true
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -no-snapshot -memory 3072 -cores 4 -camera-back none -camera-front none
           script: |
-            adb root
+            bash scripts/prepare-test-device.sh
             adb wait-for-device
             adb shell wm size 720x1600
             adb shell wm density 280

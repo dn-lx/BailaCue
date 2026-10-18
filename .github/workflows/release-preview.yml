@@ -90,7 +90,7 @@ jobs:
           disable-animations: true
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -no-snapshot -memory 3072 -cores 4 -camera-back none -camera-front none
           script: |
-            adb root
+            bash scripts/prepare-test-device.sh
             adb wait-for-device
             adb shell wm size 720x1600
             adb shell wm density 280

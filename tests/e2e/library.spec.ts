@@ -371,3 +371,76 @@ test("artist and video-type labels can be created, reused, edited and retained a
     }),
   ).toBeVisible();
 });
+
+test("Daily Picks chooses one rated video per style, supports a minimum rating and persists the daily mix", async ({
+  page,
+}) => {
+  const add = async (
+    title: string,
+    style: "Salsa" | "Bachata",
+    stars: number,
+  ) => {
+    await page.goto("/upload");
+    const chooser = page.waitForEvent("filechooser");
+    await page
+      .getByRole("button", { name: "Choose a video", exact: true })
+      .click();
+    await (await chooser).setFiles(fixture);
+    await page
+      .getByRole("textbox", { name: "Video title", exact: true })
+      .fill(title);
+    await page.getByRole("button", { name: style, exact: true }).click();
+    await page.getByRole("button", { name: `${stars} ★`, exact: true }).click();
+    await page
+      .getByRole("button", { name: "Add to my library", exact: true })
+      .click();
+    await page.waitForURL(/\/video\//);
+  };
+  await add("Salsa five stars", "Salsa", 5);
+  await add("Salsa three stars", "Salsa", 3);
+  await add("Bachata four stars", "Bachata", 4);
+  await page.goto("/");
+  await page
+    .getByRole("button", { name: "Update today’s picks", exact: true })
+    .click();
+  await expect(
+    page.getByRole("button", { name: "Play Salsa five stars", exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Play Bachata four stars", exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Play Salsa three stars", exact: true }),
+  ).toHaveCount(0);
+  await page.reload();
+  await expect(
+    page.getByRole("button", { name: "Play Bachata four stars", exact: true }),
+  ).toBeVisible();
+  await page.screenshot({
+    path: "artifacts/screenshots/daily-salsa-bachata.png",
+    fullPage: true,
+  });
+  await page.getByRole("tab", { name: "Settings", exact: true }).click();
+  await expect(
+    page.getByRole("switch", {
+      name: "One video per selected style",
+      exact: true,
+    }),
+  ).toBeChecked();
+  await page.getByRole("button", { name: "5★ or higher", exact: true }).click();
+  await page.getByRole("tab", { name: "Today", exact: true }).click();
+  await expect(
+    page.getByRole("button", { name: "Play Salsa five stars", exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByText("Your Bachata pick is waiting", { exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Play Bachata four stars", exact: true }),
+  ).toHaveCount(0);
+  await page.getByRole("button", { name: "Skip today", exact: true }).click();
+  await page.reload();
+  await expect(
+    page.getByText("A rest day counts, too.", { exact: true }),
+  ).toBeVisible();
+});

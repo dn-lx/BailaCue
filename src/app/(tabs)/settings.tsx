@@ -22,6 +22,7 @@ import {
 } from "../../services/reminders";
 import { reminderSchedule } from "../../core/reminders";
 import { unlock } from "../../services/lock";
+import { refreshDailyPicks } from "../../core/recommendations";
 import type { Preferences, DanceStyle } from "../../core/types";
 export default function Settings() {
   const { library, update } = useLibrary();
@@ -51,8 +52,9 @@ export default function Settings() {
           />
         </Row>
         <Txt color={t.muted} size={13}>
-          Personal suggestions from your available videos. Picks are saved for
-          the day, even when you change preferences.
+          Your star ratings lead each new selection. Labels, learning status and
+          recency break ties. Recent picks get a rest when another video is
+          available.
         </Txt>
         <View style={layout.wrap}>
           {(["Bachata", "Salsa", "Other"] as DanceStyle[]).map((s) => (
@@ -85,20 +87,67 @@ export default function Settings() {
             })
           }
         />
-        <Txt size={13} weight="bold">
-          Videos per day
+        <Row style={{ justifyContent: "space-between" }}>
+          <Txt style={{ flex: 1 }}>One video per selected style</Txt>
+          <Switch
+            accessibilityLabel="One video per selected style"
+            value={p.onePerStyle !== false}
+            onValueChange={(onePerStyle) => set({ onePerStyle })}
+            trackColor={{ true: t.primary }}
+          />
+        </Row>
+        <Txt size={13} color={t.muted}>
+          {p.onePerStyle !== false
+            ? "Select Salsa and Bachata for one of each every day. A missing style is left empty, never replaced by another style."
+            : "Choose the total number of videos for your daily selection."}
         </Txt>
-        <Row>
-          {[1, 2, 3].map((count) => (
+        {p.onePerStyle === false ? (
+          <>
+            <Txt size={13} weight="bold">
+              Videos per day
+            </Txt>
+            <Row>
+              {[1, 2, 3].map((count) => (
+                <Chip
+                  key={count}
+                  selected={p.count === count}
+                  onPress={() => set({ count })}
+                >
+                  {count}
+                </Chip>
+              ))}
+            </Row>
+          </>
+        ) : null}
+        <Txt size={13} weight="bold">
+          Minimum star rating for picks
+        </Txt>
+        <Row style={{ flexWrap: "wrap" }}>
+          {[1, 2, 3, 4, 5].map((minPickRating) => (
             <Chip
-              key={count}
-              selected={p.count === count}
-              onPress={() => set({ count })}
+              key={minPickRating}
+              selected={(p.minPickRating ?? 1) === minPickRating}
+              onPress={() => set({ minPickRating })}
             >
-              {count}
+              {minPickRating}★ or higher
             </Chip>
           ))}
         </Row>
+        <Txt size={12} color={t.muted}>
+          The daily mix and minimum rating apply immediately. Other rating or
+          preference changes affect the next selection; update today’s picks to
+          apply them now.
+        </Txt>
+        <Button
+          variant="soft"
+          disabled={!p.picksEnabled}
+          onPress={() => {
+            update((l) => refreshDailyPicks(l));
+            setNotice("Today’s picks updated using your current ratings.");
+          }}
+        >
+          Update today’s picks
+        </Button>
       </Card>
       <Card>
         <Txt size={21} weight="display">

@@ -1,6 +1,7 @@
 import React from "react";
 import {
   ActivityIndicator,
+  Image,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -11,29 +12,15 @@ import {
   type ViewStyle,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import Svg, { Circle, Path } from "react-native-svg";
+import Svg, { Path } from "react-native-svg";
 import { useTheme } from "./theme";
 export function Mark({ size = 44 }: { size?: number }) {
   return (
-    <Svg width={size} height={size} viewBox="0 0 100 100">
-      <Path
-        d="M73 31a31 31 0 1 0 3 40"
-        fill="none"
-        stroke="#FF8C74"
-        strokeWidth="8"
-        strokeLinecap="round"
-      />
-      <Path
-        d="m72 15 2 18-18-2"
-        fill="none"
-        stroke="#FF8C74"
-        strokeWidth="8"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <Path d="m43 35 23 14q3 2 0 4L43 67q-3 2-3-2V37q0-4 3-2" fill="#FFF6E8" />
-      <Circle cx="79" cy="78" r="4" fill="#D8F17D" />
-    </Svg>
+    <Image
+      source={require("../../assets/icon.png")}
+      accessible={false}
+      style={{ width: size, height: size, borderRadius: size * 0.22 }}
+    />
   );
 }
 export type IconName =

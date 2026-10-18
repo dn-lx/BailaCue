@@ -252,6 +252,46 @@ async def main():
         await locate("Done choosing labels",scrolls=2)
         await locate("Save details",scrolls=3)
         report["checks"].append({"check":"Native artist label creation, saved reuse and case-insensitive selection", "result":"passed"})
+        # New daily-mix acceptance uses real imports and star controls, with no
+        # injected library state or live cloud credentials.
+        await controller.go_back()
+        await asyncio.sleep(1)
+        for title, style, stars in (("ARTEMIS Salsa pick","Salsa",5),("ARTEMIS Bachata pick","Bachata",4)):
+            await locate("Add video",attempts=5)
+            await locate("Choose a video",scrolls=12)
+            for _ in range(15):
+                elements = await observe("daily-file-picker")
+                if any("BailaCue-ARTEMIS" in label(e) for e in elements): break
+                await asyncio.sleep(1)
+            await locate("BailaCue-ARTEMIS",attempts=8)
+            await field("Video title",title)
+            await locate(style,scrolls=3)
+            await locate(f"{stars} ★",scrolls=5)
+            await locate("Add to my library",scrolls=12)
+            for _ in range(20):
+                elements = await observe("daily-imported")
+                if any("Video position" in label(e) for e in elements): break
+                await asyncio.sleep(1)
+            else: raise AssertionError("Rated native video did not open")
+            await controller.go_back()
+            await asyncio.sleep(1)
+        await locate("Today",attempts=5)
+        await locate("Update today’s picks",scrolls=6)
+        async def see(text, name):
+            for _ in range(12):
+                elements = await observe(name)
+                for element in elements:
+                    b = element.get("parsed_bounds", {})
+                    if text in label(element) and b.get("bottom", 0) > b.get("top", 0) >= 0 and b["bottom"] <= controller.ctx.device.device_height:
+                        return
+                screen = await controller.get_screen_data()
+                await controller.swipe_coords(screen.width//2,int(screen.height*.78),screen.width//2,int(screen.height*.28),400)
+                await asyncio.sleep(0.8)
+            raise AssertionError(f"Native Daily Picks did not show {text}")
+        await see("Play ARTEMIS Bachata pick","daily-bachata")
+        await see("Play ARTEMIS Salsa pick","daily-salsa")
+        report["checks"].append({"check":"Native rated imports produce one Bachata and one Salsa Daily Pick", "result":"passed"})
+
     report["status"] = "passed"
 
 try:

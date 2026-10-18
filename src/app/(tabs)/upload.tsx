@@ -181,7 +181,7 @@ export default function Upload() {
             options={libraryLabels(library)}
             onChange={setLabels}
           />
-          <Txt weight="bold">Importance</Txt>
+          <Txt weight="bold">Your rating · Daily Picks priority</Txt>
           <Row>
             {[1, 2, 3, 4, 5].map((n) => (
               <Chip
