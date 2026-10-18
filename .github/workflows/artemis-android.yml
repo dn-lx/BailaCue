@@ -59,7 +59,7 @@ jobs:
             adb shell wm size 720x1600
             adb shell input keyevent 82
             adb shell settings put secure show_ime_with_hard_keyboard 1
-            uv run --project /tmp/artemis artemis helper install --serial emulator-5554
+            uv run --project /tmp/artemis artemis helper install --serial emulator-5554 || uv run --project /tmp/artemis artemis helper install --serial emulator-5554 || echo 'ARTEMIS helper could not enable; using its UIAutomator fallback'
             adb install -r artifacts/*.apk
             adb push /tmp/BailaCue-ARTEMIS.mp4 /sdcard/Download/BailaCue-ARTEMIS.mp4
             adb shell am broadcast -a android.intent.action.MEDIA_SCANNER_SCAN_FILE -d file:///sdcard/Download/BailaCue-ARTEMIS.mp4

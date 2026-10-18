@@ -89,12 +89,14 @@ jobs:
           arch: x86_64
           profile: pixel_7
           disable-animations: true
-          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -camera-front none
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -no-snapshot -memory 3072 -cores 4 -camera-back none -camera-front none
           script: |
             adb root
             adb wait-for-device
+            adb shell wm size 720x1600
             adb shell input keyevent 82
-            uv run --project /tmp/artemis artemis helper install --serial emulator-5554
+            adb shell settings put secure show_ime_with_hard_keyboard 1
+            uv run --project /tmp/artemis artemis helper install --serial emulator-5554 || uv run --project /tmp/artemis artemis helper install --serial emulator-5554 || echo 'ARTEMIS helper could not enable; using its UIAutomator fallback'
             adb install -r artifacts/*.apk
             adb push /tmp/BailaCue-ARTEMIS.mp4 /sdcard/Download/BailaCue-ARTEMIS.mp4
             adb shell am broadcast -a android.intent.action.MEDIA_SCANNER_SCAN_FILE -d file:///sdcard/Download/BailaCue-ARTEMIS.mp4

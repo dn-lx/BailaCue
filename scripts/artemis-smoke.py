@@ -14,6 +14,7 @@ import hashlib
 import re
 from pathlib import Path
 from artemis.mcp.adb_server import _get_controller
+from artemis.clients.screen_client_factory import hierarchy_backend_summary
 
 OUT = Path(os.environ.get("BAILACUE_ARTEMIS_OUT", "/workspace/BailaCue/artifacts/artemis"))
 OUT.mkdir(parents=True, exist_ok=True)
@@ -23,6 +24,7 @@ async def main():
     controller = _get_controller(device_serial=os.environ.get("ARTEMIS_DEVICE_ID", "emulator-5554"))
     async def observe(name):
         screen = await asyncio.wait_for(controller.get_screen_data(), timeout=45)
+        report["observation_backend"] = hierarchy_backend_summary(controller.ctx.ui_adb_client)
         (OUT / f"{name}.png").write_bytes(base64.b64decode(screen.base64))
         (OUT / f"{name}.json").write_text(json.dumps(screen.elements, indent=2))
         return screen.elements
