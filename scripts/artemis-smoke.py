@@ -110,8 +110,15 @@ async def main():
             raise AssertionError(f"Native journey could not locate {text}")
         async def field(text,value):
             await locate(text,scrolls=6)
-            if not await controller.type_text(value,clear_existing=True):
+            # The upstream driver's --meta keyevent clear command is rejected
+            # by API35, leaving the old value intact. Use a real Ctrl+A chord.
+            await controller.driver.execute_shell("input keycombination 113 29")
+            await controller.driver.execute_shell("input keyevent 67")
+            if not await controller.type_text(value,clear_existing=False):
                 raise AssertionError(f"Could not edit {text}")
+            elements = await observe("field-value")
+            if not any("EditText" in e.get("class", "") and text.lower() in label(e).lower() and e.get("text") == value for e in elements):
+                raise AssertionError(f"Native text entry did not replace {text} with {value}")
             await controller.go_back()
         await locate("Add video")
         await locate("Choose a video")
