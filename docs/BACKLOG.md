@@ -5,7 +5,7 @@ a claim of native device validation. `[x]` means implemented with recorded local
 verification; `[ ]` means still pending, including implemented code awaiting its
 necessary integration/device validation. See VERIFICATION.md for exact evidence.
 
-## 0.2.0 continuation
+## 0.2.3 continuation
 
 Implemented: Drive/Dropbox account and folder UI, native credentials/PKCE, paginated
 scans, defaults/deduplication/reconnect preservation, source filters, streaming,
@@ -31,7 +31,8 @@ server-generated picks and remote new-video push remain implementation work.
 - [x] Additive owner-isolated schema; real local PostgreSQL negative access tests.
 - [x] Full scope backlog, CI definitions, build instructions and versioning.
 - [x] Android ARM64 preview APK built; signature, version and packaged assets verified.
-- [ ] Android device validation; iOS native compile, signing and device validation.
+- [x] Android API35 emulator launch/import/section/export/Photos acceptance via Google ARTEMIS.
+- [ ] Physical Android hardening; iOS native compile, signing and device validation.
 
 ## M2 · Connected working core
 
@@ -73,9 +74,9 @@ server-generated picks and remote new-video push remain implementation work.
 
 ## M4 · Editing, comparison, sharing and privacy
 
-- [ ] Native Media3/AVFoundation MP4 trim compiled and device-tested; exact bounds,
-      separate output, cancel/failure/unsupported-codec paths and original checksum.
-      Native implementation + export/Photos/share UI exist in this branch.
+- [x] Android Media3 trim1–4s to separate MP4, original checksum unchanged and Photos save verified by ARTEMIS.
+- [ ] AVFoundation/iOS compilation/runtime; native cancel/failure/unsupported-codec paths.
+      Native implementation and export/Photos/share UI exist in this branch.
 - [ ] Native camera permission/denial, recording and explicit local-save validation.
 - [ ] Side-by-side reference/self recording with manual alignment and independent mute.
 - [x] Adjustable count overlay with tempo/pattern/offset; explicit manual timing copy.
@@ -96,5 +97,6 @@ server-generated picks and remote new-video push remain implementation work.
 - [ ] Screen reader, dynamic type, contrast and one-hand usability device review.
 - [ ] Privacy policy/data export/retention, security review, performance budgets.
 - [ ] Protected caches and account cleanup across devices; no originals deleted.
-- [ ] Release signing, internal distribution, immutable versioned APK/AAB/IPA evidence.
+- [x] Versioned Android preview APK published with matching successful native-test checksum/signature evidence.
+- [ ] Store release signing, AAB/IPA distribution and iOS evidence.
 - [ ] App store publication / production deployment only on separate instruction.

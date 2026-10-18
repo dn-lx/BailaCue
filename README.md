@@ -7,14 +7,20 @@ and iOS, built with React Native, TypeScript and Expo SDK 58.
 
 ## Install Android
 
-Download [BailaCue 0.2.3 for Android](https://github.com/dn-lx/BailaCue/releases/download/v0.2.3-preview.4/BailaCue-v0.2.3-build5-preview.apk)
-or open [release notes](https://github.com/dn-lx/BailaCue/releases/tag/v0.2.3-preview.4).
+Download [BailaCue 0.2.3 for Android](https://github.com/dn-lx/BailaCue/releases/download/v0.2.3-preview.5/BailaCue-v0.2.3-build5-preview.apk)
+or open [release notes](https://github.com/dn-lx/BailaCue/releases/tag/v0.2.3-preview.5).
 Open it on an Android phone and allow installation from your browser/files app when
 Android asks. This is an internal preview signed with a test certificate, not a
 Play Store release. Version **0.2.3 (5)**; minimum Android 7/API 24.
 
 No Metro server or Expo Go is needed for the APK. iOS needs a separate signed build
 with an Apple Developer account; an Android APK cannot be installed on an iPhone.
+
+The published APK passed seven Google ARTEMIS native checks, including real import,
+new-file trimming, original-byte preservation and saving to Photos.
+[Verification and screenshots](docs/VERIFICATION.md) record exact scope and remaining
+live-provider/iOS setup. The public download's checksum, signature and version were
+verified separately.
 
 ## What is implemented
 

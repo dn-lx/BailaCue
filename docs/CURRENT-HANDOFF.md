@@ -1,65 +1,58 @@
-# Current handoff · 0.2.3 (build 5)
+# Current handoff · BailaCue0.2.3 (build5)
 
-Continue the active task in `/workspace/BailaCue`, feature branch
-`feat/bailacue-mobile-foundation`, draft PR #1. User authorized completing personal
-cloud video sources, online/phone choice, editing/new-file saves, GitHub upload and
-Google ARTEMIS testing. Owner explicitly approved deployment to shared production
-Me+ this turn; it is already deployed. Do not ask for that approval again.
+Source: `feat/bailacue-mobile-foundation`, draft PR#1. App source tag
+`v0.2.3-preview.5` points to3cf916c1c811ecd238f5920b236cc718559adfec. Later commits
+improve the native acceptance harness, publication gates and documentation only.
 
-## Completed work
+## Delivered
 
-Personal Drive/Dropbox account/folder configuration, discovery/reconciliation,
-online playback, phone downloads, secure resumable uploads, comparison, reminders,
-quiet hours, device lock, scoped account/sync/sharing API + UI and original branding.
-API v2 and all three BailaCue-only migrations are live on Me+
-`wbqnctrvxohxwiaignhg`. Anonymous/invalid login return401; no health data/auth settings
-were changed. Real two-account/live OAuth acceptance remains unverified. Provider
-app registrations are absent; each user's account choice does not replace that
-one-time developer setup. File-picker import works independently of provider OAuth.
+Original icon/brand/badges/themes; personal Drive/Dropbox account/folder configuration,
+refresh/reconciliation, labels/ratings/notes/collections, authenticated streaming or
+phone copies, recoverable uploads to explicit writable sources, native practice
+player/loops, separate trimmed MP4s with Photos/share/upload, comparison, local
+reminders/quiet hours and device lock. See README and the full BACKLOG ledger.
 
-## Actual native findings and current build
+Owner-approved Me+ APIv2 and all3 BailaCue-only migrations are deployed to
+`wbqnctrvxohxwiaignhg`. The client receives scoped opaque app sessions, not broad
+Me+ JWTs. No health tables/data, existing functions or auth settings were changed.
+Do not ask for deployment approval again. Real account acceptance is still pending.
 
-Build3 compiled/published but ARTEMIS found Room/WorkManager startup failure: R8
-removed WorkDatabase_Impl's reflective constructor. Build4 disabled shrinking with
-SDK58 expo-build-properties; ARTEMIS then passed native launch/Today/Settings/Library.
-Picker harness fixes wait for DocumentsUI, select filename rather than separate
-Preview action, and use a properly scaled720x1600/density280 viewport.
+## Published and verified Android
 
-Actual import then exposed a second app bug: SDK58 File.copy and File.move return
-promises; both were unawaited. Build5 awaits copying before inspection and cache
-cleanup, and moving before downloaded-file inspection. Failed-copy partial cleanup
-was fixed. New deferred-I/O regression tests cover copy/move readiness and cleanup.
-**68 tests across7 suites, TypeScript and lint pass.**
+https://github.com/dn-lx/BailaCue/releases/tag/v0.2.3-preview.5
+APK `BailaCue-v0.2.3-build5-preview.apk`,68,508,221 bytes.
+SHA256 `7443b70330a8b6e0afdddfbab1711415b074f9c82a85df416fcf20008e42bb1f`.
+Public bytes were downloaded and verified: APKv2 signature, packageapp.bailacue.mobile,
+version0.2.3/code5, minimumAPI24/target36, ARM64+x86_64. Preview cert SHA1:
+`5e8f16062ea3cd2c4a0d547876baa6f38cabf625`.
 
-Builds2/3/4 are withdrawn drafts, not recommended downloads. Build5 source/tag:
-`3cf916c1c811ecd238f5920b236cc718559adfec`, `v0.2.3-preview.5`.
-Current GitHub workflow run **39102137159**. It builds universal ARM64+x86_64,
-verifies/uploads an artifact, runs ARTEMIS against that artifact, and only then
-publishes. Build5 draft release is prepared. Native source is unchanged from4;
-only JS file-operation timing and version changed. No build5 local APK is built.
+68 tests across7 suites, TypeScript, lint,3 browser journeys, Deno check, Expo Doctor
+20/20 and web export passed. Build run39102137159 compiled the universal APK.
+Native ARTEMIS run39104109693 passed all7 checks against those exact bytes:
+launch, Settings/Library, real import, named1–4s section/loop control, separate native
+Media3 MP4 (ffprobe3.017075s), original checksum unchanged and Save to Photos.
+Recovery publication run39104394080 checked the successful report's APK hash before
+uploading. Committed report/screenshots are under docs/verification/android-build5.
+ARTEMIS used its real controller/helper1.2.0, not autonomous Gemini.
 
-## Next actions — keep working, do not end with an untested download
+## Important history and limits
 
-1. Watch run39102137159. The new job names are `build`, `ARTEMIS Android device tests`,
-   and `publish`. Fetch completed job logs with the GitHub connector; actual decoded
-   logs are in structuredContent.content, not content's “Action completed” text.
-2. Inspect ARTEMIS report/evidence. Harness uses actual Google ARTEMIS controller
-   (not autonomous Gemini); pinned351ca8422f7b5b54e80a9c1ce03a222e02415b6b.
-   Checks: native launch, two tabs, synthetic document import, named1–4s loop,
-   Media3 new-file export, original checksum unchanged, ffprobe3s±.25, Photos save.
-   Do not claim unexecuted checks. Fix actual app bugs or harness interactions as
-   evidence warrants; genuine app changes require a new version/APK/tag.
-3. After successful publication, download public build5 bytes again, verify attached
-   SHA-256, signature, package/version/code and ABIs. Do not use another build's hash.
-4. Update VERIFICATION.md, ARTEMIS.md, this file, README/remaining docs, PR body and
-   release notes with actual results. Optionally preserve synthetic screenshots and
-   report in docs; no private media/credentials. Push all work to the feature branch.
-5. Final answer should lead with direct Android APK link, source PR link, what was
-   added/deployed/tested and real remaining OAuth/iOS setup. Full scope is tracked
-   in BACKLOG.md; remote source push, automatic merge/sync, server picks and WebDAV/S3
-   are not implemented. Do not claim production readiness or iOS native validation.
+Native testing caught an R8-removed Room constructor (fixed by disabling preview
+shrinking) and unawaited SDK58 File.copy/File.move (fixed and regression-tested).
+Builds2–4 are withdrawn drafts. Native harness corrections concern picker Preview
+buttons, below-fold content and keyboard input/visibility; no app assertion was
+skipped. Do not recommend old builds or reuse their checksums.
 
-GitHub CLI credentials intermittently return401/503; retry or use connector tools.
-Never print tokens. uploads.github.com failed from the workspace; Actions publication
-works with owner-prepared drafts. No store publication/merge/signing purchase.
-Do not spawn agents. Keep user progress updates within60s while working.
+Live OAuth still needs BailaCue's one-time Google/Dropbox app registrations; each
+user then selects their own account/folders. No IDs/secrets were invented. Files
+picker import works independently. No live cloud transfer or real two-user Me+
+acceptance is claimed. iOS native source is maintained but not compiled/signed.
+Remote source push, automatic merge/sync, server picks and WebDAV/S3 remain tracked
+implementation scope; physical camera/notifications/accessibility/large-file codec
+acceptance and release signing remain hardening work. APK is an internal preview.
+
+No store submission, main-branch merge, paid purchase or private-video sharing was
+performed. User authorization for GitHub upload and the scoped Me+ deployment is
+already explicit. Native root android/ios/artifacts are generated/ignored; use the
+Expo config plugin and modules, not manual generated-source edits. Read AGENTS.md
+and matching SDK58 docs before changing APIs. Do not spawn agents unless instructed.
