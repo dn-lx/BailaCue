@@ -349,6 +349,14 @@ test("user connects Salsa and Bachata folders → streams → edits → refresh 
     ),
   ).toBe(true);
   expect(renames.some((r) => r.to_path === "/bachata/0001.mp4")).toBe(true);
+  await page
+    .getByRole("button", { name: "Play 0001", exact: true })
+    .first()
+    .scrollIntoViewIfNeeded();
+  await page.screenshot({
+    path: "artifacts/screenshots/numeric-source-library.png",
+    fullPage: true,
+  });
   await page.getByRole("tab", { name: "Today", exact: true }).click();
   await page
     .getByRole("button", { name: "Update today’s picks", exact: true })
@@ -360,6 +368,9 @@ test("user connects Salsa and Bachata folders → streams → edits → refresh 
     page.getByText("Bachata class · Daily Pick", { exact: false }),
   ).toBeVisible();
   await expect(page.getByText("Unrated · treated as 5★").first()).toBeVisible();
+  await page
+    .getByText("Bachata class · Daily Pick", { exact: false })
+    .scrollIntoViewIfNeeded();
   await page.screenshot({
     path: "artifacts/screenshots/source-daily-picks.png",
     fullPage: true,
