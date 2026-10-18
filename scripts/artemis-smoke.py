@@ -32,7 +32,10 @@ async def main():
         return " ".join(str(element.get(k, "")) for k in ["text", "content-desc", "contentDescription", "label"])
     async def tap(text):
         elements = await observe("before-tap")
-        matches = [e for e in elements if text.lower() in label(e).lower()]
+        # DocumentsUI exposes a separate accessible "Preview the file ..."
+        # button. Selecting it opens a player instead of returning the file.
+        matches = [e for e in elements if text.lower() in label(e).lower()
+                   and not label(e).strip().lower().startswith("preview the file")]
         for element in sorted(matches, key=lambda e: (not (e.get("focusable") in (True,"true") or e.get("clickable") in (True,"true")),len(label(e)))):
             bounds = re.fullmatch(r"\[(-?\d+),(-?\d+)\]\[(-?\d+),(-?\d+)\]", str(element.get("bounds", "")))
             if not bounds:
