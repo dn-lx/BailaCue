@@ -1,0 +1,87 @@
+# Complete product scope and acceptance ledger
+
+The original [build brief](BUILD-BRIEF.md) remains authoritative. No item below is
+a claim of native device validation. `[x]` means implemented with recorded local
+verification; `[ ]` means still pending, including implemented code awaiting its
+necessary integration/device validation. See VERIFICATION.md for exact evidence.
+
+## M1 · Foundation and first local vertical slice
+
+- [x] Shared TypeScript Android/iOS project; tab navigation; routed video details.
+- [x] Original icon, adaptive icon, splash, palette, typography, status/style badges.
+- [x] Light/dark/system themes; labelled controls and 44–48 dp touch targets.
+- [x] Local video import, title/style/labels/importance/teacher/class/location/date/notes.
+- [x] Persisted local library, search, combined style/status/importance filters.
+- [x] Browser-verified playback, saved sections, notes, timestamp seeking/bookmarks.
+- [x] Collections with cross-library membership and manual order.
+- [x] Me+ identity/schema read-only inspection and integration design.
+- [x] Additive owner-isolated schema; real local PostgreSQL negative access tests.
+- [x] Full scope backlog, CI definitions, build instructions and versioning.
+- [ ] Android installable APK generated and checked (see current verification).
+- [ ] Android device validation; iOS native compile, signing and device validation.
+
+## M2 · Connected working core
+
+- [x] Owner explicitly selected shared Me+; additive migration applied and advisors checked.
+- [ ] Reuse Me+ Auth; username/password registration/login, rate limits, recovery,
+      secure expiring/revocable sessions, password change and logout. Never read health data.
+- [ ] Real two-account RLS/API and existing Me+ policy review.
+- [ ] Secure Google OAuth PKCE flow, callbacks, least scopes, token expiry/reconnect.
+- [ ] Two independent Drive folders on one account; source add/rename/edit/disconnect;
+      default style/labels; write capability; preserve metadata on reconnect.
+- [ ] Existing-folder discovery, initial import, pull-to-refresh, incremental refresh,
+      last sync, moved/renamed/deleted/restricted files and deduped memberships.
+- [ ] Pick explicit writable destination; upload gallery/file/recording with metadata.
+- [ ] Resumable upload initiation, persisted secure jobs, progress/cancel/retry;
+      reconcile expiry/completion by stable provider ID; register only confirmed files.
+- [x] Mock-HTTP tests for Drive paging, two folders, read-only/401/403/404 errors.
+- [x] Upload transport tests for retry identity, interruption, acknowledgement, completion.
+- [ ] Real interrupted upload, read-only destination, duplicate retry and token expiry tests.
+- [ ] Authenticated remote playback; remote labels/priority/notes/search and source filters.
+- [ ] Cross-device metadata sync, stable IDs, optimistic revision/conflict UI.
+- [ ] Acceptance journey: register → connect Salsa + Bachata → upload to chosen folder
+      → label/rate/note → saved loop → receive/open Daily Pick on device.
+
+## M3 · Practice and personalisation
+
+- [x] Explainable deterministic picks; status/importance/labels/unwatched/recency;
+      cooldown/diversity/fallbacks; More/Less/Learned/Skip; device-local persistence.
+- [x] Ranking/cooldown, stable-day, missing-access, empty-library and Skip tests.
+- [ ] Server-stable cross-device picks; reroll; weekdays/timezone/frequency/teacher/level options.
+- [ ] Native playback verification: full screen, resume, speed/pitch, seeking, mirror,
+      A–B loops with multiple named sections; format and unavailable-file errors.
+- [ ] Selected-video offline downloads, usage/delete controls, Wi-Fi preference,
+      permission revocation handling, user-specific protected-cache cleanup on logout.
+- [x] Local focus/break timer and session journal with weekly goals/progress.
+- [ ] Timer interruption/device clock tests and session conflict/recovery policy.
+- [ ] Contextual notification permission; local practice and pick reminders, quiet hours,
+      immediate preference changes, DST/timezone reconciliation and deep links.
+- [ ] Schedule-change/cancellation/duplicate-suppression and permission denial tests.
+
+## M4 · Editing, comparison, sharing and privacy
+
+- [ ] Native Media3/AVFoundation MP4 trim compiled and device-tested; exact bounds,
+      separate output, cancel/failure/unsupported-codec paths and original checksum.
+      Native implementation + export/Photos/share UI exist in this branch.
+- [ ] Native camera permission/denial, recording and explicit local-save validation.
+- [ ] Side-by-side reference/self recording with manual alignment and independent mute.
+- [x] Adjustable count overlay with tempo/pattern/offset; explicit manual timing copy.
+- [ ] Count overlay native verification at different playback speeds and seek positions.
+- [ ] Export upload to explicitly chosen writable source; export-job recovery/storage cleanup.
+- [ ] Provider-aware playlist sharing, explicit access adjustment and grant revocation;
+      inaccessible-video UI. Never make provider files public implicitly.
+- [ ] Optional biometric/device lock, authenticated account deletion, metadata retention,
+      downloaded/cache cleanup and revocation limitations disclosed in settings.
+- [ ] Server scheduler/push infrastructure for new-video alerts and remote refresh events;
+      per-source alert preferences, quiet hours and deduplication; delivery limits.
+- [ ] Dropbox, WebDAV/S3 or other adapters as requested; never label untested adapters connected.
+
+## M5 · Hardening and release preparation
+
+- [ ] Real end-to-end Android device test of the connected journey; iOS parity.
+- [ ] Large-file/storage-pressure, airplane-mode, force-stop, expiry/reconnect tests.
+- [ ] Screen reader, dynamic type, contrast and one-hand usability device review.
+- [ ] Privacy policy/data export/retention, security review, performance budgets.
+- [ ] Protected caches and account cleanup across devices; no originals deleted.
+- [ ] Release signing, internal distribution, immutable versioned APK/AAB/IPA evidence.
+- [ ] App store publication / production deployment only on separate instruction.
