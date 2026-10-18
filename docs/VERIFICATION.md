@@ -1,7 +1,7 @@
 # Verification · BailaCue 0.2.8 (build11)
 
 Local checks on2026-10-18:130 unit/database tests /16 suites; six browser journeys;
-TypeScript, ESLint and web export. Source/Android publication still in progress.
+TypeScript, ESLint and web export. GitHub source checks also passed in [run39164210653](https://github.com/dn-lx/BailaCue/actions/runs/39164210653), including Deno and Expo Doctor20/20. Android publication is still in progress.
 Historical [build9 evidence](VERIFICATION-0.2.6.md) is retained separately.
 
 New upload regression: synthetic114.5MiB native-adapter Drive and Dropbox transfers,
@@ -23,3 +23,10 @@ be verified after publication. No previous build result is substituted for this.
 Live Drive/Dropbox transfers/renames/consent, physical accessibility/notifications,
 two-user Me+ acceptance and iOS compilation/signing remain unverified. No production
 writes or real private media were used for this update.
+
+App source: `11c796165917e7b376a3591784cd2bdd0d04a4cb`.
+[Browser/check details](verification/browser-build11/checks.json) ·
+[Import preview](verification/browser-build11/import-preview.png) ·
+[Settings source cards](verification/browser-build11/layout-settings-320.png) ·
+[Storage source cards](verification/browser-build11/layout-storage-320.png).
+Screenshots are original Playwright bytes, using synthetic media/accounts.
