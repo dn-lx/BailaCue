@@ -4,7 +4,7 @@ on:
     inputs:
       tag:
         description: Published Android preview tag
-        default: v0.2.4-preview.7
+        default: v0.2.5-preview.8
       build_run:
         description: Optional build run artifact to test before publication
         required: false
@@ -32,7 +32,7 @@ jobs:
       - name: Download preview and create synthetic video
         env:
           GH_TOKEN: ${{ github.token }}
-          PREVIEW_TAG: ${{ inputs.tag || 'v0.2.4-preview.7' }}
+          PREVIEW_TAG: ${{ inputs.tag || 'v0.2.5-preview.8' }}
           BUILD_RUN: ${{ inputs.build_run }}
         run: |
           mkdir -p artifacts

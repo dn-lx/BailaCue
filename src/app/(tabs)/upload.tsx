@@ -1,3 +1,5 @@
+import { SaveDestinationPicker } from "../../components/SaveDestinationPicker";
+import { phoneDestination, uploadDestination } from "../../core/destination";
 import { LabelPicker } from "../../components/LabelPicker";
 import { libraryLabels } from "../../core/labels";
 import { useRef, useState } from "react";
@@ -24,6 +26,7 @@ import { formatTime } from "../../core/practice";
 export default function Upload() {
   const t = useTheme();
   const { library, update } = useLibrary();
+  const [destination, setDestination] = useState(phoneDestination);
   const [media, setMedia] = useState<ImportedMedia | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -61,6 +64,13 @@ export default function Upload() {
   }
   function save() {
     if (!media || !title.trim() || saved.current) return;
+    try {
+      if (destination.mode === "cloud")
+        uploadDestination(library, destination.sourceId);
+    } catch (e) {
+      setError((e as Error).message);
+      return;
+    }
     saved.current = true;
     const id = uid();
     const now = new Date().toISOString();
@@ -95,7 +105,17 @@ export default function Upload() {
     setMedia(null);
     setTitle("");
     setNotes("");
-    router.push({ pathname: "/video/[id]", params: { id } });
+    if (destination.mode === "cloud")
+      router.push({
+        pathname: "/transfer/[id]",
+        params: {
+          id,
+          destination: destination.sourceId,
+          keepCopy: destination.keepCopy ? "1" : "0",
+          autoUpload: "1",
+        },
+      });
+    else router.push({ pathname: "/video/[id]", params: { id } });
   }
   return (
     <Screen
@@ -112,8 +132,8 @@ export default function Upload() {
           Bring your videos along
         </Txt>
         <Txt color={t.muted} style={{ textAlign: "center" }}>
-          Choose a video from your files or record a fresh practice. Nothing is
-          uploaded automatically.
+          Choose a video from your files or record a fresh practice. Choose this
+          phone or a cloud folder before saving.
         </Txt>
         <Row style={{ flexWrap: "wrap", justifyContent: "center" }}>
           <Button icon="folder" onPress={() => pick()} loading={busy}>
@@ -200,20 +220,14 @@ export default function Upload() {
             value={notes}
             onChangeText={setNotes}
           />
-          <Card>
-            <Row>
-              <Icon name="lock" />
-              <View style={{ flex: 1 }}>
-                <Txt weight="bold">Destination: This device</Txt>
-                <Txt size={13} color={t.muted}>
-                  A private local copy. Open it after saving to upload to a
-                  folder you choose.
-                </Txt>
-              </View>
-            </Row>
-          </Card>
+          <SaveDestinationPicker
+            value={destination}
+            onChange={setDestination}
+          />
           <Button icon="check" disabled={!title.trim()} onPress={save}>
-            Add to my library
+            {destination.mode === "cloud"
+              ? "Upload & add to library"
+              : "Add to my library"}
           </Button>
           <Button
             variant="ghost"

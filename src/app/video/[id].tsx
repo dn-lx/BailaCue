@@ -37,6 +37,10 @@ import { useTheme } from "../../components/theme";
 import { CloudVideoControls } from "../../components/CloudVideoControls";
 import { resolveVideo, RevokedAccess } from "../../services/cloud/playback";
 import Timeline from "../../components/Timeline";
+import { VideoArea } from "../../components/VideoArea";
+import { SaveDestinationPicker } from "../../components/SaveDestinationPicker";
+import { clipDestination, uploadDestination } from "../../core/destination";
+import { trimRange } from "../../core/editing";
 import { formatTime, parseTime, validateSegment } from "../../core/practice";
 import { uid, type Video } from "../../core/types";
 import { removeVideo, videoFromExport } from "../../core/library";
@@ -44,6 +48,9 @@ function Player({ video, uri }: { video: Video; uri: VideoSource }) {
   const { library, update, updateVideo } = useLibrary();
   const t = useTheme();
   const [fullscreen, setFullscreen] = useState(false);
+  const [dragging, setDragging] = useState(false);
+  const [trimming, setTrimming] = useState(false);
+  const [destination, setDestination] = useState(() => clipDestination(video));
   const [error, setError] = useState("");
   const [time, setTime] = useState(video.resume);
   const [playing, setPlaying] = useState(false);
@@ -180,6 +187,8 @@ function Player({ video, uri }: { video: Video; uri: VideoSource }) {
   async function trim() {
     try {
       const range = section();
+      if (destination.mode === "cloud")
+        uploadDestination(library, destination.sourceId);
       if (!resolved.current)
         throw new Error(
           "Download this cloud video to your phone before exporting a new clip.",
@@ -197,6 +206,18 @@ function Player({ video, uri }: { video: Video; uri: VideoSource }) {
       update((l) => ({ ...l, videos: [clip, ...l.videos] }));
       setExported(result.uri);
       setExportedId(clip.id);
+      if (destination.mode === "cloud") {
+        setExported(undefined);
+        router.push({
+          pathname: "/transfer/[id]",
+          params: {
+            id: clip.id,
+            destination: destination.sourceId,
+            keepCopy: destination.keepCopy ? "1" : "0",
+            autoUpload: "1",
+          },
+        });
+      }
     } catch (e) {
       setError((e as Error).message);
     } finally {
@@ -234,6 +255,7 @@ function Player({ video, uri }: { video: Video; uri: VideoSource }) {
       style={{ flex: 1, backgroundColor: t.background }}
     >
       <ScrollView
+        scrollEnabled={!dragging}
         keyboardShouldPersistTaps="handled"
         contentContainerStyle={{
           paddingBottom: 40,
@@ -252,13 +274,7 @@ function Player({ video, uri }: { video: Video; uri: VideoSource }) {
             </Badge>
           </Row>
         </View>
-        <View
-          style={{
-            backgroundColor: "#140D19",
-            height: 270,
-            overflow: "hidden",
-          }}
-        >
+        <VideoArea onDragging={setDragging}>
           <View style={{ flex: 1, transform: [{ scaleX: mirror ? -1 : 1 }] }}>
             {!fullscreen ? (
               <VideoView
@@ -288,7 +304,7 @@ function Player({ video, uri }: { video: Video; uri: VideoSource }) {
               </Txt>
             </View>
           ) : null}
-        </View>
+        </VideoArea>
         <View style={{ padding: 20, gap: 22 }}>
           <Row style={{ justifyContent: "space-between" }}>
             <Txt size={13} color={t.muted}>
@@ -301,12 +317,70 @@ function Player({ video, uri }: { video: Video; uri: VideoSource }) {
           <Timeline
             duration={video.duration}
             position={time}
-            disabled={!playerReady}
+            disabled={!playerReady || busy}
+            onDragging={setDragging}
+            trim={
+              trimming
+                ? {
+                    ...trimRange(
+                      video.duration,
+                      parseTime(start),
+                      parseTime(end),
+                    ),
+                    onChange: (range, edge) => {
+                      setStart(range.start.toFixed(2));
+                      setEnd(range.end.toFixed(2));
+                      setLoop(false);
+                      player.pause();
+                      seek(player, range[edge]);
+                    },
+                  }
+                : undefined
+            }
             onSeek={(seconds) => {
               setLoop(false);
               seek(player, seconds);
             }}
           />
+          <Row style={{ flexWrap: "wrap" }}>
+            <Button
+              variant={trimming ? "primary" : "soft"}
+              disabled={busy}
+              onPress={() => {
+                if (!trimming) {
+                  const range = trimRange(
+                    video.duration,
+                    parseTime(start),
+                    parseTime(end),
+                  );
+                  setStart(range.start.toFixed(2));
+                  setEnd(range.end.toFixed(2));
+                  player.pause();
+                }
+                setTrimming(!trimming);
+              }}
+            >
+              {trimming ? "Done trimming" : "Trim on timeline"}
+            </Button>
+          </Row>
+          {trimming ? (
+            <Card>
+              <Txt>
+                Drag the two handles on the playback line to choose your clip.
+              </Txt>
+              <Txt accessibilityLiveRegion="polite">
+                Selected: {start}s → {end}s
+              </Txt>
+              <SaveDestinationPicker
+                value={destination}
+                onChange={setDestination}
+                label="Save trimmed clip to"
+              />
+              <Button onPress={trim} loading={busy}>
+                Save selected clip
+              </Button>
+            </Card>
+          ) : null}
           <Row style={{ justifyContent: "center", flexWrap: "wrap" }}>
             <Button
               variant="soft"
@@ -481,6 +555,13 @@ function Player({ video, uri }: { video: Video; uri: VideoSource }) {
             >
               Save practice section
             </Button>
+            {!trimming ? (
+              <SaveDestinationPicker
+                value={destination}
+                onChange={setDestination}
+                label="Save trimmed clip to"
+              />
+            ) : null}
             <Button icon="download" onPress={trim} loading={busy}>
               Export new trimmed video
             </Button>

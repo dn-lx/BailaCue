@@ -1,58 +1,50 @@
-# Current handoff · BailaCue0.2.4 (build7)
+# Current handoff · BailaCue 0.2.5 (build8)
 
-Source: `feat/bailacue-mobile-foundation`, draft PR#1. App source tag
-`v0.2.4-preview.7` points to `6c2e0fb40486a16fddc3c423d95db708c38ba9fe`.
-Later commits update documentation/evidence only.
+Source branch `feat/bailacue-mobile-foundation`, draft PR#1. Build8 release tag
+`v0.2.5-preview.8`; compilation/native publication checks pending.
+Previous public build7 remains available until the new gated release succeeds.
 
-## Current Android delivery
+## Implemented for the latest request
 
-https://github.com/dn-lx/BailaCue/releases/tag/v0.2.4-preview.7
-APK `BailaCue-v0.2.4-build7-preview.apk`, 68,515,481 bytes.
-SHA256 `59557aa55efecff2baa0250f239b4f9478a66fb00f43d3ee827731d53f06faa8`.
-Public bytes were downloaded again and exactly matched the passing ARTEMIS report.
-APKv2 signature verified; packageapp.bailacue.mobile, version0.2.4/code7,
-minimumAPI24/target36, ARM64+x86_64. Preview certificate SHA1:
-`5e8f16062ea3cd2c4a0d547876baa6f38cabf625`, unchanged from build5.
+Imports/recordings and native trimmed-clip saves offer explicit phone/cloud destination,
+separate Salsa/Bachata folders (including one account), and keep-phone-copy selection.
+Online saves start uploading to the chosen source. Failure retains the owned local
+file; online-only cleanup follows successful transfer confirmation. Resume pins
+source/folder/account/provider. Upload registration retains latest metadata and
+all library references. Drive token refresh respects writable account permission.
 
-Run39111878471 built, passed all8 native ARTEMIS checks and published the APK.
-Checks39111879404 passed: 80 tests/9 suites,4 browser journeys, type/lint, Deno,
-Expo Doctor20/20 and web export. Native report/screenshots are committed under
-`docs/verification/android-build7`; original/output hashes and3.017075s duration
-were independently checked in the workspace. ARTEMIS uses its real controller,
-not autonomous Gemini. Build6 passed separate native acceptance but is superseded
-and remains a draft. Builds2–4 remain withdrawn. Build5 is historical.
+Playback timeline has draggable, accessible trim start/end handles; numeric timing
+and separate-file export remain. Video has a vertical resize grip and three presets,
+with aspect ratio preserved. Clip saves from an online source default to its sole
+folder; ambiguous membership requires a choice. Local saves remain separate.
 
-## New features and current Google blocker
+100 unit/database tests and four browser journeys pass locally; type/lint pass.
+Native ARTEMIS harness now additionally asserts real grip and both handle gestures,
+then existing import/labels/loop/export/original-hash/Photos behavior. Publication
+requires native acceptance. See VERIFICATION.md for actual results/limits.
 
-Searchable multi-label pickers in video import, details and cloud-folder defaults:
-select existing labels or create artist/video-type/custom labels, remove selected
-chips and save. Suggestions come from saved videos/folders in the current library;
-case/whitespace/Unicode variants deduplicate. Existing arrays/sync remain compatible.
-See docs/LABELS.md. Browser and native tests verify creation, reuse and persistence.
+## Google setup progress
 
-The user's screenshot showed Google DEVELOPER_ERROR/code10. Official SDK docs
-identify it as an app/remote OAuth registration mismatch. Native code now maps it
-to GoogleDriveSetupError, with clear recovery and Files/setup-help actions.
-Nine SDK mock regressions pass. This is not a completed live sign-in fix.
-No Google Cloud credentials/project exist in the cloud runtime. Remote registration
-is awaiting the app owner's authenticated Google Cloud access. Do not request a
-password in chat. Once access is available, inspect the project and public Android
-OAuth client settings for this exact package/certificate; do not infer success.
-No private browser/session data belongs in the repository. See CLOUD-STORAGE.md.
+The owner manually created an Android OAuth client, reports Drive API enabled,
+Audience test users configured and read/write consent scopes saved. Exact preview
+package `app.bailacue.mobile`, SHA1
+`5E:8F:16:06:2E:A3:CD:2C:4A:0D:54:78:76:BA:A6:F3:8C:AB:F6:25`.
+Current correct Data Access console route is `/auth/scopes`, not `/auth/data-access`.
+Android native sign-in needs no bundled Android client ID. Optional web/iOS build
+identifiers must be of their matching OAuth client types. No Google Cloud credentials
+are available in the workspace. Actual real-account login/upload remains unverified.
+The user explicitly requested no TinyFish; do not invoke it or access browser profile
+files/cookies. No browser control runtime is available here.
 
-## Existing app and infrastructure
+## Existing scope and authorization
 
-Original branding/themes, local import/recording, personal Drive/Dropbox folders,
-online/phone copies, recoverable uploads, practice player/loops/notes/collections,
-separate native trims with Photos/share/upload, comparison/reminders/device lock.
-Owner-approved Me+ APIv2 and all3 additive BailaCue migrations remain deployed to
-`wbqnctrvxohxwiaignhg`. The app receives scoped opaque sessions; existing health
-tables/auth settings were not changed. Do not request deployment approval again.
+Branding, labels/artist dropdowns, account API, personal sources, offline copies,
+video practice, collections and native media module remain. Me+ shared production
+BailaCue APIv2 and three additive migrations were owner-approved and deployed already;
+do not re-ask approval or modify unrelated Me+ health/auth data. Source pushes and
+APK prerelease publication are authorized. Do not merge main or submit to stores.
+No paid actions. No subagents unless explicitly requested.
 
-Live provider transfers, real two-user Me+ acceptance, physical camera/notifications/
+Live provider transfers, real two-user Me+ acceptance, camera/notification/physical
 accessibility/large-file hardening and iOS compilation/signing remain unverified.
-Automatic merge/sync, remote new-video push, server picks and WebDAV/S3 remain pending.
-No main merge, store submission or paid purchase was performed. User authorization
-for GitHub source/APK upload and scoped Me+ deployment is explicit. Root native dirs
-are generated; read AGENTS.md and matching SDK58 docs before API changes. Do not
-spawn agents unless explicitly instructed.
+Automatic metadata merge/sync, new-video push and WebDAV/S3 adapters remain pending.

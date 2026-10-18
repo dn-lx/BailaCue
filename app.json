@@ -2,7 +2,7 @@
   "expo": {
     "name": "BailaCue",
     "slug": "bailacue",
-    "version": "0.2.4",
+    "version": "0.2.5",
     "scheme": "bailacue",
     "orientation": "default",
     "userInterfaceStyle": "automatic",
@@ -10,14 +10,14 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "app.bailacue.mobile",
-      "buildNumber": "7",
+      "buildNumber": "8",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
       "package": "app.bailacue.mobile",
-      "versionCode": 7,
+      "versionCode": 8,
       "permissions": [],
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
@@ -54,9 +54,7 @@
         {
           "photosPermission": "Save your exported dance clips to Photos.",
           "savePhotosPermission": "Save the new trimmed video you choose to export.",
-          "granularPermissions": [
-            "video"
-          ]
+          "granularPermissions": ["video"]
         }
       ],
       "expo-secure-store",

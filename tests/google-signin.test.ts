@@ -100,3 +100,23 @@ it("keeps unrelated connection failures distinguishable from app setup", async (
   sdk.signIn.mockRejectedValue(network);
   await expect(connectGoogle()).rejects.toBe(network);
 });
+it.each([true, false])(
+  "refreshes the chosen account token with its upload permission (write=%s)",
+  async (write) => {
+    sdk.signInSilently.mockResolvedValue({
+      type: "success",
+      data: { user: { id: "chosen-user" } },
+    });
+    sdk.getTokens.mockResolvedValue({ accessToken: "own-token" });
+    await expect(googleToken("chosen-user", write)).resolves.toBe("own-token");
+    expect(sdk.configure).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        scopes: [
+          write
+            ? "https://www.googleapis.com/auth/drive"
+            : "https://www.googleapis.com/auth/drive.readonly",
+        ],
+      }),
+    );
+  },
+);

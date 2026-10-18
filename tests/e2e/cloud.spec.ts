@@ -277,5 +277,54 @@ test("user connects Salsa and Bachata folders → streams → edits → refresh 
   await expect(
     page.getByRole("button", { name: "Play Bachata basics", exact: true }),
   ).toBeVisible();
+  // Imports explicitly choose their folder, independent of style or labels.
+  await page.getByRole("tab", { name: "Add video", exact: true }).click();
+  const chooser = page.waitForEvent("filechooser");
+  await page
+    .getByRole("button", { name: "Choose a video", exact: true })
+    .click();
+  await (await chooser).setFiles(fixture);
+  await page
+    .getByRole("textbox", { name: "Video title", exact: true })
+    .fill("New Bachata upload");
+  await page
+    .getByRole("button", { name: "Online storage", exact: true })
+    .click();
+  await expect(
+    page.getByRole("button", { name: "Tuesday class · Dropbox", exact: true }),
+  ).toBeVisible();
+  await page
+    .getByRole("button", { name: "Bachata class · Dropbox", exact: true })
+    .click();
+  await page
+    .getByRole("switch", {
+      name: "Keep a phone copy after upload",
+      exact: true,
+    })
+    .uncheck();
+  await page
+    .getByRole("button", { name: "Upload & add to library", exact: true })
+    .click();
+  await page.waitForURL(/\/transfer\//);
+  await expect(
+    page.getByText("Selected: Bachata class", { exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("switch", {
+      name: "Keep a phone copy after upload",
+      exact: true,
+    }),
+  ).not.toBeChecked();
+  // The web preview cannot transfer native files; its failed upload must retain the import.
+  await expect(
+    page.getByText("Upload phone videos in the Android or iOS app.", {
+      exact: false,
+    }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Back", exact: true }).click();
+  await page.getByRole("tab", { name: "Library", exact: true }).click();
+  await expect(
+    page.getByRole("button", { name: "Play New Bachata upload", exact: true }),
+  ).toBeVisible();
   expect(errors).toEqual([]);
 });

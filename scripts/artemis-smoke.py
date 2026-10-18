@@ -158,6 +158,39 @@ async def main():
             if any("Video position" in label(e) for e in elements): break
             await asyncio.sleep(1)
         else: raise AssertionError("Imported native video did not open")
+        # Exercise the actual native resize grip and shared-line trim handles.
+        async def control(text, name):
+            elements = await observe(name)
+            matches = [e for e in elements if text.lower() in label(e).lower() and e.get("parsed_bounds")]
+            for element in matches:
+                b = element["parsed_bounds"]
+                if b["bottom"] > b["top"] >= 0 and b["bottom"] <= controller.ctx.device.device_height:
+                    return element, b
+            raise AssertionError(f"Native control {text} is not visible")
+        await locate("Compact video",scrolls=2)
+        grip, b = await control("Resize video area", "player-compact")
+        if "170 pixels tall" not in label(grip): raise AssertionError("Compact video size was not applied")
+        await controller.swipe_coords((b["left"]+b["right"])//2,(b["top"]+b["bottom"])//2,(b["left"]+b["right"])//2,(b["top"]+b["bottom"])//2+90,600)
+        await asyncio.sleep(1)
+        grip, _ = await control("Resize video area", "player-resized")
+        height = re.search(r"(\d+) pixels tall", label(grip))
+        if not height or int(height.group(1)) <= 170: raise AssertionError("Dragging the native video grip did not increase its height")
+        report["checks"].append({"check":"Native player size preset and drag resizing", "result":"passed", "dragged_height":int(height.group(1))})
+        await locate("Standard video",scrolls=2)
+        await locate("Trim on timeline",scrolls=3)
+        for edge, movement in (("start",90),("end",-90)):
+            handle, b = await control(f"Trim {edge}", f"trim-{edge}-before")
+            x,y = (b["left"]+b["right"])//2,(b["top"]+b["bottom"])//2
+            await controller.swipe_coords(x,y,x+movement,y,600)
+            await asyncio.sleep(1)
+            handle, _ = await control(f"Trim {edge}", f"trim-{edge}-after")
+            value = re.search(r"(\d+\.\d+) seconds", label(handle))
+            if not value: raise AssertionError(f"Trim {edge} does not expose its selected time")
+            seconds = float(value.group(1))
+            if edge == "start" and seconds <= 0.25: raise AssertionError("Native start trim handle did not move")
+            if edge == "end" and seconds >= 5.9: raise AssertionError("Native end trim handle did not move")
+        report["checks"].append({"check":"Native start and end trim handles dragged on playback timeline", "result":"passed"})
+        await locate("Done trimming",scrolls=2)
         # The title follows the player and local-storage controls below the fold.
         await locate("ARTEMIS practice", scrolls=4)
         report["checks"].append({"check":"Native document import and video detail", "result":"passed"})

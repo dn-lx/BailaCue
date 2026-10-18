@@ -292,44 +292,63 @@ describe("Dropbox adapter (mock HTTP)", () => {
   });
 });
 describe("upload initiation and safe recovery (mock HTTP)", () => {
-  it("reserves a Drive ID before creating a session and confirms the final size", async () => {
-    const request = vi
-      .fn()
-      .mockResolvedValueOnce(response({ ids: ["reserved"] }))
-      .mockResolvedValueOnce(response({}, 404))
-      .mockResolvedValueOnce(
-        response(null, 200, {
-          Location:
-            "https://www.googleapis.com/upload/drive/v3/files?upload_id=one",
-        }),
-      )
-      .mockResolvedValueOnce(response(null, 308))
-      .mockResolvedValueOnce(response({ id: "reserved" }))
-      .mockResolvedValueOnce(
-        response({
-          id: "reserved",
-          name: "Footwork.mp4",
-          mimeType: "video/mp4",
-          size: "10",
-          capabilities: { canDownload: true },
-        }),
-      );
-    const states: PendingUpload[] = [];
-    const result = await uploadFile(pending, "folder-a", {
-      request,
-      token: async () => "token",
-      read: async (a, b) => new Blob([new Uint8Array(b - a)]),
-      persist: async (j) => {
-        states.push(j);
-      },
-    });
-    expect(states[0].fileId).toBe("reserved");
-    expect(result.fileId).toBe("reserved");
-    expect(states.at(-1)?.status).toBe("ready");
-    expect(JSON.parse(request.mock.calls[2][1].body).parents).toEqual([
-      "folder-a",
-    ]);
+  it("refuses a resumed folder change before requesting a token, file bytes or HTTP", async () => {
+    const request = vi.fn(),
+      token = vi.fn(),
+      read = vi.fn(),
+      persist = vi.fn();
+    await expect(
+      uploadFile({ ...pending, folderId: "folder-a" }, "folder-b", {
+        request,
+        token,
+        read,
+        persist,
+      }),
+    ).rejects.toThrow("original upload folder changed");
+    for (const operation of [request, token, read, persist])
+      expect(operation).not.toHaveBeenCalled();
   });
+  it.each(["drive-salsa", "drive-bachata"])(
+    "uploads to selected Drive parent %s and confirms the final size",
+    async (folderId) => {
+      const request = vi
+        .fn()
+        .mockResolvedValueOnce(response({ ids: ["reserved"] }))
+        .mockResolvedValueOnce(response({}, 404))
+        .mockResolvedValueOnce(
+          response(null, 200, {
+            Location:
+              "https://www.googleapis.com/upload/drive/v3/files?upload_id=one",
+          }),
+        )
+        .mockResolvedValueOnce(response(null, 308))
+        .mockResolvedValueOnce(response({ id: "reserved" }))
+        .mockResolvedValueOnce(
+          response({
+            id: "reserved",
+            name: "Footwork.mp4",
+            mimeType: "video/mp4",
+            size: "10",
+            capabilities: { canDownload: true },
+          }),
+        );
+      const states: PendingUpload[] = [];
+      const result = await uploadFile({ ...pending, folderId }, folderId, {
+        request,
+        token: async () => "token",
+        read: async (a, b) => new Blob([new Uint8Array(b - a)]),
+        persist: async (j) => {
+          states.push(j);
+        },
+      });
+      expect(states[0].fileId).toBe("reserved");
+      expect(result.fileId).toBe("reserved");
+      expect(states.at(-1)?.status).toBe("ready");
+      expect(JSON.parse(request.mock.calls[2][1].body).parents).toEqual([
+        folderId,
+      ]);
+    },
+  );
   it("does not re-upload a completed Drive file after the completion response was lost", async () => {
     const request = vi.fn().mockResolvedValue(
       response({
@@ -347,6 +366,36 @@ describe("upload initiation and safe recovery (mock HTTP)", () => {
     expect(request).toHaveBeenCalledTimes(1);
     expect(request.mock.calls[0][1].method).toBeUndefined();
   });
+  it.each(["/Salsa", "/Bachata"])(
+    "creates the new Dropbox file inside the selected %s folder",
+    async (folderId) => {
+      const request = vi
+        .fn()
+        .mockResolvedValueOnce(
+          response({ error_summary: "path/not_found" }, 409),
+        )
+        .mockResolvedValueOnce(response({ session_id: "new-session" }))
+        .mockResolvedValueOnce(response(null))
+        .mockResolvedValueOnce(
+          response({ ".tag": "file", id: "id:new", name: "new.mp4", size: 10 }),
+        );
+      await uploadFile(
+        { ...pending, provider: "dropbox", folderId },
+        folderId,
+        {
+          request,
+          token: async () => "token",
+          read: async (a, b) => new Blob([new Uint8Array(b - a)]),
+          persist: vi.fn(),
+        },
+      );
+      const commit = JSON.parse(
+        request.mock.calls.at(-1)![1].headers["Dropbox-API-Arg"],
+      ).commit;
+      expect(commit.path).toBe(`${folderId}/${pending.id}-${pending.name}`);
+      expect(commit.mode).toBe("add");
+    },
+  );
   it("resumes Dropbox after a lost acknowledgement without changing its unique destination", async () => {
     const request = vi
       .fn()

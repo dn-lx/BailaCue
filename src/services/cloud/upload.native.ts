@@ -1,3 +1,4 @@
+import { assertUploadDestination } from "../../core/destination";
 import { File, FileMode, Paths } from "expo-file-system";
 import { fetch as expoFetch } from "expo/fetch";
 import { accessToken } from "./accounts";
@@ -12,6 +13,7 @@ export async function uploadVideo(
   progress: (job: PendingUpload) => void,
   signal: AbortSignal,
 ) {
+  assertUploadDestination(job, source, connection);
   if (!uri.startsWith(Paths.document.uri))
     throw new Error("Upload a BailaCue phone copy. Import this file first.");
   const file = new File(uri);

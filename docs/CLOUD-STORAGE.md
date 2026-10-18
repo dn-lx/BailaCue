@@ -132,18 +132,33 @@ Photos/shared external copies are outside that cleanup. Save to Photos is explic
 
 ## Uploads and editing
 
-Import/record locally, open the video, select **Upload to my storage**, choose a
-writable source and choose whether to keep a phone copy. Nothing uploads automatically.
-Drive uses a reserved provider ID and resumable sessions. Dropbox uses resumable
-sessions and a stable unique destination, strict conflicts and no automatic renaming.
-Both reconcile a previously completed file before retrying. Native reads are bounded
-2 MiB chunks rather than loading a large video into memory. Jobs persist securely;
-return to the video to resume after interruption. An expired session restarts against
-the same file identity/destination. Library registration waits for confirmed size.
+On import/record, choose **This phone** or **Online storage** before saving. For online
+storage, select the exact source folder and whether to keep a phone copy, then press
+**Upload & add to library**. Multiple folders on one account (for example Salsa and
+Bachata) are independent destinations. Labels and dance style never route a file.
+An existing local video also has **Upload to my storage**. The folder's name is shown
+before uploading and after confirmation. Enable **Allow uploads to my Drive** on the
+account when needed; refreshing its token retains upload scopes.
 
-To edit an online video, download it first. Exporting a practice section creates a
-separate MP4 library video. Use Save to Photos / Share / Save file, or upload that
-new clip to your selected storage folder. Originals are never overwritten.
+Online-only saves upload first, register the confirmed cloud file and then delete
+BailaCue's temporary phone file. Failures/pauses keep that file for retry. Choosing a
+phone save performs no upload. Streaming an already-cloud video uses the existing
+file; it does not create a duplicate upload.
+
+Drive uses reserved provider IDs and resumable sessions. Dropbox uses stable unique
+paths, strict conflicts and no automatic renaming. Both reconcile completed files
+before retrying. Native reads use bounded 2 MiB chunks. Jobs persist securely with
+the original folder/account/provider; resume cannot silently switch Salsa/Bachata or
+accounts. Legacy jobs remain readable. Registration follows confirmed size and
+preserves current labels, notes, ratings and library references.
+
+To edit an online video, download it first. Choose **Trim on timeline**, drag its two
+handles and **Save selected clip**, or use numeric times and **Export new trimmed
+video**. Choose phone storage or the exact cloud folder before saving; an online
+parent's single source is preselected, while multiple memberships require a choice.
+Every trim creates a new MP4 entry and preserves the original. Phone clips also
+have Save to Photos / Share / Save file. Drag the grip below the picture to resize
+it, or use Compact / Standard / Large presets.
 
 ## Verification boundary
 

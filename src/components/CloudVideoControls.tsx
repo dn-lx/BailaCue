@@ -79,6 +79,12 @@ export function CloudVideoControls({
       </Txt>
       {video.remote ? (
         <>
+          <Txt weight="bold">
+            {library.sources
+              .filter((source) => video.remote!.sourceIds.includes(source.id))
+              .map((source) => source.name)
+              .join(" · ") || "Connected storage"}
+          </Txt>
           <Txt color={t.muted}>
             {video.source === "dropbox" ? "Dropbox" : "Google Drive"} ·{" "}
             {(video.size / 1048576).toFixed(1)} MB. Streaming uses data. Phone

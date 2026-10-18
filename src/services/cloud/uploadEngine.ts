@@ -10,6 +10,9 @@ export type PendingUpload = {
   id: string;
   videoId: string;
   sourceId: string;
+  folderId?: string;
+  connectionId?: string;
+  accountId?: string;
   provider: "google-drive" | "dropbox";
   name: string;
   mimeType: string;
@@ -40,6 +43,8 @@ export async function uploadFile(
   folderId: string,
   transport: Transport,
 ): Promise<RemoteVideo> {
+  if (input.folderId !== undefined && input.folderId !== folderId)
+    throw new Error("The original upload folder changed. No file was sent.");
   const { token, read, persist, signal } = transport;
   const request = transport.request ?? fetch;
   let job = { ...input };

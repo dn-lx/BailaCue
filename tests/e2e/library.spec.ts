@@ -94,6 +94,64 @@ test("import → label → loop → note → daily pick → persisted local vide
       .first()
       .evaluate((v: HTMLVideoElement) => v.currentTime),
   ).toBeLessThan(2.1);
+  const frame = page.getByTestId("video-frame");
+  await page
+    .getByRole("button", { name: "Compact video", exact: true })
+    .click();
+  await expect.poll(async () => (await frame.boundingBox())!.height).toBe(170);
+  await page.getByRole("button", { name: "Large video", exact: true }).click();
+  await expect.poll(async () => (await frame.boundingBox())!.height).toBe(480);
+  await page
+    .getByRole("button", { name: "Standard video", exact: true })
+    .click();
+  await expect.poll(async () => (await frame.boundingBox())!.height).toBe(270);
+  await page
+    .getByRole("button", { name: "Trim on timeline", exact: true })
+    .click();
+  const startHandle = page.getByRole("slider", {
+    name: "Trim start",
+    exact: true,
+  });
+  await startHandle.focus();
+  await startHandle.press("ArrowRight");
+  await expect(
+    page.getByRole("textbox", { name: "Start (m:ss or seconds)" }),
+  ).toHaveValue("0.01");
+  // Drag the actual handle on the shared playback line as well as using keyboard access.
+  const handleBounds = (await startHandle.boundingBox())!;
+  await page.mouse.move(
+    handleBounds.x + 8,
+    handleBounds.y + handleBounds.height / 2,
+  );
+  await page.mouse.down();
+  await page.mouse.move(
+    handleBounds.x + handleBounds.width * 0.3,
+    handleBounds.y + handleBounds.height / 2,
+    { steps: 10 },
+  );
+  await page.mouse.up();
+  await expect
+    .poll(async () =>
+      Number(
+        await page
+          .getByRole("textbox", { name: "Start (m:ss or seconds)" })
+          .inputValue(),
+      ),
+    )
+    .toBeGreaterThan(1);
+  const endHandle = page.getByRole("slider", { name: "Trim end", exact: true });
+  await endHandle.focus();
+  await endHandle.press("ArrowLeft");
+  await expect(
+    page.getByRole("textbox", { name: "End (m:ss or seconds)" }),
+  ).toHaveValue("5.99");
+  await page.screenshot({
+    path: "artifacts/screenshots/timeline-trim.png",
+    fullPage: true,
+  });
+  await page
+    .getByRole("button", { name: "Done trimming", exact: true })
+    .click();
   await page
     .getByRole("textbox", { name: "Start (m:ss or seconds)" })
     .fill("1");

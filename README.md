@@ -7,20 +7,20 @@ and iOS, built with React Native, TypeScript and Expo SDK 58.
 
 ## Install Android
 
-Download [BailaCue 0.2.4 for Android](https://github.com/dn-lx/BailaCue/releases/download/v0.2.4-preview.7/BailaCue-v0.2.4-build7-preview.apk)
-or open [release notes](https://github.com/dn-lx/BailaCue/releases/tag/v0.2.4-preview.7).
+Download [BailaCue 0.2.5 for Android](https://github.com/dn-lx/BailaCue/releases/download/v0.2.5-preview.8/BailaCue-v0.2.5-build8-preview.apk)
+or open [release notes](https://github.com/dn-lx/BailaCue/releases/tag/v0.2.5-preview.8).
 Open it on an Android phone and allow installation from your browser/files app when
 Android asks. This is an internal preview signed with a test certificate, not a
-Play Store release. Version **0.2.4 (7)**; minimum Android 7/API 24.
+Play Store release. Version **0.2.5 (8)**; minimum Android 7/API 24.
 
 No Metro server or Expo Go is needed for the APK. iOS needs a separate signed build
 with an Apple Developer account; an Android APK cannot be installed on an iPhone.
 
-The published APK passed eight Google ARTEMIS native checks, including real import,
-new-file trimming, original-byte preservation, saving to Photos and artist-label creation/reuse.
+The preview publication is gated on Google ARTEMIS native checks, including actual
+resize/trim-handle gestures, real import, new-file trimming, original-byte preservation,
+saving to Photos and artist-label creation/reuse.
 [Verification and screenshots](docs/VERIFICATION.md) record exact scope and remaining
-live-provider/iOS setup. The public download's checksum, signature and version were
-verified separately.
+live-provider/iOS setup. Exact public APK verification is recorded there after publication.
 
 ## What is implemented
 
@@ -29,12 +29,15 @@ verified separately.
   create new ones in imports, video details and cloud-folder defaults.
 - Local import/camera recording, editable importance/status, search/source filters,
   notes/bookmarks, ordered collections, Daily Picks and practice timer/history/goals.
-- Native player with speed/pitch, mirror, full screen, seeking and named A–B loops.
-- **New trimmed MP4 files** as separate library entries: Save to Photos, Share / Save
-  file and upload to a chosen storage folder. Originals are preserved. Speed/mirror/count
+- Native player with draggable resize grip/presets, speed/pitch, mirror, full screen,
+  seeking, timeline trim handles and named A–B loops.
+- **New trimmed MP4 files** as separate library entries: choose phone storage or an
+  exact cloud folder before saving; Save to Photos / Share / Save file for phone clips. Originals are preserved. Speed/mirror/count
   overlays are practice controls and are not baked into exported trims.
 - User-selected **Drive and Dropbox accounts/folders**, defaults, folder refresh,
   stable file identities, online streaming and selective phone downloads.
+- Imports/recordings offer **phone or online storage**: upload directly to a selected
+  folder; retain a phone copy or remove it only after upload confirmation.
 - Separate **Salsa and Bachata folder sources**, including two folders on one
   account or a mix of providers; independent defaults and Library source filters.
 - Wi-Fi preference, download progress/cancel/delete, explicit online/phone choice,
@@ -89,7 +92,7 @@ npm run build:android
 ```
 
 The script generates Android from Expo config and builds a bundled release-mode APK
-at `artifacts/BailaCue-v0.2.4-build7-preview.apk` with SHA-256. Native media code is
+at `artifacts/BailaCue-v0.2.5-build8-preview.apk` with SHA-256. Native media code is
 committed under `modules/baila-media`; generated root `android/` and `ios/` are ignored.
 The generated internal debug certificate is used for previews; configure your own
 release signing before store publication. Never commit signing keys.

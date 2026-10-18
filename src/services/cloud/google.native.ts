@@ -24,12 +24,12 @@ export async function connectGoogle(write = false) {
     throw googleConnectionError(error);
   }
 }
-export async function googleToken(accountId: string) {
+export async function googleToken(accountId: string, write = false) {
   try {
     GoogleSignin.configure({
       iosClientId: process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID,
       webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID,
-      scopes: [readonly],
+      scopes: [write ? "https://www.googleapis.com/auth/drive" : readonly],
     });
     const result = await GoogleSignin.signInSilently();
     if (result.type !== "success" || result.data.user.id !== accountId)

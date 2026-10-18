@@ -1,4 +1,9 @@
-import { useEffect, useRef, useState } from "react";
+import {
+  assertUploadDestination,
+  registerUpload,
+  uploadDestination,
+} from "../../core/destination";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Switch } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import {
@@ -19,16 +24,28 @@ import { uploadVideo } from "../../services/cloud/upload";
 import type { PendingUpload } from "../../services/cloud/uploadEngine";
 import { deleteMedia } from "../../services/media";
 export default function Transfer() {
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const {
+    id,
+    destination,
+    keepCopy: requestedCopy,
+    autoUpload,
+  } = useLocalSearchParams<{
+    id: string;
+    destination?: string;
+    keepCopy?: string;
+    autoUpload?: string;
+  }>();
   const { library, update } = useLibrary();
   const t = useTheme();
   const video = library.videos.find((v) => v.id === id);
-  const [sourceId, setSourceId] = useState("");
-  const [keepCopy, setKeepCopy] = useState(true);
+  const [sourceId, setSourceId] = useState(destination ?? "");
+  const [keepCopy, setKeepCopy] = useState(requestedCopy !== "0");
   const [job, setJob] = useState<PendingUpload>();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [confirmedId, setConfirmedId] = useState("");
+  const [restored, setRestored] = useState(false);
+  const autoStarted = useRef(false);
   const abort = useRef<AbortController | null>(null);
   useEffect(() => {
     let alive = true;
@@ -49,28 +66,22 @@ export default function Transfer() {
           setError(
             "The previous upload could not be restored. Your local video is safe.",
           );
+      })
+      .finally(() => {
+        if (alive) setRestored(true);
       });
     return () => {
       alive = false;
       abort.current?.abort();
     };
   }, [id]);
-  async function start() {
+  const start = useCallback(async () => {
     if (!video || busy) return;
     setBusy(true);
     setError("");
     abort.current = new AbortController();
     try {
-      const source = library.sources.find((s) => s.id === sourceId);
-      const connection = library.connections.find(
-        (c) => c.id === source?.connectionId && c.connected,
-      );
-      if (!source || !source.writable || !connection)
-        throw new Error(
-          "Choose a connected writable folder. For Drive, allow uploads in Storage first.",
-        );
-      if (!connection.writable)
-        throw new Error("Allow uploads for this account in Storage first.");
+      const { source, connection } = uploadDestination(library, sourceId);
       const extension =
         /\.(mov|m4v|webm|mkv|avi|3gp)$/i.exec(video.uri)?.[1]?.toLowerCase() ??
         "mp4";
@@ -87,6 +98,9 @@ export default function Transfer() {
         id: uid(),
         videoId: id,
         sourceId,
+        folderId: source.folderId,
+        connectionId: connection.id,
+        accountId: connection.accountId,
         provider: connection.provider,
         name: `${video.title.replace(/[\\/]/g, "_")}.${extension}`,
         mimeType: video.mimeType ?? mimeTypes[extension],
@@ -96,6 +110,7 @@ export default function Transfer() {
         status: "queued",
         keepCopy,
       };
+      assertUploadDestination(current, source, connection);
       await vault.set(`upload-for-${id}`, current.id);
       await vault.set(`upload-${current.id}`, JSON.stringify(current));
       setJob(current);
@@ -108,43 +123,39 @@ export default function Transfer() {
         abort.current.signal,
       );
       const newId = remoteId(connection, file.fileId);
-      update((l) => ({
-        ...l,
-        videos: [
-          {
-            ...video,
-            id: newId,
-            source: connection.provider,
-            uri: "",
-            offlineUri: current.keepCopy ? video.uri : undefined,
-            thumbnail: current.keepCopy ? video.thumbnail : undefined,
-            storagePreference: current.keepCopy ? "offline" : "online",
-            remote: {
-              connectionId: connection.id,
-              fileId: file.fileId,
-              sourceIds: [source.id],
-              canDownload: file.canDownload,
-            },
-            available: true,
-          },
-          ...l.videos.filter((v) => v.id !== id && v.id !== newId),
-        ],
-        playlists: l.playlists.map((p) => ({
-          ...p,
-          videoIds: [...new Set(p.videoIds.map((v) => (v === id ? newId : v)))],
-        })),
-        picks: l.picks.map((p) => ({
-          ...p,
-          videoIds: p.videoIds.map((v) => (v === id ? newId : v)),
-        })),
-        sessions: l.sessions.map((s) =>
-          s.videoId === id ? { ...s, videoId: newId } : s,
-        ),
-      }));
+      // Keep the owned phone file referenced until cleanup succeeds.
+      update((l) => {
+        const next = registerUpload(l, id, source, connection, file, true);
+        if (!current.keepCopy)
+          next.videos = next.videos.map((v) =>
+            v.id === newId ? { ...v, storagePreference: "online" } : v,
+          );
+        return next;
+      });
+      setConfirmedId(newId);
       if (!current.keepCopy) {
-        await deleteMedia(video.uri);
-        if (video.thumbnail?.startsWith("file:"))
-          await deleteMedia(video.thumbnail);
+        try {
+          await deleteMedia(video.uri);
+          if (video.thumbnail?.startsWith("file:")) {
+            try {
+              await deleteMedia(video.thumbnail);
+            } catch {
+              /* Thumbnail cleanup can be retried separately. */
+            }
+          }
+          update((l) => ({
+            ...l,
+            videos: l.videos.map((v) =>
+              v.id === newId
+                ? { ...v, offlineUri: undefined, thumbnail: undefined }
+                : v,
+            ),
+          }));
+        } catch {
+          setError(
+            "Upload confirmed. The phone copy could not be removed; you can remove it from the video’s storage controls.",
+          );
+        }
       }
       await vault.remove(`upload-for-${id}`);
       await vault.remove(`upload-${current.id}`);
@@ -154,7 +165,13 @@ export default function Transfer() {
     } finally {
       setBusy(false);
     }
-  }
+  }, [video, busy, library, sourceId, keepCopy, job, id, update]);
+  useEffect(() => {
+    if (autoUpload === "1" && restored && video && !autoStarted.current) {
+      autoStarted.current = true;
+      void start();
+    }
+  }, [autoUpload, restored, video, start]);
   return (
     <Screen
       title="Choose its home"
@@ -169,8 +186,12 @@ export default function Transfer() {
         <Card>
           <Badge tone="lime">UPLOAD CONFIRMED</Badge>
           <Txt>
-            Your video is saved online. Your notes, ratings and practice
-            sections came along.
+            Your video is saved online in{" "}
+            {
+              library.sources.find((s) => s.id === (job?.sourceId ?? sourceId))
+                ?.name
+            }
+            . Your notes, ratings and practice sections came along.
           </Txt>
           <Button
             onPress={() =>
@@ -196,12 +217,19 @@ export default function Transfer() {
           </Card>
           <Card>
             <Txt weight="bold">Destination folder</Txt>
+            {sourceId ? (
+              <Txt>
+                Selected:{" "}
+                {library.sources.find((s) => s.id === sourceId)?.name ??
+                  "Folder unavailable"}
+              </Txt>
+            ) : null}
             {library.sources
               .filter(
                 (s) =>
                   s.writable &&
                   library.connections.some(
-                    (c) => c.id === s.connectionId && c.connected,
+                    (c) => c.id === s.connectionId && c.connected && c.writable,
                   ),
               )
               .map((s) => (

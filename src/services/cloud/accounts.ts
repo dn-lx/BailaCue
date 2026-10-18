@@ -120,7 +120,7 @@ export async function accessToken(connection: Connection) {
   if (existing) return existing;
   const refresh = (async () => {
     if (connection.provider === "google-drive")
-      return googleToken(connection.accountId);
+      return googleToken(connection.accountId, connection.writable);
     const raw = await vault.get(connection.id);
     if (!raw)
       throw new Error(

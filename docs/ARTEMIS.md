@@ -1,4 +1,11 @@
-# Google ARTEMIS · build7 passed
+# Google ARTEMIS · build8 acceptance
+
+Build8 adds real native video resize-grip and start/end trim-handle gesture assertions.
+The existing import/labels/loop/native-export/original-byte/Photos checks remain.
+Publication is gated on these checks; build8 results are pending. See
+[verification](VERIFICATION.md) for the current evidence and boundaries.
+
+## Historical build7 result
 
 [Build7 native test and publication run39111878471](https://github.com/dn-lx/BailaCue/actions/runs/39111878471)
 passed **all eight checks** on Android API35 with the pinned real ARTEMIS controller
