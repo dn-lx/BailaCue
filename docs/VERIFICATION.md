@@ -1,76 +1,88 @@
-# Verification · BailaCue 0.2.1 (build 3)
+# Verification · BailaCue 0.2.3 (build 5)
 
-Date: 2026-10-18. Linux cloud workspace, Node 24.19, npm 11.9, JDK 21.
-This file records executed checks. [0.1.0 evidence](VERIFICATION-0.1.md) is retained.
+Executed on 2026-10-18. Cloud workspace: Linux, Node 24.19, npm 11.9, JDK21.
+[Earlier 0.1.0 evidence](VERIFICATION-0.1.md) is retained.
 
 | Check | Actual result |
 |---|---|
-| TypeScript | Passed |
-| ESLint | Passed |
-| Vitest | 65 passing tests across 6 suites |
-| PostgreSQL | All three migrations applied in local PGlite; 27 tables with RLS; negative client grants, owner/FK isolation, atomic rate limits, stale revisions and BailaCue-only cleanup tested |
-| Gateway | Mock transport tests: opaque session hashing, no broad Auth tokens returned, owner derived from session, forged-owner denial, rate limits, secret/path rejection, conflicts and sharing ownership/revocation/allowlisting |
-| Providers | Mock HTTP: Drive/Dropbox paging, folders, errors, temporary URL checks, stable upload identity, completed-file reconciliation, lost Dropbox acknowledgement and strict no-overwrite commits |
-| Notifications | Mock OS: schedule replacement/cancellation, duplicate prevention, denied permission and serial updates; quiet-hour rollover calculations |
-| Browser | Existing import/loop/notes/persistence and theme/collection journeys passed; new Dropbox PKCE → folder → streaming → edit → refresh journey passed with mocked provider HTTP |
+| TypeScript / ESLint | Passed |
+| Vitest | 68 passing tests across 7 suites |
+| PostgreSQL | All three migrations applied in PGlite; 27 tables with RLS; negative grants, owner/FK isolation, atomic rate limits, stale revisions and BailaCue-only cleanup tested |
+| Gateway transport | Mock tests cover hashed opaque sessions, no broad Auth tokens returned, forged owner denial, rate limits, path/secret rejection, revision conflicts, share ownership/revocation and literal username underscores |
+| Providers | Mock HTTP covers paging, folders, access errors, temporary links, stable upload identity, completed-file reconciliation, lost Dropbox acknowledgement and strict no-overwrite commits |
+| Notifications | Mock OS covers replacement/cancellation, duplicates, denied permission, serial updates and quiet-hour rollover |
+| Browser | All 3 Chromium journeys passed: local import/playback/loop/notes/persistence; themes/collections; Dropbox PKCE/folder/stream/edit/refresh with mocked provider HTTP |
 | Web production export | Passed with clear Metro cache |
-| Deno Edge Function check | Passed |
-| Android | New native dependencies compiled; first universal ARM64/x86_64 release-mode preview built successfully in 7 min. Final native rebuild succeeded (6m23s) and final JS update succeeded (32s); signature/version/ABIs verified |
-| Google ARTEMIS | Installed; doctor executed. API credential absent. API35 software emulator reached ADB/package service; helper installation timed out, then Android PackageInstaller threw a null PackageManagerInternal exception during boot. No native app test pass claimed |
-| Live provider OAuth/transfers | Not run; BailaCue Google/Dropbox app registrations not supplied |
-| Live Me+ account API | Owner approved deployment; API v2 and all migrations are live. Anonymous request and invalid login return 401; private table/RPC client denial verified |
-| iOS build/signing/runtime | Not run: no macOS/Xcode/Apple signing environment |
+| Deno check / Expo Doctor | Passed / 20 of 20 |
+| Android compilation | Build5 is compiling with native-gated publication; earlier build4 compiled and passed startup but failed import |
+| Public APK | Builds2–4 withdrawn; build5 publication/download verification pending |
+| Google ARTEMIS | Actual framework installed and exercised; see [ARTEMIS evidence](ARTEMIS.md) for device-run outcomes |
+| Live provider OAuth/transfers | Not run: BailaCue Google/Dropbox app registrations were not supplied |
+| Live Me+ gateway | API v2 and all migrations deployed after explicit approval. Anonymous request and invalid login return 401; private table/RPC grants verified |
+| iOS compile/signing/runtime | Not run: no macOS/Xcode/Apple signing environment |
 
-Browser tests use synthetic H.264 fixtures. The Dropbox browser test intercepts provider
-OAuth/token/metadata/media endpoints; it verifies the application's PKCE callback and
-UI integration, not Dropbox's production consent service. It caught and fixed an
-unbound browser fetch receiver bug in the provider adapter. No private user media was
-uploaded. Unit tests do not imply real provider permissions or physical-device codecs.
+## Android runtime finding
 
-The initial 23-table migration remains live on the explicitly approved shared Me+
-project. The additional migration has only been exercised locally. No existing Me+
-auth settings/functions/domain records were modified during this continuation.
+Build3's public APK was downloaded and its matching SHA-256, v2 signature,
+version/code and ABIs checked. ARTEMIS then found a real AndroidX Startup / Room
+WorkDatabase initialization crash before the app opened. Compilation/signing are
+not runtime acceptance. Build3 was withdrawn and build2 retired. Build4 disables
+release shrinking through the supported Expo config plugin.
+Local build4 compiled in 4m56s; APK v2 signature, version 0.2.2/code4 and ARM64/x86_64
+were verified. DEX inspection confirms the public no-argument WorkDatabase_Impl
+constructor is present in build4 and absent in build3. The public CI APK was downloaded and verified separately:
 
-Remaining acceptance includes native trim bounds/original checksum/Photos/camera,
-large-file and low-space recovery, actual token expiry/reconnect, two real scoped API
-accounts, device accessibility, physical notification delivery and iOS parity.
+`BailaCue-v0.2.2-build4-preview.apk`: **68,507,957 bytes**.
+SHA-256: `b9a24d42dfe0d64f252e878bf4a55421cb314eda241bc1e603be5bbedf48822b`.
+Version 0.2.2/code4, minimum API24, target36, ARM64 + x86_64, APK v2 signature.
+Preview certificate SHA-1: `5e8f16062ea3cd2c4a0d547876baa6f38cabf625`.
+[Release](https://github.com/dn-lx/BailaCue/releases/tag/v0.2.2-preview.4) ·
+[Build and native test run](https://github.com/dn-lx/BailaCue/actions/runs/39100084476).
+Initial ARTEMIS build4 run passed native launch and Settings/Library navigation,
+then stopped at test-fixture selection in DocumentsUI. Rerun 39101471275 uses the
+same published APK with corrected picker-transition timing; export/Photos results
+are pending.
 
-Final APK: `BailaCue-v0.2.0-build2-preview.apk`, 59,006,103 bytes.
-SHA-256: `333d015745af10386f2d4f2d02963b8fbb0a3489dd9ae692e27293573bb2bccd`.
-`apksigner` verified APK v2 signing; `aapt` verified package `app.bailacue.mobile`,
-version 0.2.0/build 2, minimum API24, target36, ARM64 and x86_64. Bundled Hermes
-program: 2,710,044 bytes. Internal debug certificate SHA-1:
-`5e8f16062ea3cd2c4a0d547876baa6f38cabf625` (register only for this preview).
+## Scope of evidence
 
-Final combined browser run: all 3 journeys passed (12.8s). An intermediate run
-exposed a test reconnect race: it waited for an already-persisted account label
-instead of completion of the new OAuth flow. The assertion now waits for the
-selected-account folder browser before navigating away; targeted and combined reruns passed.
-Expo Doctor: 20/20. GitHub Checks on 198385e passed; newer evidence commits have
-separate CI status visible in the PR.
+Browser videos are synthetic H.264 fixtures. The Dropbox browser journey intercepts
+OAuth/token/metadata/media endpoints: it checks the app's PKCE callback and UI,
+not Dropbox's live consent service. It caught an unbound browser fetch receiver bug.
+A later reconnect assertion race was fixed by waiting for the new account's folder
+browser rather than its already-persisted label. Final combined run: 3 passed (13s).
+No private user videos were uploaded.
 
-Direct release upload from the cloud session failed with GitHub HTTP 401 on
-uploads.github.com despite successful repository API/git access. A tag-triggered
-GitHub Actions workflow now builds/verifies/publishes the prerelease using the
-repository's own GITHUB_TOKEN. Its uploaded APK is a separate CI build and may
-have a different binary checksum from the local APK above; the release includes
-its actual matching SHA-256 file. No credentials were copied or exposed.
+All three deployed migration filenames match remote history. The initial invalid-login
+probe returned 503 because shared Me+ default privileges denied the service role access
+to new BailaCue tables. Explicit BailaCue-only grants fixed this; the probe then returned
+401. Tests now emulate those actual default privileges. API v2 also fixes literal
+underscore username lookup by using equality on canonical lowercase usernames.
 
-The owner approved production deployment after reviewing the prepared code.
-`bailacue-api` v2 deployed with its own opaque-session authentication (gateway JWT
-validation disabled deliberately). Missing sessions return 401. Initial invalid-login
-verification returned 503 because Me+ default privileges deny service access to new
-tables. The BailaCue-only service grant migration fixed this; invalid login then
-returned 401. Tests now emulate that actual default and apply the explicit grant.
-All four new tables have RLS and zero anonymous/authenticated client grants; both
-new RPCs are SECURITY INVOKER and deny those client roles. Advisors report only
-informational RLS-with-no-policy findings for the intentionally service-only tables:
-https://supabase.com/docs/guides/database/database-linter?lint=0008_rls_enabled_no_policy
-No real accounts, emails, passwords or health data were used for these HTTP probes.
-The local file timestamps for deployed migrations were aligned with actual remote
-history versions 20261018043447 and 20261018043638.
+All four new private gateway tables have RLS and no anonymous/authenticated grants.
+The two new RPCs are SECURITY INVOKER and service-only. Advisors report informational
+[RLS-with-no-policy](https://supabase.com/docs/guides/database/database-linter?lint=0008_rls_enabled_no_policy)
+notices for these intentionally service-only tables. Existing Me+ health tables,
+functions, domain records and auth settings were untouched. No real account credentials
+or health data were used in the live probes. Positive two-user authentication/sync is
+still acceptance work.
 
-A new exact-username regression test verifies literal underscores. The gateway now
-uses equality on canonical lowercase usernames instead of ILIKE wildcard matching.
-API v2 is deployed with this fix; all 65 tests pass. Browser build 3: all three
-journeys pass (13.0s). This backend fix does not change mobile APK code.
+Remaining acceptance includes real provider consent, cloud transfer interruptions,
+large-file/low-space recovery, camera, real account registration/recovery, accessibility,
+physical notification delivery, physical-device codecs and iOS parity. Downloaded
+copies cannot be remotely revoked while offline; exported Photos/external copies
+remain under the user's control. Automatic metadata merge, remote new-video push,
+server-generated picks and WebDAV/S3 are not implemented.
+
+Build4 source checks on `5c185d3991959abfd50a4b2c368195a255489c64` passed in
+GitHub runs 39100087425 and 39100084472, including 65 tests, 3 browser journeys,
+Deno check, web export and Expo Doctor. The release workflow has been revised for
+future tags to gate publication on successful ARTEMIS native acceptance. Recovery
+also requires a passed native job; already-published assets are preserved.
+
+Native build4 fixture selection ultimately exposed a real SDK58 importer race:
+File.copy was not awaited before native inspection. Cloud download File.move had
+the same issue. Build5 awaits both and cleans failed partial copies. Three new
+mocked/deferred-I/O regression tests verify inspection waits for completed files,
+picker-cache lifetime and failed-copy cleanup. All68 tests, TypeScript and lint pass.
+Build5 source3cf916c and native-gated workflow run39102137159 are in progress.
+The old build4 checksum above is historical, not a recommended download.

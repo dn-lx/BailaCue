@@ -1,4 +1,4 @@
-# BailaCue architecture · 0.2.1
+# BailaCue architecture · 0.2.3
 
 Expo SDK 58 / React Native 0.88 / TypeScript, Expo Router and a shared Android/iOS UI.
 Routes in `src/app` use `LibraryProvider`, domain functions and platform services.

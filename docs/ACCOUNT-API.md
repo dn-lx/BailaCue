@@ -42,7 +42,7 @@ BailaCue data and sessions. It never deletes `auth.users` or other Me+ applicati
 3. Server runtime provides SUPABASE_URL, SUPABASE_ANON_KEY and SUPABASE_SERVICE_ROLE_KEY.
    If enabling browser use, set server-only BAILACUE_WEB_ORIGIN to one exact origin.
    Do not add service keys to app config, GitHub source or EXPO_PUBLIC variables.
-4. Build 3 uses the deployed URL by default on mobile. EXPO_PUBLIC_BAILACUE_API_URL
+4. Build 5 uses the deployed URL by default on mobile. EXPO_PUBLIC_BAILACUE_API_URL
    can override it. Browser access needs a separately configured exact CORS origin.
 5. Verify register/confirm/login/recovery, two real accounts, incorrect passwords,
    owner isolation, revocation, stale-revision conflicts and BailaCue-only deletion.
@@ -61,8 +61,10 @@ excluded from snapshots and rejected by the server when submitted as such fields
 Signing out deletes this account's app copies, credentials, job references, reminders
 and local metadata. Original provider files and external Photos copies remain.
 Changing password changes the shared Me+ identity's password, with explicit UI copy.
-Session deletion prevents subsequent API use, but offline devices cannot be remotely
-wiped until they reconnect. Add periodic deletion of expired sessions and old rate
+Session deletion prevents subsequent API use; it does not remotely erase copies
+on other devices. Signing out on each device removes its app-owned copies. Provider
+and collection access is checked when opening shared/remote videos online; exported
+Photos/external copies remain under the user's control. Add periodic deletion of expired sessions and old rate
 windows to the deployment's maintenance schedule; no existing cron is changed here.
 
 ## Collection sharing
