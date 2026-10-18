@@ -24,6 +24,18 @@ export function numberedName(number: number, original: string) {
     `${String(number).padStart(4, "0")} — ${original.replace(prefix, "") || "video.mp4"}`,
   );
 }
+export function stagedUploadNames(source: CloudFolder) {
+  return new Map(
+    Object.entries(source.numbering?.files ?? {})
+      .filter(([key]) => key.startsWith("upload:"))
+      .map(([key, entry]) => [
+        safeVideoName(
+          `${key.slice(7)}-${numberedName(entry.number, entry.originalName)}`,
+        ),
+        entry,
+      ]),
+  );
+}
 export function planNumbering(source: CloudFolder, files: RemoteVideo[]) {
   const state: SourceNumbering = {
     next: Math.max(1, source.numbering?.next ?? 1),
@@ -45,6 +57,7 @@ export function planNumbering(source: CloudFolder, files: RemoteVideo[]) {
         key,
       ]),
   );
+  const staged = stagedUploadNames(source);
   const used = new Set(Object.values(state.files).map((v) => v.number));
   for (const entry of Object.values(state.files))
     state.next = Math.max(state.next, entry.number + 1);
@@ -56,6 +69,12 @@ export function planNumbering(source: CloudFolder, files: RemoteVideo[]) {
   );
   for (const file of sorted) {
     if (state.files[file.fileId]) continue;
+    const stage = staged.get(file.name);
+    if (stage && !assignedNumbers.has(stage.number)) {
+      state.files[file.fileId] = { ...stage };
+      assignedNumbers.add(stage.number);
+      continue;
+    }
     const match = prefix.exec(file.name);
     const number = Number(match?.[1]);
     const reservation = reservations.get(`${number}:${file.name}`);

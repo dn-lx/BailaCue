@@ -380,7 +380,7 @@ describe("upload initiation and safe recovery (mock HTTP)", () => {
           response({ ".tag": "file", id: "id:new", name: "new.mp4", size: 10 }),
         );
       await uploadFile(
-        { ...pending, provider: "dropbox", folderId },
+        { ...pending, provider: "dropbox", folderId, sequenceNumber: 1 },
         folderId,
         {
           request,
@@ -507,15 +507,13 @@ it("renames a Dropbox video inside its selected folder without overwrite or owne
     autorename: false,
     allow_ownership_transfer: false,
   });
-  const denied = vi
-    .fn()
-    .mockResolvedValue(
-      response({
-        ".tag": "file",
-        id: "id:v",
-        path_display: "/Elsewhere/Turn.mp4",
-      }),
-    );
+  const denied = vi.fn().mockResolvedValue(
+    response({
+      ".tag": "file",
+      id: "id:v",
+      path_display: "/Elsewhere/Turn.mp4",
+    }),
+  );
   await expect(
     new DropboxProvider(async () => "token", denied).renameVideo(
       "id:v",

@@ -70,6 +70,7 @@ export function registerUpload(
   file: RemoteVideo,
   keepCopy: boolean,
   number?: number,
+  intendedName?: string,
 ): Library {
   const video = library.videos.find((v) => v.id === videoId);
   if (!video) throw new Error("The phone video is no longer in this library.");
@@ -117,7 +118,10 @@ export function registerUpload(
                     ),
                     [file.fileId]: {
                       number,
-                      originalName: file.name.replace(/^\d{4,}\s+[—-]\s+/, ""),
+                      originalName: (intendedName ?? file.name).replace(
+                        /^\d{4,}\s+[—-]\s+/,
+                        "",
+                      ),
                     },
                   },
                 },

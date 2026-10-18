@@ -1,8 +1,10 @@
 import { reconcileSource } from "../../core/sources";
-import { planNumbering } from "../../core/numbering";
+import { planNumbering, stagedUploadNames } from "../../core/numbering";
 import type { CloudFolder, Library } from "../../core/types";
 import { prepareNamedCopy } from "../phoneCopies";
 import { deleteMedia } from "../media";
+import { vault } from "./vault";
+import type { PendingUpload } from "./uploadEngine";
 import { provider } from "./provider";
 const active = new Map<string, Promise<void>>();
 export type ScanStore = {
@@ -45,10 +47,30 @@ async function scan(store: ScanStore, sourceId: string) {
     return reconcileSource(l, planned, videos);
   });
   const names = planNumbering(planned, videos).names;
+  const pendingNames = new Set(stagedUploadNames(planned).keys());
+  const pendingIds = new Set<string>();
+  // A completed-but-unregistered job must still be found at its saved path after
+  // a lost acknowledgement. Do not let discovery rename it ahead of resume.
+  for (const video of store.getLibrary().videos.filter((v) => !v.remote)) {
+    const jobId = await vault.get(`upload-for-${video.id}`);
+    if (!jobId) continue;
+    const raw = await vault.get(`upload-${jobId}`);
+    if (!raw) continue;
+    const pending: PendingUpload = JSON.parse(raw);
+    if (pending.sourceId !== source.id) continue;
+    if (pending.fileId) pendingIds.add(pending.fileId);
+    if (pending.path) pendingNames.add(pending.path.split("/").pop()!);
+  }
+
   let failures = 0;
   for (const file of videos) {
     const name = names.get(file.fileId)!;
-    if (file.name === name) continue;
+    if (
+      file.name === name ||
+      pendingNames.has(file.name) ||
+      pendingIds.has(file.fileId)
+    )
+      continue;
     if (!connection.writable || !info.writable) {
       failures++;
       continue;

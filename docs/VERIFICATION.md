@@ -1,6 +1,6 @@
-# Verification · BailaCue 0.2.7 (build10)
+# Verification · BailaCue 0.2.8 (build11)
 
-Local checks on2026-10-18:128 unit/database tests /16 suites; six browser journeys;
+Local checks on2026-10-18:130 unit/database tests /16 suites; six browser journeys;
 TypeScript, ESLint and web export. Source/Android publication still in progress.
 Historical [build9 evidence](VERIFICATION-0.2.6.md) is retained separately.
 
@@ -16,7 +16,7 @@ preview, mocked source renames/discovery, both source Daily Picks, unrated stars
 minimum ratings. Layout checks cover seven screens at320/360/412px with long source
 names/account emails and ensure buttons do not overflow the viewport.
 
-Android build10 must pass its own Google ARTEMIS gate, including native preview
+Android build11 must pass its own Google ARTEMIS gate, including native preview
 playback. Public APK checksum, signature, version and exact native-tested bytes will
 be verified after publication. No previous build result is substituted for this.
 

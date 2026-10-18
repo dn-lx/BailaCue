@@ -125,3 +125,13 @@ it("reconciles a completed upload reservation once without giving duplicate file
   ).toBe(2);
   expect(plan.numbering.files["upload:job"]).toBeUndefined();
 });
+
+it("adopts a completed Dropbox staging file's reserved number while retaining its pending reservation", () => {
+  const reserved = reserveUploadNumber(source, "job", "Turn.mp4");
+  const plan = planNumbering({ ...source, numbering: reserved.numbering }, [
+    file("uploaded", `job-${reserved.name}`),
+  ]);
+  expect(plan.numbering.files.uploaded.number).toBe(1);
+  expect(plan.numbering.files["upload:job"].number).toBe(1);
+  expect(plan.names.get("uploaded")).toBe("0001 — Turn.mp4");
+});

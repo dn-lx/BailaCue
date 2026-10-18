@@ -184,6 +184,7 @@ export default function Transfer() {
           file,
           true,
           current.sequenceNumber,
+          current.name,
         );
         next.videos = next.videos.map((v) =>
           v.id === newId ? { ...v, offlineUri: phoneUri } : v,

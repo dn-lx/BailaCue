@@ -159,9 +159,12 @@ export async function uploadFile(
       return file;
     }
     if (!job.path) {
-      const safeName = safeVideoName(job.name);
+      // Upload to a job-unique staging name. A readable numbered name is applied
+      // by stable file ID only after confirmation; an unrelated same-size file
+      // must never be mistaken for a completed upload.
+      const safeName = safeVideoName(`${job.id}-${job.name}`);
       await save({
-        path: `${folderId === "/" ? "" : folderId}/${job.sequenceNumber ? "" : `${job.id}-`}${safeName}`,
+        path: `${folderId === "/" ? "" : folderId}/${safeName}`,
       });
     }
     const metadata = await request(

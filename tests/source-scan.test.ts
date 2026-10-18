@@ -6,7 +6,9 @@ const remote = vi.hoisted(() => ({
   renameVideo: vi.fn(),
   prepare: vi.fn(),
   remove: vi.fn(),
+  get: vi.fn(),
 }));
+vi.mock("../src/services/cloud/vault", () => ({ vault: { get: remote.get } }));
 vi.mock("../src/services/cloud/provider", () => ({ provider: () => remote }));
 vi.mock("../src/services/phoneCopies", () => ({
   prepareNamedCopy: remote.prepare,
@@ -57,6 +59,7 @@ const file = {
 };
 beforeEach(() => {
   vi.clearAllMocks();
+  remote.get.mockResolvedValue(null);
   remote.inspectFolder.mockResolvedValue({ writable: true });
   remote.listVideos.mockResolvedValue({ videos: [file] });
   remote.renameVideo.mockResolvedValue(undefined);
@@ -118,4 +121,23 @@ it("records remote rename failures for retry and commits phone references before
   await scanSource(store, "s");
   expect(store.getLibrary().sources[0].error).toBeUndefined();
   expect(remote.remove).toHaveBeenCalledWith("file:///owned/old.mp4");
+});
+
+it("leaves completed legacy jobs at their saved path until resume registers the file", async () => {
+  const store = fixture();
+  store.getLibrary().videos.push({ id: "local", remote: undefined } as never);
+  const staged = { ...file, name: "job-Turn.mp4" };
+  remote.listVideos.mockResolvedValue({ videos: [staged] });
+  remote.get.mockImplementation(async (key: string) =>
+    key === "upload-for-local"
+      ? "job"
+      : JSON.stringify({
+          sourceId: "s",
+          path: "/Salsa/job-Turn.mp4",
+          fileId: "",
+          status: "interrupted",
+        }),
+  );
+  await scanSource(store, "s");
+  expect(remote.renameVideo).not.toHaveBeenCalled();
 });

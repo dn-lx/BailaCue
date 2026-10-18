@@ -38,3 +38,5 @@ slot. Otherwise its configured default style is used. Daily Picks chooses from t
 source's actual file membership; editing a video's style does not move its file or
 change its upload destination. A new imported video must still explicitly select
 its desired folder after preview.
+
+Dropbox uses a job-unique temporary filename during transfer. After confirmation, the app renames that stable file ID to its numbered name. A conflicting numbered name is reported, never treated as a successful upload of another file. Discovery leaves pending jobs at their saved paths until registration, so lost acknowledgements remain recoverable.
