@@ -42,8 +42,15 @@ async def main():
                     raise AssertionError(result.error)
                 return
         raise AssertionError(f"ARTEMIS could not locate {text!r}")
-    if not await asyncio.wait_for(controller.launch_app("app.bailacue.mobile"),timeout=45):
-        raise AssertionError("ARTEMIS could not launch the installed APK")
+    await controller.driver.execute_shell("logcat -c")
+    async def launch():
+        # ARTEMIS's monkey wrapper can return success while a launcher dialog
+        # consumes its event. Use its shell driver to start the exact activity.
+        result = await controller.driver.execute_shell("am start -W -n app.bailacue.mobile/.MainActivity", timeout_seconds=45)
+        (OUT / "activity-start.txt").write_text(result)
+        if "Error:" in result or "Exception" in result:
+            raise AssertionError(f"Native activity launch failed: {result}")
+    await launch()
     for attempt in range(12):
         elements = await observe("launch")
         # A fresh emulator can show a launcher ANR over the newly opened app.
@@ -51,7 +58,7 @@ async def main():
         if any("Pixel Launcher isn't responding" in label(e) for e in elements):
             await tap("Close app")
             await asyncio.sleep(3)
-            await controller.launch_app("app.bailacue.mobile")
+            await launch()
             continue
         if any("BailaCue isn't responding" in label(e) for e in elements):
             raise AssertionError("BailaCue native application is not responding")
@@ -164,7 +171,7 @@ except Exception as error:
     report["error"] = str(error)
 finally:
     try:
-        diagnostic = subprocess.run(["adb", "-s", os.environ.get("ARTEMIS_DEVICE_ID", "emulator-5554"), "logcat", "-d", "-t", "2000"], capture_output=True, text=True, timeout=20)
+        diagnostic = subprocess.run(["adb", "-s", os.environ.get("ARTEMIS_DEVICE_ID", "emulator-5554"), "logcat", "-d", "-b", "main", "-b", "system", "-b", "crash"], capture_output=True, text=True, timeout=20)
         (OUT / "device-logcat.txt").write_text(diagnostic.stdout)
     except Exception:
         pass
