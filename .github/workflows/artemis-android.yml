@@ -11,6 +11,7 @@ on:
         default: v0.2.1-preview.3
 permissions:
   contents: read
+  actions: read
 concurrency:
   group: artemis-${{ github.ref }}
   cancel-in-progress: true
@@ -35,11 +36,9 @@ jobs:
           PREVIEW_TAG: ${{ inputs.tag || 'v0.2.1-preview.3' }}
         run: |
           mkdir -p artifacts
-          for attempt in $(seq 1 60); do
-            if gh release download "$PREVIEW_TAG" --pattern '*.apk' --dir artifacts --clobber; then break; fi
-            sleep 15
-          done
-          test -n "$(ls artifacts/*.apk)"
+          gh run watch 39097892415 --repo "$GITHUB_REPOSITORY" --interval 15
+          gh run download 39097892415 --repo "$GITHUB_REPOSITORY" --name BailaCue-published-preview --dir artifacts
+          (cd artifacts && sha256sum --check *.sha256)
           sudo apt-get update && sudo apt-get install -y ffmpeg
           ffmpeg -y -f lavfi -i testsrc2=size=320x240:rate=24 -f lavfi -i sine=frequency=440 -t 6 -c:v libx264 -pix_fmt yuv420p -c:a aac /tmp/BailaCue-ARTEMIS.mp4
       - name: Enable emulator acceleration
