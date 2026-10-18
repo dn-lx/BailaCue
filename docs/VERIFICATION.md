@@ -7,7 +7,7 @@ Date: 2026-10-18. This records executed checks, not planned acceptance.
 | -------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
 | TypeScript `npm run typecheck`         | Passed                                                                                                       |
 | ESLint `npm run lint`                  | Passed without errors or warnings                                                                            |
-| `npm test`                             | 32 passed across 3 suites                                                                                    |
+| `npm test`                             | 33 passed across 3 suites                                                                                    |
 | `npm run build:web`                    | Passed, Metro production bundle in `dist/`                                                                   |
 | Playwright Chromium / Pixel 7 viewport | 2 journeys passed                                                                                            |
 | `NODE_USE_ENV_PROXY=1 npx expo-doctor` | 20/20 checks passed                                                                                          |
@@ -21,6 +21,9 @@ Date: 2026-10-18. This records executed checks, not planned acceptance.
 | Physical Android / emulator runtime    | Not run; no attached device or KVM                                                                           |
 | iOS build / device / signing           | Not run; no macOS/Xcode/Apple credentials                                                                    |
 | Live Auth, Drive, uploads, push        | Not connected or tested                                                                                      |
+
+Migration history version: `20261018032846`. Source SHA-256:
+`79693dafbba6bcbc9e719785e61d70ed45f612992b8f6eacc712b52fff76ec2c`.
 
 The first Android build installed SDK 37 / build tools 37 and NDK 27.1, then
 failed because the preinstalled Java runtime lacked `JAVA_COMPILER`. A full

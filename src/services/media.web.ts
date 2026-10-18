@@ -125,7 +125,12 @@ export async function exportClip(
   _start: number,
   _end: number,
   _duration: number,
-): Promise<{ uri: string; duration: number }> {
+): Promise<{
+  uri: string;
+  duration: number;
+  size: number;
+  thumbnail?: string;
+}> {
   throw new Error(
     "Trimmed-file export is available in the Android and iOS app. Open this video on your phone to create a new clip.",
   );

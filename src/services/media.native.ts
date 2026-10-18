@@ -60,7 +60,11 @@ export async function recordMedia(): Promise<ImportedMedia | null> {
   });
   return result.canceled
     ? null
-    : retain(result.assets[0].uri, `Practice-${Date.now()}.mp4`);
+    : retain(
+        result.assets[0].uri,
+        result.assets[0].fileName ??
+          `Practice-${Date.now()}.${result.assets[0].uri.split(".").pop() || "mp4"}`,
+      );
 }
 export async function resolveMedia(uri: string) {
   if (!new File(uri).exists)
@@ -82,7 +86,14 @@ export async function exportClip(
   duration: number,
 ) {
   validateSegment(start, end, duration);
-  return nativeMedia().trimAsync(uri, start, end);
+  const output = await nativeMedia().trimAsync(uri, start, end);
+  try {
+    const info = await nativeMedia().getInfoAsync(output.uri);
+    return { uri: output.uri, ...info, size: new File(output.uri).size ?? 0 };
+  } catch (error) {
+    await deleteMedia(output.uri);
+    throw error;
+  }
 }
 export async function saveToPhotos(uri: string) {
   const permission = await MediaLibrary.requestPermissionsAsync(true, [

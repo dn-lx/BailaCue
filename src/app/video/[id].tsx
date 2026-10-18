@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useEvent } from "expo";
 import {
   View,
   ScrollView,
@@ -32,9 +33,10 @@ import {
   layout,
 } from "../../components/ui";
 import { useTheme } from "../../components/theme";
+import Timeline from "../../components/Timeline";
 import { formatTime, parseTime, validateSegment } from "../../core/practice";
 import { uid, type Video } from "../../core/types";
-import { removeVideo } from "../../core/library";
+import { removeVideo, videoFromExport } from "../../core/library";
 function Player({ video, uri }: { video: Video; uri: string }) {
   const { update, updateVideo } = useLibrary();
   const t = useTheme();
@@ -53,6 +55,7 @@ function Player({ video, uri }: { video: Video; uri: string }) {
   const [bookmarkName, setBookmarkName] = useState("");
   const [busy, setBusy] = useState(false);
   const [exported, setExported] = useState<string>();
+  const [exportedId, setExportedId] = useState<string>();
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [title, setTitle] = useState(video.title);
   const [labels, setLabels] = useState(video.labels.join(", "));
@@ -69,6 +72,10 @@ function Player({ video, uri }: { video: Video; uri: string }) {
     p.timeUpdateEventInterval = 0.1;
     p.preservesPitch = true;
   });
+  const { status: playerStatus } = useEvent(player, "statusChange", {
+    status: player.status,
+  });
+  const playerReady = playerStatus === "readyToPlay";
   useEffect(() => {
     const loaded = player.addListener("sourceLoad", () =>
       seek(
@@ -169,7 +176,10 @@ function Player({ video, uri }: { video: Video; uri: string }) {
         range.end,
         video.duration,
       );
+      const clip = videoFromExport(video, result);
+      update((l) => ({ ...l, videos: [clip, ...l.videos] }));
       setExported(result.uri);
+      setExportedId(clip.id);
     } catch (e) {
       setError((e as Error).message);
     } finally {
@@ -269,6 +279,15 @@ function Player({ video, uri }: { video: Video; uri: string }) {
               {speed}× · {mirror ? "Mirrored" : "Original view"}
             </Txt>
           </Row>
+          <Timeline
+            duration={video.duration}
+            position={time}
+            disabled={!playerReady}
+            onSeek={(seconds) => {
+              setLoop(false);
+              seek(player, seconds);
+            }}
+          />
           <Row style={{ justifyContent: "center", flexWrap: "wrap" }}>
             <Button
               variant="soft"
@@ -280,6 +299,7 @@ function Player({ video, uri }: { video: Video; uri: string }) {
             </Button>
             <Button
               icon={playing ? "clock" : "play"}
+              disabled={!playerReady}
               onPress={() => {
                 if (playing) player.pause();
                 else {
@@ -464,7 +484,8 @@ function Player({ video, uri }: { video: Video; uri: string }) {
               <View style={{ gap: 12 }}>
                 <Badge tone="lime">NEW CLIP READY</Badge>
                 <Txt size={13}>
-                  Your new MP4 is ready. Choose where to save it.
+                  Your new MP4 is saved in your library. You can also save a
+                  copy to Photos or Files.
                 </Txt>
                 <Button
                   icon="download"
@@ -484,15 +505,16 @@ function Player({ video, uri }: { video: Video; uri: string }) {
                   Share / Save file
                 </Button>
                 <Button
-                  variant="ghost"
-                  onPress={() =>
-                    handle(async () => {
-                      await deleteMedia(exported);
-                      setExported(undefined);
-                    })
-                  }
+                  variant="soft"
+                  onPress={() => {
+                    if (exportedId)
+                      router.push({
+                        pathname: "/video/[id]",
+                        params: { id: exportedId },
+                      });
+                  }}
                 >
-                  Remove temporary clip
+                  Open new clip in library
                 </Button>
               </View>
             ) : null}

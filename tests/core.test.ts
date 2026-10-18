@@ -12,7 +12,11 @@ import {
   localDay,
   weekStart,
 } from "../src/core/practice";
-import { filterVideos, removeVideo } from "../src/core/library";
+import {
+  filterVideos,
+  removeVideo,
+  videoFromExport,
+} from "../src/core/library";
 export function video(id: string, changes: Partial<Video> = {}): Video {
   return {
     id,
@@ -140,4 +144,25 @@ it("combines library filters and removes collection references", () => {
   ).toHaveLength(1);
   l.playlists = [{ id: "p", name: "Class", videoIds: ["a", "b"] }];
   expect(removeVideo(l, "a").playlists[0].videoIds).toEqual(["b"]);
+});
+
+it("registers a new exported clip without mutating the original or inheriting invalid timestamps", () => {
+  const original = video("original", {
+    notes: [{ id: "n", text: "Keep this", time: 25, createdAt: "2026-10-18" }],
+    segments: [{ id: "s", name: "Part", start: 10, end: 20 }],
+  });
+  const clip = videoFromExport(original, {
+    uri: "file:new.mp4",
+    duration: 4,
+    size: 2048,
+  });
+  expect(clip.id).not.toBe(original.id);
+  expect(clip.uri).toBe("file:new.mp4");
+  expect(clip.parentId).toBe(original.id);
+  expect(clip.duration).toBe(4);
+  expect(clip.notes).toEqual([]);
+  expect(clip.segments).toEqual([]);
+  expect(original.uri).toBe("file:original");
+  expect(original.notes).toHaveLength(1);
+  expect(original.labels).toEqual(["Footwork"]);
 });

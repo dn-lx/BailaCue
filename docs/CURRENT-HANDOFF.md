@@ -2,6 +2,7 @@
 
 Task: BailaCue mobile foundation and first working vertical slice.
 Branch: `feat/bailacue-mobile-foundation`; base: `main`.
+Draft PR: https://github.com/dn-lx/BailaCue/pull/1.
 Version: 0.1.0 / Android versionCode 1 / iOS buildNumber 1.
 
 ## Completed and verified
@@ -10,7 +11,7 @@ Original BailaCue identity and mobile UI; local library/import, search and editi
 metadata, practice sections/loop controls, notes, bookmarks, collections,
 explainable Daily Picks, timer/journal/goals and theme preferences. Native trim,
 Photos/share and camera code exists and requires native verification. Browser
-journeys and 32 automated tests pass; Expo Doctor 20/20; production web bundle.
+journeys and 33 automated tests pass; Expo Doctor 20/20; production web bundle.
 
 ## External actions and owner decisions
 

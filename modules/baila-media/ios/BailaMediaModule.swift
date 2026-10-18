@@ -71,6 +71,10 @@ public class BailaMediaModule: Module {
     let path = url.resolvingSymlinksInPath().path
     let roots = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask) + FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)
     guard roots.contains(where: { path.hasPrefix($0.resolvingSymlinksInPath().path + "/") }), FileManager.default.fileExists(atPath: path) else { throw MediaError.invalidVideo }
+    var parent = url.deletingLastPathComponent()
+    var values = URLResourceValues(); values.isExcludedFromBackup = true
+    try parent.setResourceValues(values)
+    try FileManager.default.setAttributes([.protectionKey: FileProtectionType.completeUntilFirstUserAuthentication], ofItemAtPath: path)
     return url
   }
 }

@@ -17,6 +17,8 @@ storage, not authenticated multi-user storage or metadata sync.
 Expo Video handles playback. Saved practice sections are nondestructive metadata.
 `modules/baila-media` is an autolinked local Expo module. Android uses Media3
 Transformer 1.9.1 (matching Expo Video's Media3 version); iOS uses AVFoundation.
+Successful clips are registered as separate local library videos, with fresh
+identifiers/thumbnails and no inherited out-of-range notes or sections.
 The module validates real asset duration and app-private file paths, uses unique
 MP4 filenames, and deletes partial exports on failure/cancellation. Exports are
 foreground work. They do not modify originals. Playback speed, count and mirror
@@ -49,6 +51,10 @@ accounts, perform real two-account isolation tests and verify Me+ existing
 authentication and row policies are compatible. Adding BailaCue RLS cannot revoke
 any pre-existing Me+ grants: review the shared project's existing policies before
 releasing a BailaCue client authenticated against it. Never weaken Me+ auth.
+
+Existing Me+ authenticated APIs cover other personal domains. Keep BailaCue
+mobile sessions scoped through a trusted backend rather than shipping a broad
+Me+ access token into the app.
 
 The planned username flow needs a rate-limited trusted endpoint that resolves a
 BailaCue username server-side and delegates password verification to Supabase

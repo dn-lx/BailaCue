@@ -17,3 +17,7 @@ test-results/
 .DS_Store
 
 /supabase/.temp/
+
+/modules/**/build/
+/modules/**/.cxx/
+/modules/**/.gradle/

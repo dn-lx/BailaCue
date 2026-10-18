@@ -42,7 +42,11 @@ export default function Upload() {
     try {
       const next = await (record ? recordMedia() : importMedia());
       if (next) {
-        if (media) await deleteMedia(media.uri);
+        if (media) {
+          await deleteMedia(media.uri);
+          if (media.thumbnail?.startsWith("file:"))
+            await deleteMedia(media.thumbnail);
+        }
         setMedia(next);
         setTitle(next.name.replace(/\.[^.]+$/, ""));
         saved.current = false;

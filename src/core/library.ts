@@ -1,4 +1,10 @@
-import type { Library, LearningStatus, DanceStyle, Video } from "./types";
+import {
+  uid,
+  type Library,
+  type LearningStatus,
+  type DanceStyle,
+  type Video,
+} from "./types";
 export type Filters = {
   query?: string;
   style?: DanceStyle;
@@ -39,5 +45,29 @@ export function removeVideo(library: Library, id: string): Library {
     feedback: Object.fromEntries(
       Object.entries(library.feedback).filter(([key]) => key !== id),
     ),
+  };
+}
+
+export function videoFromExport(
+  original: Video,
+  output: { uri: string; duration: number; size: number; thumbnail?: string },
+): Video {
+  return {
+    ...original,
+    ...output,
+    thumbnail: output.thumbnail,
+    id: uid(),
+    parentId: original.id,
+    title: `${original.title} · practice clip`,
+    labels: [...new Set([...original.labels, "Practice clip"])],
+    createdAt: new Date().toISOString(),
+    status: "Practising",
+    lastPractisedAt: undefined,
+    resume: 0,
+    notes: [],
+    bookmarks: [],
+    segments: [],
+    source: "device",
+    available: true,
   };
 }

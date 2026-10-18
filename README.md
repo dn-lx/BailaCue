@@ -13,7 +13,7 @@ save and loop practice sections, add timestamped notes/bookmarks, arrange
 collections, get deterministic Daily Picks, and track practice sessions/goals.
 
 The native Media3/AVFoundation module creates a **separate trimmed MP4**, with
-Save to Photos and Share / Save file actions. It does not overwrite your original.
+a new library entry, Save to Photos and Share / Save file actions. It does not overwrite your original.
 Native build/runtime verification is recorded separately in
 [VERIFICATION.md](docs/VERIFICATION.md); do not equate source code with device tests.
 Exports are trims only: playback speed/mirror/count overlays are not rendered
@@ -81,8 +81,8 @@ npx eas-cli@latest build --platform ios --profile development
 ```
 
 EAS needs your account and may have usage costs; it was not invoked for a paid
-build. GitHub Actions includes checks and a manually triggered Android preview
-workflow. No workflow submits to an app store or deploys production.
+build. GitHub Actions includes checks and a pull-request Android preview
+workflow (also available manually after the workflow reaches the default branch). No workflow submits to an app store or deploys production.
 
 ## iOS signing
 

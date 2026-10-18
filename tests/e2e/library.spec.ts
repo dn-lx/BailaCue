@@ -56,6 +56,33 @@ test("import → label → loop → note → daily pick → persisted local vide
       .getByText("Bachata turn practice", { exact: true })
       .filter({ visible: true }),
   ).toBeVisible();
+  await expect
+    .poll(() =>
+      page
+        .locator("video")
+        .first()
+        .evaluate((v: HTMLVideoElement) => v.readyState),
+    )
+    .toBeGreaterThan(1);
+  const timeline = page.getByRole("slider", { name: "Video position" });
+  const bounds = await timeline.boundingBox();
+  await timeline.click({
+    position: { x: bounds!.width / 4, y: bounds!.height / 2 },
+  });
+  await expect
+    .poll(() =>
+      page
+        .locator("video")
+        .first()
+        .evaluate((v: HTMLVideoElement) => v.currentTime),
+    )
+    .toBeGreaterThan(1);
+  expect(
+    await page
+      .locator("video")
+      .first()
+      .evaluate((v: HTMLVideoElement) => v.currentTime),
+  ).toBeLessThan(2.1);
   await page
     .getByRole("textbox", { name: "Start (m:ss or seconds)" })
     .fill("1");
@@ -66,23 +93,31 @@ test("import → label → loop → note → daily pick → persisted local vide
   await expect(
     page.getByRole("button", { name: "Loop on", exact: true }),
   ).toBeVisible();
+  await page
+    .locator("video")
+    .first()
+    .evaluate((element: HTMLVideoElement) => {
+      const video = element as HTMLVideoElement & { loopObserved?: boolean };
+      let last = video.currentTime;
+      video.addEventListener("timeupdate", () => {
+        if (last > 3 && video.currentTime < 2) video.loopObserved = true;
+        last = video.currentTime;
+      });
+    });
   await page.getByRole("button", { name: "Play", exact: true }).click();
   await expect
-    .poll(() =>
-      page
-        .locator("video")
-        .first()
-        .evaluate((v: HTMLVideoElement) => v.currentTime),
+    .poll(
+      () =>
+        page
+          .locator("video")
+          .first()
+          .evaluate(
+            (video: HTMLVideoElement & { loopObserved?: boolean }) =>
+              !!video.loopObserved,
+          ),
+      { timeout: 15000, intervals: [100] },
     )
-    .toBeGreaterThan(3.3);
-  await expect
-    .poll(() =>
-      page
-        .locator("video")
-        .first()
-        .evaluate((v: HTMLVideoElement) => v.currentTime),
-    )
-    .toBeLessThan(2);
+    .toBe(true);
   await expect(
     page.getByRole("button", { name: "Pause", exact: true }),
   ).toBeVisible();
