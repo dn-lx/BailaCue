@@ -2,6 +2,10 @@ name: Publish Android preview
 on:
   push:
     tags: ["v*-preview.*"]
+env:
+  EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID: ${{ vars.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID }}
+  EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID: ${{ vars.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID }}
+  EXPO_PUBLIC_DROPBOX_APP_KEY: ${{ vars.EXPO_PUBLIC_DROPBOX_APP_KEY }}
 permissions:
   contents: read
 concurrency:
@@ -37,7 +41,7 @@ jobs:
         run: |
           set -euo pipefail
           apk_assets=(artifacts/*.apk)
-          "$ANDROID_HOME/build-tools/37.0.0/apksigner" verify --verbose "${apk_assets[0]}"
+          "$ANDROID_HOME/build-tools/37.0.0/apksigner" verify --verbose --print-certs "${apk_assets[0]}"
           (cd artifacts && sha256sum --check *.sha256)
       - uses: actions/upload-artifact@v4
         if: always()

@@ -13,6 +13,10 @@ on:
 concurrency:
   group: android-preview-${{ github.ref }}
   cancel-in-progress: true
+env:
+  EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID: ${{ vars.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID }}
+  EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID: ${{ vars.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID }}
+  EXPO_PUBLIC_DROPBOX_APP_KEY: ${{ vars.EXPO_PUBLIC_DROPBOX_APP_KEY }}
 permissions:
   contents: read
 jobs:

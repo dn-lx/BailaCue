@@ -3,6 +3,8 @@ import { libraryLabels } from "../core/labels";
 import { useState } from "react";
 import { View, Switch } from "react-native";
 import { router } from "expo-router";
+import * as WebBrowser from "expo-web-browser";
+import { GoogleDriveSetupError } from "../services/cloud/googleError";
 import {
   Screen,
   Card,
@@ -31,6 +33,7 @@ export default function Storage() {
   const t = useTheme();
   const [busy, setBusy] = useState("");
   const [error, setError] = useState("");
+  const [googleSetupError, setGoogleSetupError] = useState(false);
   const [accountId, setAccountId] = useState("");
   const [folder, setFolder] = useState("");
   const [name, setName] = useState("");
@@ -47,9 +50,11 @@ export default function Storage() {
     if (busy) return;
     setBusy(id);
     setError("");
+    setGoogleSetupError(false);
     try {
       await action();
     } catch (e) {
+      setGoogleSetupError(e instanceof GoogleDriveSetupError);
       setError((e as Error).message);
     } finally {
       setBusy("");
@@ -249,9 +254,33 @@ export default function Storage() {
       </Card>
       {error ? (
         <Card>
+          {googleSetupError ? (
+            <Txt size={22} weight="display">
+              Google Drive needs app setup
+            </Txt>
+          ) : null}
           <Txt accessibilityRole="alert" color={t.primary}>
             {error}
           </Txt>
+          {googleSetupError ? (
+            <>
+              <Button icon="folder" onPress={() => router.push("/upload")}>
+                Import from Files
+              </Button>
+              <Button
+                variant="soft"
+                onPress={() =>
+                  run("setup-help", () =>
+                    WebBrowser.openBrowserAsync(
+                      "https://github.com/dn-lx/BailaCue/blob/feat/bailacue-mobile-foundation/docs/CLOUD-STORAGE.md#google-drive-registration",
+                    ).then(() => undefined),
+                  )
+                }
+              >
+                Connection setup help
+              </Button>
+            </>
+          ) : null}
         </Card>
       ) : null}
       {library.connections.map((connection) => (
@@ -539,6 +568,7 @@ export default function Storage() {
                 setError(
                   "Dropbox app key saved. You can connect your own account above.",
                 );
+                setGoogleSetupError(false);
               }}
             >
               Save app key

@@ -19,7 +19,9 @@ Local import through the phone's Files picker also works with installed cloud ap
    services and the registered package/certificate pair.
 4. For iOS set `EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID` to the iOS client ID, then rebuild.
    app.config.ts registers its reversed URL scheme. No Firebase project is required.
-5. Rebuild/reinstall, open **Settings → Manage video storage → Connect Google Drive**.
+5. Rebuild/reinstall if you changed bundled client IDs or the iOS URL scheme. Registering
+   an existing Android APK's package/certificate pair does not itself require rebuilding.
+   Open **Settings → Manage video storage → Connect Google Drive**.
    Choose the account, browse folders or paste a folder link, set its name/style/labels,
    and connect it. Repeat for independent Salsa/Bachata folders.
 
@@ -28,6 +30,35 @@ with `drive.file` alone. **Allow uploads to my Drive** asks for `drive` access. 
 folder/file capabilities still control actual writes and downloads. Google’s native
 SDK manages credentials. A different active Google account requires an explicit
 reconnect before operating on that account; metadata and associations are retained.
+
+### Fixing the reported DEVELOPER_ERROR / code10
+
+The SDK's [official troubleshooting guide](https://react-native-google-signin.github.io/docs/troubleshooting#developer_error)
+identifies this as a mismatch between the installed app and Google Cloud's OAuth
+configuration. It is not fixed by changing a user's Drive password or connecting
+a ChatGPT Drive plugin. The app now explains the setup failure and offers a Files
+import action, but that recovery message cannot complete the remote registration.
+
+For the verified preview signing identity, create an **Android** OAuth client in
+[Google Auth Platform → Clients](https://console.cloud.google.com/auth/clients):
+
+- Package: `app.bailacue.mobile`
+- Certificate SHA-1: `5E:8F:16:06:2E:A3:CD:2C:4A:0D:54:78:76:BA:A6:F3:8C:AB:F6:25`
+
+Also enable the Drive API and configure consent/test users in that project. Store
+and Play App Signing builds must use their own installed certificate fingerprints;
+do not register a different signing certificate by mistake. The release workflow
+prints the actual APK certificate. An optional web client ID must be a **Web** client
+from the same project, not the Android client ID. Android native sign-in does not
+require a web client ID for the access-token-only flow used here.
+
+GitHub builds read public repository variables `EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID`,
+`EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID` and `EXPO_PUBLIC_DROPBOX_APP_KEY`. Local/EAS builds
+can use the same environment names. No client secret belongs in any `EXPO_PUBLIC_`
+value. No Google Cloud account/project is currently connected to this build
+workspace, so remote registration and a successful real-account sign-in have not
+been performed. Once registration is saved and propagated, retry using your own
+Google account; each user continues choosing their own folders.
 
 ## Dropbox registration
 
