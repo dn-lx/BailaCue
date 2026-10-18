@@ -131,6 +131,21 @@ async def main():
         if abs(duration-3)>0.25: raise AssertionError(f"Unexpected trim duration {duration}")
         report["checks"].append({"check":"Native Media3 new-file export, original checksum preserved", "result":"passed", "duration":duration, "original_sha256":before})
         await observe("new-clip-ready")
+        await locate("Save new clip to Photos",scrolls=3)
+        saved = False
+        for _ in range(25):
+            elements = await observe("photos-save")
+            if any("Your new clip was saved to Photos" in label(e) for e in elements):
+                saved = True
+                break
+            for choice in ("Allow all", "Allow"):
+                candidates = [e for e in elements if label(e).strip().lower() == choice.lower()]
+                if candidates:
+                    await tap(choice)
+                    break
+            await asyncio.sleep(1)
+        if not saved: raise AssertionError("Native Photos save was not confirmed")
+        report["checks"].append({"check":"Explicit native Save new clip to Photos", "result":"passed"})
     report["status"] = "passed"
 
 try:
