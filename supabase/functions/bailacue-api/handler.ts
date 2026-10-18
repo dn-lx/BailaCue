@@ -148,7 +148,7 @@ export function createHandler(
           if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
             throw new ApiError("Enter a valid account email.");
           const check = await data(
-            `bailacue_profiles?username=ilike.${encodeURIComponent(username)}&select=user_id`,
+            `bailacue_profiles?username=eq.${encodeURIComponent(username)}&select=user_id`,
           );
           if (check.length)
             throw new ApiError("This username is unavailable.", 409);
@@ -208,7 +208,7 @@ export function createHandler(
           });
         }
         const profiles = await data(
-          `bailacue_profiles?username=ilike.${encodeURIComponent(username)}&select=user_id,username`,
+          `bailacue_profiles?username=eq.${encodeURIComponent(username)}&select=user_id,username`,
         );
         const profile = profiles[0];
         let email = "missing-bailacue-account@invalid.example";
@@ -352,7 +352,7 @@ export function createHandler(
         if (!/^[a-z0-9_]{3,30}$/.test(recipientName))
           throw new ApiError("Enter the recipient’s BailaCue username.");
         const recipients = await data(
-          `bailacue_profiles?username=ilike.${encodeURIComponent(recipientName)}&select=user_id,username`,
+          `bailacue_profiles?username=eq.${encodeURIComponent(recipientName)}&select=user_id,username`,
         );
         const recipient = recipients[0];
         if (!recipient || recipient.user_id === userId)

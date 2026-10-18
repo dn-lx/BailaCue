@@ -236,3 +236,27 @@ describe("provider-aware collection grant boundaries", () => {
     expect(JSON.stringify(saved)).not.toContain("secret");
   });
 });
+
+describe("exact username resolution", () => {
+  it("treats underscores as literal username characters, not query wildcards", async () => {
+    const request = vi
+      .fn()
+      .mockResolvedValueOnce(response(true))
+      .mockResolvedValueOnce(response(true))
+      .mockResolvedValueOnce(response([]))
+      .mockResolvedValueOnce(response({}, 400));
+    const result = await createHandler(
+      env,
+      request,
+    )(
+      send({
+        action: "login",
+        username: "alice_test",
+        password: "valid-password",
+      }),
+    );
+    expect(result.status).toBe(401);
+    expect(request.mock.calls[2][0]).toContain("username=eq.alice_test");
+    expect(request.mock.calls[2][0]).not.toContain("ilike");
+  });
+});

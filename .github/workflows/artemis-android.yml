@@ -1,0 +1,72 @@
+name: ARTEMIS preview acceptance
+on:
+  push:
+    paths:
+      - scripts/artemis-smoke.py
+      - .github/workflows/artemis-android.yml
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Published Android preview tag
+        default: v0.2.1-preview.3
+permissions:
+  contents: read
+concurrency:
+  group: artemis-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  device:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: astral-sh/setup-uv@v6
+      - name: Install Google ARTEMIS
+        run: |
+          git clone https://github.com/google/artemis.git /tmp/artemis
+          git -C /tmp/artemis checkout 351ca8422f7b5b54e80a9c1ce03a222e02415b6b
+          uv sync --project /tmp/artemis --no-dev
+      - name: Download preview and create synthetic video
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PREVIEW_TAG: ${{ inputs.tag || 'v0.2.1-preview.3' }}
+        run: |
+          mkdir -p artifacts
+          for attempt in $(seq 1 60); do
+            if gh release download "$PREVIEW_TAG" --pattern '*.apk' --dir artifacts --clobber; then break; fi
+            sleep 15
+          done
+          test -n "$(ls artifacts/*.apk)"
+          sudo apt-get update && sudo apt-get install -y ffmpeg
+          ffmpeg -y -f lavfi -i testsrc2=size=320x240:rate=24 -f lavfi -i sine=frequency=440 -t 6 -c:v libx264 -pix_fmt yuv420p -c:a aac /tmp/BailaCue-ARTEMIS.mp4
+      - name: Enable emulator acceleration
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 35
+          target: google_apis
+          arch: x86_64
+          profile: pixel_7
+          disable-animations: true
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -camera-front none
+          script: |
+            adb root
+            adb wait-for-device
+            adb shell input keyevent 82
+            adb shell settings put secure show_ime_with_hard_keyboard 1
+            uv run --project /tmp/artemis artemis helper install --serial emulator-5554
+            adb install -r artifacts/*.apk
+            adb push /tmp/BailaCue-ARTEMIS.mp4 /sdcard/Download/BailaCue-ARTEMIS.mp4
+            adb shell am broadcast -a android.intent.action.MEDIA_SCANNER_SCAN_FILE -d file:///sdcard/Download/BailaCue-ARTEMIS.mp4
+            BAILACUE_ARTEMIS_VIDEO=1 BAILACUE_ARTEMIS_FIXTURE=/tmp/BailaCue-ARTEMIS.mp4 BAILACUE_ARTEMIS_OUT="$GITHUB_WORKSPACE/artifacts/artemis" uv run --project /tmp/artemis python scripts/artemis-smoke.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: BailaCue-ARTEMIS-acceptance-evidence
+          path: artifacts/artemis/

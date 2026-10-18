@@ -31,7 +31,7 @@ async def main():
     async def tap(text):
         elements = await observe("before-tap")
         matches = [e for e in elements if text.lower() in label(e).lower()]
-        for element in sorted(matches, key=lambda e: len(label(e))):
+        for element in sorted(matches, key=lambda e: (not (e.get("focusable") in (True,"true") or e.get("clickable") in (True,"true")),len(label(e)))):
             bounds = re.fullmatch(r"\[(-?\d+),(-?\d+)\]\[(-?\d+),(-?\d+)\]", str(element.get("bounds", "")))
             if not bounds:
                 continue

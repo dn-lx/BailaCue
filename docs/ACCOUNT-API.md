@@ -2,7 +2,7 @@
 
 The existing production Me+ project is the user-approved database target. The
 original 23-table migration is live. After the owner explicitly approved production deployment on 2026-10-18, the new
-private tables and `bailacue-api` version 1 were deployed to the shared Me+ project.
+private tables and `bailacue-api` version 2 were deployed to the shared Me+ project.
 Live verification confirms client denial on private tables/RPCs and rejection of
 missing sessions and invalid credentials. Real two-user login/sync acceptance remains pending.
 

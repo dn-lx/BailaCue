@@ -7,7 +7,7 @@ This file records executed checks. [0.1.0 evidence](VERIFICATION-0.1.md) is reta
 |---|---|
 | TypeScript | Passed |
 | ESLint | Passed |
-| Vitest | 64 passing tests across 6 suites |
+| Vitest | 65 passing tests across 6 suites |
 | PostgreSQL | All three migrations applied in local PGlite; 27 tables with RLS; negative client grants, owner/FK isolation, atomic rate limits, stale revisions and BailaCue-only cleanup tested |
 | Gateway | Mock transport tests: opaque session hashing, no broad Auth tokens returned, owner derived from session, forged-owner denial, rate limits, secret/path rejection, conflicts and sharing ownership/revocation/allowlisting |
 | Providers | Mock HTTP: Drive/Dropbox paging, folders, errors, temporary URL checks, stable upload identity, completed-file reconciliation, lost Dropbox acknowledgement and strict no-overwrite commits |
@@ -18,7 +18,7 @@ This file records executed checks. [0.1.0 evidence](VERIFICATION-0.1.md) is reta
 | Android | New native dependencies compiled; first universal ARM64/x86_64 release-mode preview built successfully in 7 min. Final native rebuild succeeded (6m23s) and final JS update succeeded (32s); signature/version/ABIs verified |
 | Google ARTEMIS | Installed; doctor executed. API credential absent. API35 software emulator reached ADB/package service; helper installation timed out, then Android PackageInstaller threw a null PackageManagerInternal exception during boot. No native app test pass claimed |
 | Live provider OAuth/transfers | Not run; BailaCue Google/Dropbox app registrations not supplied |
-| Live Me+ account API | Owner approved deployment; API v1 and all migrations are live. Anonymous request and invalid login return 401; private table/RPC client denial verified |
+| Live Me+ account API | Owner approved deployment; API v2 and all migrations are live. Anonymous request and invalid login return 401; private table/RPC client denial verified |
 | iOS build/signing/runtime | Not run: no macOS/Xcode/Apple signing environment |
 
 Browser tests use synthetic H.264 fixtures. The Dropbox browser test intercepts provider
@@ -57,7 +57,7 @@ have a different binary checksum from the local APK above; the release includes
 its actual matching SHA-256 file. No credentials were copied or exposed.
 
 The owner approved production deployment after reviewing the prepared code.
-`bailacue-api` v1 deployed with its own opaque-session authentication (gateway JWT
+`bailacue-api` v2 deployed with its own opaque-session authentication (gateway JWT
 validation disabled deliberately). Missing sessions return 401. Initial invalid-login
 verification returned 503 because Me+ default privileges deny service access to new
 tables. The BailaCue-only service grant migration fixed this; invalid login then
@@ -69,3 +69,8 @@ https://supabase.com/docs/guides/database/database-linter?lint=0008_rls_enabled_
 No real accounts, emails, passwords or health data were used for these HTTP probes.
 The local file timestamps for deployed migrations were aligned with actual remote
 history versions 20261018043447 and 20261018043638.
+
+A new exact-username regression test verifies literal underscores. The gateway now
+uses equality on canonical lowercase usernames instead of ILIKE wildcard matching.
+API v2 is deployed with this fix; all 65 tests pass. Browser build 3: all three
+journeys pass (13.0s). This backend fix does not change mobile APK code.
