@@ -60,7 +60,7 @@ export async function downloadVideo(
       (expectedSize > 0 && temporary.size !== expectedSize)
     )
       throw new Error("The download was incomplete. Retry when connected.");
-    temporary.move(destination);
+    await temporary.move(destination);
     const info = await nativeMedia().getInfoAsync(destination.uri);
     progress(1);
     return { uri: destination.uri, size: destination.size ?? 0, ...info };

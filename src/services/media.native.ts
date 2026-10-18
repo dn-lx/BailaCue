@@ -23,12 +23,12 @@ async function retain(uri: string, name: string): Promise<ImportedMedia> {
       ?.replace(/[^a-z0-9]/gi, "")
       .slice(0, 8) || "mp4";
   const destination = new File(dir, `${uid()}.${ext}`);
-  new File(uri).copy(destination);
   try {
+    await new File(uri).copy(destination);
     const info = await nativeMedia().getInfoAsync(destination.uri);
     return { uri: destination.uri, name, size: destination.size ?? 0, ...info };
   } catch (error) {
-    destination.delete();
+    if (destination.exists) destination.delete();
     throw error;
   }
 }

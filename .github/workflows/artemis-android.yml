@@ -4,7 +4,7 @@ on:
     inputs:
       tag:
         description: Published Android preview tag
-        default: v0.2.2-preview.4
+        default: v0.2.3-preview.5
 permissions:
   contents: read
   actions: read
@@ -29,7 +29,7 @@ jobs:
       - name: Download preview and create synthetic video
         env:
           GH_TOKEN: ${{ github.token }}
-          PREVIEW_TAG: ${{ inputs.tag || 'v0.2.2-preview.4' }}
+          PREVIEW_TAG: ${{ inputs.tag || 'v0.2.3-preview.5' }}
         run: |
           mkdir -p artifacts
           gh release download "$PREVIEW_TAG" --repo "$GITHUB_REPOSITORY" --pattern '*.apk' --pattern '*.sha256' --dir artifacts
