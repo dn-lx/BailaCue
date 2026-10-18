@@ -42,6 +42,7 @@ async def main():
                 result = await asyncio.wait_for(controller.tap_at((x1+x2)//2,(y1+y2)//2),timeout=30)
                 if getattr(result,"error",None):
                     raise AssertionError(result.error)
+                await asyncio.sleep(0.8)
                 return
         raise AssertionError(f"ARTEMIS could not locate {text!r}")
     await controller.driver.execute_shell("logcat -c")
@@ -107,11 +108,19 @@ async def main():
             await controller.go_back()
         await locate("Add video")
         await locate("Choose a video")
-        # Android's document provider lists the synthetic fixture in Recents after scanning.
-        elements = await observe("file-picker")
-        if not any("BailaCue-ARTEMIS" in label(e) for e in elements):
+        # Wait for the external picker rather than inspecting the previous app
+        # screen while its activity transition is still running.
+        for _ in range(15):
+            elements = await observe("file-picker")
+            if any("BailaCue-ARTEMIS" in label(e) for e in elements):
+                break
+            await asyncio.sleep(1)
+        else:
             await locate("Show roots",attempts=3)
-            await locate("Downloads",attempts=3)
+            await locate("Videos",attempts=3)
+            elements = await observe("video-folders")
+            if not any("BailaCue-ARTEMIS" in label(e) for e in elements):
+                await locate("Download",attempts=5)
         await locate("BailaCue-ARTEMIS",attempts=8)
         await field("Video title","ARTEMIS practice")
         await locate("Add to my library",scrolls=10)

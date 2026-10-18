@@ -3,12 +3,12 @@ on:
   push:
     tags: ["v*-preview.*"]
 permissions:
-  contents: write
+  contents: read
 concurrency:
   group: publish-${{ github.ref }}
   cancel-in-progress: false
 jobs:
-  release:
+  build:
     runs-on: ubuntu-latest
     timeout-minutes: 35
     steps:
@@ -32,19 +32,13 @@ jobs:
       - run: npm run build:android
         env:
           BAILACUE_ARCHS: arm64-v8a,x86_64
-      - name: Verify APK and publish prerelease
+      - name: Verify built APK
         shell: bash
-        env:
-          GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
           apk_assets=(artifacts/*.apk)
           "$ANDROID_HOME/build-tools/37.0.0/apksigner" verify --verbose "${apk_assets[0]}"
-          cp "docs/releases/$GITHUB_REF_NAME.md" /tmp/bailacue-release-notes.md
-          printf '\nActual uploaded APK SHA-256:\n\n```text\n' >> /tmp/bailacue-release-notes.md
-          cat artifacts/*.sha256 >> /tmp/bailacue-release-notes.md
-          printf '```\n' >> /tmp/bailacue-release-notes.md
-          gh release create "$GITHUB_REF_NAME" artifacts/*.apk artifacts/*.sha256 --verify-tag --target "$GITHUB_SHA" --title "BailaCue $GITHUB_REF_NAME — Android preview" --prerelease --notes-file /tmp/bailacue-release-notes.md
+          (cd artifacts && sha256sum --check *.sha256)
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -52,7 +46,7 @@ jobs:
           path: artifacts/
   artemis:
     name: ARTEMIS Android device tests
-    needs: release
+    needs: build
     runs-on: ubuntu-latest
     timeout-minutes: 25
     permissions:
@@ -69,12 +63,13 @@ jobs:
           git clone https://github.com/google/artemis.git /tmp/artemis
           git -C /tmp/artemis checkout 351ca8422f7b5b54e80a9c1ce03a222e02415b6b
           uv sync --project /tmp/artemis --no-dev
-      - name: Download published APK and generate synthetic video
-        env:
-          GH_TOKEN: ${{ github.token }}
+      - uses: actions/download-artifact@v4
+        with:
+          name: BailaCue-published-preview
+          path: artifacts
+      - name: Verify APK and generate synthetic video
         run: |
-          mkdir -p artifacts
-          gh release download "$GITHUB_REF_NAME" --pattern '*.apk' --dir artifacts
+          (cd artifacts && sha256sum --check *.sha256)
           sudo apt-get update && sudo apt-get install -y ffmpeg
           ffmpeg -y -f lavfi -i testsrc2=size=320x240:rate=24 -f lavfi -i sine=frequency=440 -t 6 -c:v libx264 -pix_fmt yuv420p -c:a aac /tmp/BailaCue-ARTEMIS.mp4
       - name: Enable emulator acceleration
@@ -94,6 +89,7 @@ jobs:
             adb root
             adb wait-for-device
             adb shell wm size 720x1600
+            adb shell wm density 280
             adb shell input keyevent 82
             adb shell settings put secure show_ime_with_hard_keyboard 1
             uv run --project /tmp/artemis artemis helper install --serial emulator-5554 || uv run --project /tmp/artemis artemis helper install --serial emulator-5554 || echo 'ARTEMIS helper could not enable; using its UIAutomator fallback'
@@ -106,3 +102,26 @@ jobs:
         with:
           name: BailaCue-ARTEMIS-device-evidence
           path: artifacts/artemis/
+  publish:
+    needs: [build, artemis]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: BailaCue-published-preview
+          path: artifacts
+      - name: Publish tested prerelease
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          (cd artifacts && sha256sum --check *.sha256)
+          cp "docs/releases/$GITHUB_REF_NAME.md" /tmp/bailacue-release-notes.md
+          printf '\nActual uploaded APK SHA-256:\n\n```text\n' >> /tmp/bailacue-release-notes.md
+          cat artifacts/*.sha256 >> /tmp/bailacue-release-notes.md
+          printf '```\n' >> /tmp/bailacue-release-notes.md
+          gh release create "$GITHUB_REF_NAME" artifacts/*.apk artifacts/*.sha256 --verify-tag --title "BailaCue $GITHUB_REF_NAME — Android preview" --prerelease --notes-file /tmp/bailacue-release-notes.md
