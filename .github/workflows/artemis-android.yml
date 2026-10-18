@@ -36,8 +36,7 @@ jobs:
           PREVIEW_TAG: ${{ inputs.tag || 'v0.2.1-preview.3' }}
         run: |
           mkdir -p artifacts
-          gh run watch 39097892415 --repo "$GITHUB_REPOSITORY" --interval 15
-          gh run download 39097892415 --repo "$GITHUB_REPOSITORY" --name BailaCue-published-preview --dir artifacts
+          gh release download "$PREVIEW_TAG" --repo "$GITHUB_REPOSITORY" --pattern '*.apk' --pattern '*.sha256' --dir artifacts
           (cd artifacts && sha256sum --check *.sha256)
           sudo apt-get update && sudo apt-get install -y ffmpeg
           ffmpeg -y -f lavfi -i testsrc2=size=320x240:rate=24 -f lavfi -i sine=frequency=440 -t 6 -c:v libx264 -pix_fmt yuv420p -c:a aac /tmp/BailaCue-ARTEMIS.mp4
@@ -53,10 +52,11 @@ jobs:
           arch: x86_64
           profile: pixel_7
           disable-animations: true
-          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -camera-front none
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -no-snapshot -memory 3072 -cores 4 -camera-back none -camera-front none
           script: |
             adb root
             adb wait-for-device
+            adb shell wm size 720x1600
             adb shell input keyevent 82
             adb shell settings put secure show_ime_with_hard_keyboard 1
             uv run --project /tmp/artemis artemis helper install --serial emulator-5554

@@ -46,6 +46,15 @@ async def main():
         raise AssertionError("ARTEMIS could not launch the installed APK")
     for attempt in range(12):
         elements = await observe("launch")
+        # A fresh emulator can show a launcher ANR over the newly opened app.
+        # Dismiss only that unrelated system dialog; never hide a BailaCue ANR.
+        if any("Pixel Launcher isn't responding" in label(e) for e in elements):
+            await tap("Close app")
+            await asyncio.sleep(3)
+            await controller.launch_app("app.bailacue.mobile")
+            continue
+        if any("BailaCue isn't responding" in label(e) for e in elements):
+            raise AssertionError("BailaCue native application is not responding")
         if any("Find your rhythm" in label(e) for e in elements):
             break
         await asyncio.sleep(3)
@@ -154,6 +163,11 @@ except Exception as error:
     report["status"] = "blocked-or-failed"
     report["error"] = str(error)
 finally:
+    try:
+        diagnostic = subprocess.run(["adb", "-s", os.environ.get("ARTEMIS_DEVICE_ID", "emulator-5554"), "logcat", "-d", "-t", "2000"], capture_output=True, text=True, timeout=20)
+        (OUT / "device-logcat.txt").write_text(diagnostic.stdout)
+    except Exception:
+        pass
     (OUT / "report.json").write_text(json.dumps(report,indent=2))
     print(json.dumps(report,indent=2))
 if report["status"] != "passed":
