@@ -3,7 +3,8 @@
 Owner requested upload Blob fix, preview before classification/destination,
 sequential numbering in actual Drive/Dropbox files and app-owned phone copies,
 external additions discovery, unrated=5★, one Daily Pick per Salsa/Bachata source,
-and alignment fixes across screens. Changes implemented; native/publication pending.
+and alignment fixes across screens. Changes implemented and published as v0.2.8-preview.11 from app source
+`11c796165917e7b376a3591784cd2bdd0d04a4cb`. Android build run39164214724 succeeded; its initial native job passed11 checks then failed due a substring locator opening the title keyboard. Harness commit a41f549 uses exact style/star matches. Standalone acceptance run39166069113 passed all12 checks against the same APK. Recovery publication run39166585417 verified the native report hash before publishing. Public APK checksum/signature/version and byte equality were independently verified. SHA256 `b3db5adec0b0590bd87a79387c2e2b8bec21c8540294ec8837ed4f9826b5f2ba`,70,229,381bytes.
 Build10/tagv0.2.7-preview.10/run39163469949 was intentionally cancelled before publication; no release asset exists for it. Build11 fixes numbered Dropbox destination collisions by retaining unique staging paths and protecting pending paths during discovery.
 Name remains BailaCue. Source pushes and APK prereleases remain authorized, no merge,
 store submission, paid actions, TinyFish or unrelated Me+ production changes.
@@ -21,7 +22,7 @@ Local validation:130 tests /16 suites, six browser journeys, type/lint and web e
 114.5MiB transfer regression uses mocked HTTP/native handles and rejects Blob buffers;
 real provider transfers/renames are not claimed. Layout checks include long labels
 across seven screens at320/360/412px. Native harness adds import-preview playback;
-ARTEMIS build11 and exact public APK verification still required.
+ARTEMIS build11 passed all12 checks; public-byte verification passed. See VERIFICATION.md and verification/android-build11/.
 
 Historical build9 handoff follows; its source/test details are historical only.
 

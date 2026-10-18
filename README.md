@@ -19,7 +19,8 @@ with an Apple Developer account; an Android APK cannot be installed on an iPhone
 Preview publication is gated on Google ARTEMIS native checks, including actual
 resize/trim-handle gestures, real import, new-file trimming, original-byte preservation,
 saving to Photos, artist-label creation/reuse and rated Salsa/Bachata Daily Picks.
-Build11 publication requires its own successful native checks and public-byte verification.
+Build11 passed all12 ARTEMIS checks, including preview playback. The public APK
+exactly matches the accepted bytes; checksum/signature/version were independently verified.
 [Verification and screenshots](docs/VERIFICATION.md) record exact scope and remaining
 live-provider/iOS setup. The release verification records the final native and public-download evidence.
 

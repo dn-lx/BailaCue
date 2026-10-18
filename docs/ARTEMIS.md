@@ -1,4 +1,42 @@
-# Google ARTEMIS · build9 acceptance
+# Google ARTEMIS · build11 acceptance
+
+[Acceptance run39166069113](https://github.com/dn-lx/BailaCue/actions/runs/39166069113)
+passed **all12 native checks** on the exact0.2.8/build11 APK. New native import
+preview playback passes, along with all existing resize/trim-handle/import/labels/
+loop/new-file export/original-preservation/Photos/Daily Picks assertions.
+The real pinned ARTEMIS controller/helper1.2.0 ran on API35; no autonomous Gemini
+session, real account or private media was used.
+
+[Report](verification/android-build11/report.json) ·
+[Preview playback](verification/android-build11/import-preview.jpg) ·
+[Daily mix](verification/android-build11/daily-mix.jpg) ·
+[Timeline trim](verification/android-build11/timeline-trim.jpg) ·
+[Player resize](verification/android-build11/player-resized.jpg) ·
+[Photos save](verification/android-build11/photos-saved.jpg).
+
+The [first attempt](verification/android-build11/first-attempt.json) passed11 checks
+then stopped during the final rated imports. A substring selector matched the title
+ARTEMIS Bachata pick, opening the keyboard before the star control could be reached.
+Harness commit a41f549 now requires exact style/star controls. The rerun tested the
+same built APK, with no skipped application assertion or binary change.
+
+[Build39164214724](https://github.com/dn-lx/BailaCue/actions/runs/39164214724) compiled
+and signed the app; its original publication was skipped after that harness failure.
+[Recovery39166585417](https://github.com/dn-lx/BailaCue/actions/runs/39166585417)
+required the successful acceptance job/report and matching APK hash before publishing.
+Public APK SHA256 `b3db5adec0b0590bd87a79387c2e2b8bec21c8540294ec8837ed4f9826b5f2ba` equals
+the build artifact and native report. Public checksum/signature/version were verified.
+The 1–4s clip measured3.017075s; original-before/after hashes match. Resizing changed
+170px to217px. Native Daily Picks uses real local imports; cloud-source selection,
+renames and transfer behavior use separate mocked regression/browser tests.
+
+Full original screenshots, hierarchies, synthetic media and logs are retained in the
+acceptance artifact. Committed images are unchanged JPEG bytes, renamed from the
+harness's .png extension. The Daily mix capture shows cards as reached during the
+scrolling assertions. Live provider transfers/renames, physical-device hardening and
+iOS remain unverified. See [full verification](VERIFICATION.md).
+
+## Historical build9 acceptance
 
 [Build9 run39120175502](https://github.com/dn-lx/BailaCue/actions/runs/39120175502)
 passed **all11 native checks** on Android API35 using the real pinned ARTEMIS
