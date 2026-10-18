@@ -48,3 +48,5 @@ change its upload destination. A new imported video must still explicitly select
 its desired folder after preview.
 
 Dropbox uses a job-unique temporary filename during transfer. After confirmation, the app renames that stable file ID to its numbered name. A conflicting numbered name is reported, never treated as a successful upload of another file. Discovery leaves pending jobs at their saved paths until registration, so lost acknowledgements remain recoverable.
+
+Only job-unique staging names or confirmed stable file IDs may claim an unfinished upload reservation. An unrelated numeric filename always receives a fresh allocation. Before finalization, the app durably rechecks the confirmed file ID against the registry and allocates a fresh number if a legacy conflict exists. Completed Dropbox retries query the confirmed file ID even after the temporary path has been renamed; a missing or mismatched ID never starts another upload.

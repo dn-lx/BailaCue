@@ -172,12 +172,19 @@ export async function uploadFile(
       {
         method: "POST",
         headers: { ...(await headers()), "Content-Type": "application/json" },
-        body: JSON.stringify({ path: job.path, include_media_info: true }),
+        body: JSON.stringify({
+          path: job.fileId || job.path,
+          include_media_info: true,
+        }),
         signal,
       },
     );
     if (metadata.ok) {
       const file = mapDropboxVideo(await metadata.json());
+      if (job.fileId && file.fileId !== job.fileId)
+        throw new Error(
+          "Dropbox returned a different file identity. No file was overwritten.",
+        );
       if (file.size !== job.size)
         throw new Error(
           "The Dropbox destination already has a different file. No file was overwritten.",
@@ -186,6 +193,10 @@ export async function uploadFile(
       return file;
     }
     if (metadata.status !== 409) await ensure(metadata);
+    if (job.fileId)
+      throw new Error(
+        "The confirmed Dropbox video could not be found. Reconnect and retry; no duplicate was uploaded.",
+      );
     const content = async (
       endpoint: string,
       arg: unknown,

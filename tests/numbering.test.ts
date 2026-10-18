@@ -117,7 +117,7 @@ it("retains numbers, notes and explicit ratings on refresh and metadata restore"
   expect(restored.videos[0].ratingSet).toBe(true);
 });
 
-it("reconciles a completed upload reservation once without giving duplicate files the same number", () => {
+it("keeps reservations separate from unverified numeric filenames", () => {
   const reserved = reserveUploadNumber(source, "job", "Turn.mp4");
   const plan = planNumbering({ ...source, numbering: reserved.numbering }, [
     file("first", reserved.name),
@@ -129,7 +129,9 @@ it("reconciles a completed upload reservation once without giving duplicate file
       plan.numbering.files.duplicate.number,
     ]).size,
   ).toBe(2);
-  expect(plan.numbering.files["upload:job"]).toBeUndefined();
+  expect(plan.numbering.files["upload:job"].number).toBe(1);
+  expect(plan.numbering.files.first.number).not.toBe(1);
+  expect(plan.numbering.files.duplicate.number).not.toBe(1);
 });
 
 it("adopts a completed Dropbox staging file's reserved number while retaining its pending reservation", () => {
@@ -173,7 +175,19 @@ it("uses the next allocation for an outside numeric filename rather than importi
   expect(next.numbering.next).toBe(3);
 });
 
-it("recovers legacy upload staging/final names once and prevents a duplicate from claiming the same reservation", () => {
+it("does not let an outside numeric file steal an unfinished upload's reserved number", () => {
+  const reserved = reserveUploadNumber(source, "job", "Turn.mp4");
+  const plan = planNumbering({ ...source, numbering: reserved.numbering }, [
+    file("outside", "0001.mp4"),
+    file("own-upload", "job-0001.mp4"),
+  ]);
+  expect(plan.numbering.files.outside.number).toBe(2);
+  expect(plan.numbering.files["own-upload"].number).toBe(1);
+  expect(plan.numbering.files["upload:job"].number).toBe(1);
+  expect(plan.numbering.next).toBe(3);
+});
+
+it("recovers legacy staging names without letting final-name lookalikes claim the reservation", () => {
   const reserved = reserveUploadNumber(source, "job", "Turn.mp4");
   const old = { ...source, numbering: reserved.numbering };
   expect(stagedUploadNames(old).has("job-0001 — Turn.mp4")).toBe(true);
@@ -191,7 +205,47 @@ it("recovers legacy upload staging/final names once and prevents a duplicate fro
       finished.numbering.files.b.number,
     ]).size,
   ).toBe(2);
-  expect(finished.numbering.next).toBe(3);
+  expect(finished.numbering.next).toBe(4);
+  expect(finished.numbering.files["upload:job"].number).toBe(1);
+});
+
+it("repairs a legacy reserved-number conflict once, then keeps the confirmed allocation stable", () => {
+  const old = {
+    ...source,
+    numbering: {
+      next: 3,
+      files: {
+        outside: { number: 1, originalName: "0001.mp4" },
+        own: { number: 2, originalName: "job-0001.mp4" },
+        "upload:job": { number: 1, originalName: "Turn.mp4" },
+      },
+    },
+  };
+  const confirmed = reserveUploadNumber(old, "job", "0001 — Turn.mp4", "own");
+  expect(confirmed.name).toBe("0003.mp4");
+  expect(confirmed.number).toBe(3);
+  const retry = reserveUploadNumber(
+    { ...source, numbering: confirmed.numbering },
+    "job",
+    "0001 — Turn.mp4",
+    "own",
+  );
+  expect(retry).toEqual(confirmed);
+  expect(retry.numbering.files.outside.number).toBe(1);
+  expect(retry.numbering.next).toBe(4);
+  const registered = {
+    ...source,
+    numbering: {
+      next: 4,
+      files: {
+        outside: confirmed.numbering.files.outside,
+        own: { number: 3, originalName: "0003.mp4" },
+      },
+    },
+  };
+  expect(
+    reserveUploadNumber(registered, "job", "0001 — Turn.mp4", "own"),
+  ).toMatchObject({ number: 3, name: "0003.mp4", numbering: { next: 4 } });
 });
 
 it("normalizes stored titles offline and keeps numeric source titles on subsequent edits", async () => {

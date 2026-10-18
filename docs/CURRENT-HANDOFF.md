@@ -1,4 +1,4 @@
-# Current handoff · BailaCue 0.2.9 (build13)
+# Current handoff · BailaCue 0.2.9 (build14)
 
 Owner corrected the filename requirement: every source video must have a number-only
 name, with no original title. The library displays `0001`; source files and owned
@@ -7,10 +7,13 @@ its own incremental sequence. Existing numbers are retained and descriptive suff
 removed on refresh. Stored titles normalize offline; source titles are read-only.
 Legacy saved upload sessions retain their paths and numbers; final confirmed files
 are renamed by stable ID. Both legacy and numeric staging names remain recognizable.
-No production database changes. Source pushes and Android prereleases remain authorized.
+Unverified numeric filenames cannot claim upload reservations. Finalization rechecks
+the confirmed ID and repairs legacy conflicts durably; saved Dropbox IDs allow retry
+after renaming without reuploading. Intended numeric filenames are used for phone
+downloads even if the provider rename needs retry. No production database changes. Source pushes and Android prereleases remain authorized.
 
-Local135 tests/16 suites, type/lint and six browser journeys passed. Native/public results pending. Build12/run39170414260 was cancelled before publication to fix outside numeric filenames skipping the sequence.
-See SOURCE-NUMBERING.md, VERIFICATION.md and releases/v0.2.9-preview.13.md.
+Local140 tests/16 suites, type/lint and six browser journeys passed. Native/public results pending. Build13/run39171131452 was also cancelled before publication for reservation collision and post-rename retry corrections. Build12/run39170414260 was cancelled before publication to fix outside numeric filenames skipping the sequence.
+See SOURCE-NUMBERING.md, VERIFICATION.md and releases/v0.2.9-preview.14.md.
 
 Historical build11 handoff follows.
 

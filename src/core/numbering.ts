@@ -59,18 +59,6 @@ export function planNumbering(source: CloudFolder, files: RemoteVideo[]) {
       .filter(([key]) => !key.startsWith("upload:"))
       .map(([, entry]) => entry.number),
   );
-  const reservations = new Map(
-    Object.entries(state.files)
-      .filter(
-        ([key, entry]) =>
-          key.startsWith("upload:") && !assignedNumbers.has(entry.number),
-      )
-      .flatMap(([key, entry]) =>
-        reservationNames(entry).map(
-          (name) => [`${entry.number}:${name}`, key] as const,
-        ),
-      ),
-  );
   const staged = stagedUploadNames(source);
   const used = new Set(Object.values(state.files).map((v) => v.number));
   for (const entry of Object.values(state.files))
@@ -91,23 +79,17 @@ export function planNumbering(source: CloudFolder, files: RemoteVideo[]) {
     }
     const match = prefix.exec(file.name);
     const number = Number(match?.[1]);
-    const reservation = reservations.get(`${number}:${file.name}`);
     if (
       match &&
       Number.isSafeInteger(number) &&
       number > 0 &&
-      ((!source.numbering && !used.has(number)) ||
-        (reservation && !assignedNumbers.has(number)))
+      !source.numbering &&
+      !used.has(number)
     ) {
       state.files[file.fileId] = {
         number,
         originalName: file.name.replace(prefix, "") || "video.mp4",
       };
-      if (reservation) {
-        delete state.files[reservation];
-        for (const [name, key] of reservations)
-          if (key === reservation) reservations.delete(name);
-      }
       assignedNumbers.add(number);
       used.add(number);
       state.next = Math.max(state.next, number + 1);
@@ -153,10 +135,25 @@ export function reserveUploadNumber(
   source: CloudFolder,
   jobId: string,
   name: string,
+  confirmedFileId?: string,
 ) {
   const plan = planNumbering(source, []);
   const key = `upload:${jobId}`;
-  const entry = plan.numbering.files[key] ?? {
+  const existing =
+    plan.numbering.files[key] ??
+    (confirmedFileId ? plan.numbering.files[confirmedFileId] : undefined);
+  // Only a confirmed stable ID may reuse a reservation already associated with
+  // a discovered file. An outside file or another job must keep its own number.
+  const conflict =
+    existing &&
+    confirmedFileId &&
+    Object.entries(plan.numbering.files).some(
+      ([id, entry]) =>
+        id !== key &&
+        id !== confirmedFileId &&
+        entry.number === existing.number,
+    );
+  const entry = (conflict ? undefined : existing) ?? {
     number: plan.numbering.next++,
     originalName: name.replace(prefix, "") || "video.mp4",
   };

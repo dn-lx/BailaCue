@@ -1,4 +1,4 @@
-import { numberedName, reserveUploadNumber } from "../../core/numbering";
+import { reserveUploadNumber } from "../../core/numbering";
 import { provider } from "../../services/cloud/provider";
 import { scanSource } from "../../services/cloud/scan";
 import { prepareNamedCopy } from "../../services/phoneCopies";
@@ -139,17 +139,45 @@ export default function Transfer() {
       await vault.set(`upload-for-${id}`, current.id);
       await vault.set(`upload-${current.id}`, JSON.stringify(current));
       setJob(current);
+      let completedJob = current;
       const file = await uploadVideo(
         current,
         video.uri,
         source,
         connection,
-        setJob,
+        (saved) => {
+          completedJob = saved;
+          setJob(saved);
+        },
         abort.current.signal,
       );
       // Old saved jobs keep their original session/path across retry. Number
       // their confirmed file by stable ID after completion, without reuploading.
-      const finalName = numberedName(current.sequenceNumber!, current.name);
+      let finalName = "";
+      await commit((l) => {
+        const latest = uploadDestination(l, sourceId).source;
+        assertUploadDestination(current, latest, connection);
+        const reserved = reserveUploadNumber(
+          latest,
+          current.id,
+          current.name,
+          file.fileId,
+        );
+        current.sequenceNumber = reserved.number;
+        finalName = reserved.name;
+        return {
+          ...l,
+          sources: l.sources.map((s) =>
+            s.id === sourceId ? { ...s, numbering: reserved.numbering } : s,
+          ),
+        };
+      });
+      completedJob = {
+        ...completedJob,
+        sequenceNumber: current.sequenceNumber,
+      };
+      await vault.set(`upload-${current.id}`, JSON.stringify(completedJob));
+      setJob(completedJob);
       if (file.name !== finalName) {
         try {
           await provider(connection).renameVideo(

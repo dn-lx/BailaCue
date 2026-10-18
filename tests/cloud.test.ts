@@ -292,6 +292,72 @@ describe("Dropbox adapter (mock HTTP)", () => {
   });
 });
 describe("upload initiation and safe recovery (mock HTTP)", () => {
+  it("recovers a renamed Dropbox upload by saved file ID without resending bytes", async () => {
+    const request = vi.fn().mockResolvedValue(
+      response({
+        ".tag": "file",
+        id: "id:ours",
+        name: "0001.mp4",
+        size: 10,
+      }),
+    );
+    const read = vi.fn();
+    const result = await uploadFile(
+      {
+        ...pending,
+        provider: "dropbox",
+        fileId: "id:ours",
+        path: "/Salsa/job-0001.mp4",
+        status: "ready",
+        offset: 10,
+      },
+      "/Salsa",
+      {
+        request,
+        read,
+        token: async () => "token",
+        persist: vi.fn(),
+      },
+    );
+    expect(JSON.parse(request.mock.calls[0][1].body).path).toBe("id:ours");
+    expect(result.fileId).toBe("id:ours");
+    expect(request).toHaveBeenCalledOnce();
+    expect(read).not.toHaveBeenCalled();
+  });
+  it.each(["missing", "different"])(
+    "never reuploads a confirmed Dropbox job when its ID is %s",
+    async (kind) => {
+      const request = vi
+        .fn()
+        .mockResolvedValue(
+          kind === "missing"
+            ? response({}, 409)
+            : response({
+                ".tag": "file",
+                id: "id:other",
+                name: "0001.mp4",
+                size: 10,
+              }),
+        );
+      const read = vi.fn();
+      await expect(
+        uploadFile(
+          {
+            ...pending,
+            provider: "dropbox",
+            fileId: "id:ours",
+            path: "/Salsa/job-0001.mp4",
+          },
+          "/Salsa",
+          { request, read, token: async () => "token", persist: vi.fn() },
+        ),
+      ).rejects.toThrow(
+        kind === "missing" ? /could not be found/ : /different file identity/,
+      );
+      expect(request).toHaveBeenCalledOnce();
+      expect(read).not.toHaveBeenCalled();
+    },
+  );
   it("refuses a resumed folder change before requesting a token, file bytes or HTTP", async () => {
     const request = vi.fn(),
       token = vi.fn(),

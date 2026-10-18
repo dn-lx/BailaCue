@@ -197,7 +197,11 @@ it.each([true, false])(
       labels: ["Artist edited during upload"],
       importance: 4,
       uri: "",
-      remote: { sourceIds: [bachata.id], fileId: "uploaded" },
+      remote: {
+        sourceIds: [bachata.id],
+        fileId: "uploaded",
+        fileName: "0007.mp4",
+      },
       storagePreference: keepCopy ? "offline" : "online",
     });
     expect(saved.offlineUri).toBe(keepCopy ? video.uri : undefined);
