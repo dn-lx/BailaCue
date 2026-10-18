@@ -28,11 +28,12 @@ journeys and 33 automated tests pass; Expo Doctor 20/20; production web bundle.
 
 ## Current build work
 
-Android SDK/NDK provisioned. First Gradle attempt failed due to the preinstalled
-JRE missing a Java compiler; retry with a full JDK 21. Record final result in
-VERIFICATION.md and package any successful APK using `scripts/package-android.mjs`.
-Linux has no physical device/KVM/Xcode, so native runtime/iOS signing remain
-unverified even if compilation succeeds.
+Android SDK 37/build tools 37/NDK 27.1 and full JDK 21 provisioned. Release-mode
+ARM64 preview built successfully and packaged at
+`artifacts/BailaCue-v0.1.0-build1-preview.apk` with SHA-256. APK signature v2,
+package/version/build number and bundled Hermes/native libraries verified.
+Full evidence and hash are in VERIFICATION.md. Linux has no physical device/KVM
+or Xcode: no native runtime/export device tests or iOS build/signing were run.
 
 ## Next connected slice
 

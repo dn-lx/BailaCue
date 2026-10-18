@@ -212,8 +212,8 @@ export default function Upload() {
               <View style={{ flex: 1 }}>
                 <Txt weight="bold">Destination: This device</Txt>
                 <Txt size={13} color={t.muted}>
-                  A private local copy. Connected storage uploads are coming in
-                  the next milestone.
+                  A private local copy. Cloud uploads aren’t available in this
+                  version.
                 </Txt>
               </View>
             </Row>
@@ -244,8 +244,8 @@ export default function Upload() {
             One library. Different places.
           </Txt>
           <Txt color={t.muted}>
-            Your connected folders will appear here as upload destinations once
-            account and storage setup is complete.
+            Cloud folder connections will be available in a future update. For
+            now, keep your favourite clips privately on your device.
           </Txt>
           <Button variant="ghost" onPress={() => router.push("/settings")}>
             View storage setup

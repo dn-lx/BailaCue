@@ -130,8 +130,8 @@ export default function Settings() {
           Connected when you’re ready
         </Txt>
         <Txt color={t.muted}>
-          This build works with videos saved on your device. Account sync and
-          connected folders need development setup before they can be used.
+          This version saves your videos on this device. Account sync and
+          connected folders aren’t available yet.
         </Txt>
         <Row>
           <Icon name="folder" />

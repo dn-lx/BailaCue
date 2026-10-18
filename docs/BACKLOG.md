@@ -17,7 +17,7 @@ necessary integration/device validation. See VERIFICATION.md for exact evidence.
 - [x] Me+ identity/schema read-only inspection and integration design.
 - [x] Additive owner-isolated schema; real local PostgreSQL negative access tests.
 - [x] Full scope backlog, CI definitions, build instructions and versioning.
-- [ ] Android installable APK generated and checked (see current verification).
+- [x] Android ARM64 preview APK built; signature, version and packaged assets verified.
 - [ ] Android device validation; iOS native compile, signing and device validation.
 
 ## M2 · Connected working core
