@@ -19,6 +19,10 @@ from artemis.clients.screen_client_factory import hierarchy_backend_summary
 OUT = Path(os.environ.get("BAILACUE_ARTEMIS_OUT", "/workspace/BailaCue/artifacts/artemis"))
 OUT.mkdir(parents=True, exist_ok=True)
 report = {"framework": "google/artemis", "mode": "controller-driven assertions; no autonomous model invocation", "checks": [], "status": "running"}
+apk_files = list(Path("artifacts").glob("*.apk"))
+if len(apk_files) == 1:
+    report["apk_file"] = apk_files[0].name
+    report["apk_sha256"] = hashlib.sha256(apk_files[0].read_bytes()).hexdigest()
 
 async def main():
     controller = _get_controller(device_serial=os.environ.get("ARTEMIS_DEVICE_ID", "emulator-5554"))
@@ -129,9 +133,11 @@ async def main():
         await locate("Add to my library",scrolls=10)
         for _ in range(20):
             elements = await observe("imported-video")
-            if any("ARTEMIS practice" in label(e) for e in elements): break
+            if any("Video position" in label(e) for e in elements): break
             await asyncio.sleep(1)
         else: raise AssertionError("Imported native video did not open")
+        # The title follows the player and local-storage controls below the fold.
+        await locate("ARTEMIS practice", scrolls=4)
         report["checks"].append({"check":"Native document import and video detail", "result":"passed"})
         def adb(*args):
             return subprocess.run(["adb","-s",os.environ.get("ARTEMIS_DEVICE_ID","emulator-5554"),*args],check=True,capture_output=True,text=True,timeout=30).stdout.strip()

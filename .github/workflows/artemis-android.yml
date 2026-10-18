@@ -5,6 +5,9 @@ on:
       tag:
         description: Published Android preview tag
         default: v0.2.3-preview.5
+      build_run:
+        description: Optional build run artifact to test before publication
+        required: false
 permissions:
   contents: read
   actions: read
@@ -30,9 +33,14 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           PREVIEW_TAG: ${{ inputs.tag || 'v0.2.3-preview.5' }}
+          BUILD_RUN: ${{ inputs.build_run }}
         run: |
           mkdir -p artifacts
-          gh release download "$PREVIEW_TAG" --repo "$GITHUB_REPOSITORY" --pattern '*.apk' --pattern '*.sha256' --dir artifacts
+          if [ -n "$BUILD_RUN" ]; then
+            gh run download "$BUILD_RUN" --repo "$GITHUB_REPOSITORY" --name BailaCue-published-preview --dir artifacts
+          else
+            gh release download "$PREVIEW_TAG" --repo "$GITHUB_REPOSITORY" --pattern '*.apk' --pattern '*.sha256' --dir artifacts
+          fi
           (cd artifacts && sha256sum --check *.sha256)
           sudo apt-get update && sudo apt-get install -y ffmpeg
           ffmpeg -y -f lavfi -i testsrc2=size=320x240:rate=24 -f lavfi -i sine=frequency=440 -t 6 -c:v libx264 -pix_fmt yuv420p -c:a aac /tmp/BailaCue-ARTEMIS.mp4

@@ -8,6 +8,9 @@ on:
       build_run:
         description: Completed preview build run with successful ARTEMIS acceptance
         required: true
+      acceptance_run:
+        description: Optional separate successful ARTEMIS run testing these exact APK bytes
+        required: false
 permissions:
   contents: write
   actions: read
@@ -21,12 +24,18 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           BUILD_RUN: ${{ inputs.build_run }}
+          ACCEPTANCE_RUN: ${{ inputs.acceptance_run }}
         run: |
           gh run watch "$BUILD_RUN" --repo "$GITHUB_REPOSITORY" --interval 15
-          native_passes=$(gh run view "$BUILD_RUN" --repo "$GITHUB_REPOSITORY" --json jobs --jq '[.jobs[] | select(.name == "ARTEMIS Android device tests" and .conclusion == "success")] | length')
-          test "$native_passes" -ge 1
           gh run download "$BUILD_RUN" --repo "$GITHUB_REPOSITORY" --name BailaCue-published-preview --dir artifacts
           (cd artifacts && sha256sum --check *.sha256)
+          test_run="${ACCEPTANCE_RUN:-$BUILD_RUN}"
+          native_passes=$(gh run view "$test_run" --repo "$GITHUB_REPOSITORY" --json jobs --jq '[.jobs[] | select((.name == "ARTEMIS Android device tests" or .name == "device") and .conclusion == "success")] | length')
+          test "$native_passes" -ge 1
+          if [ -n "$ACCEPTANCE_RUN" ]; then
+            gh run download "$ACCEPTANCE_RUN" --repo "$GITHUB_REPOSITORY" --name BailaCue-ARTEMIS-acceptance-evidence --dir acceptance
+            python3 -c 'import glob,hashlib,json; r=json.load(open("acceptance/report.json")); p=glob.glob("artifacts/*.apk"); assert len(p)==1 and r["status"]=="passed" and r["apk_sha256"]==hashlib.sha256(open(p[0],"rb").read()).hexdigest(), "Acceptance must pass against these exact APK bytes"'
+          fi
       - name: Attach APK to the prepared draft and publish
         env:
           GH_TOKEN: ${{ github.token }}
