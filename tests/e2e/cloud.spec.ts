@@ -262,27 +262,17 @@ test("user connects Salsa and Bachata folders → streams → edits → refresh 
   // Credentials are intentionally memory-only on web; SPA navigation retains this test connection.
   // Reloading the browser requires reconnecting. Return through in-app navigation below.
   await expect(
-    page.getByRole("button", { name: "Play 0001 — Cloud turn", exact: true }),
-  ).toBeVisible();
-  await expect(
-    page.getByRole("button", {
-      name: "Play 0001 — Bachata basics",
-      exact: true,
-    }),
-  ).toBeVisible();
+    page.getByRole("button", { name: "Play 0001", exact: true }),
+  ).toHaveCount(2);
   await page
     .getByRole("button", { name: "Bachata class", exact: true })
     .click();
   await expect(
-    page.getByRole("button", {
-      name: "Play 0001 — Bachata basics",
-      exact: true,
-    }),
-  ).toBeVisible();
-  await expect(
-    page.getByRole("button", { name: "Play 0001 — Cloud turn", exact: true }),
-  ).toHaveCount(0);
-  await page.getByRole("button", { name: "All storage", exact: true }).click();
+    page.getByRole("button", { name: "Play 0001", exact: true }),
+  ).toHaveCount(1);
+  await page
+    .getByRole("button", { name: "Tuesday class", exact: true })
+    .click();
   // Reconnect after this explicit full navigation; real phone credentials use SecureStore.
   await page
     .getByRole("button", { name: "Connect storage", exact: true })
@@ -297,9 +287,7 @@ test("user connects Salsa and Bachata folders → streams → edits → refresh 
     page.getByRole("button", { name: "Browse my folders", exact: true }),
   ).toBeVisible();
   await page.getByRole("button", { name: "Done", exact: true }).click();
-  await page
-    .getByRole("button", { name: "Play 0001 — Cloud turn", exact: true })
-    .click();
+  await page.getByRole("button", { name: "Play 0001", exact: true }).click();
   await expect(page.getByText("ONLINE VIDEO", { exact: true })).toBeVisible();
   await expect
     .poll(() =>
@@ -313,9 +301,24 @@ test("user connects Salsa and Bachata folders → streams → edits → refresh 
     path: "artifacts/screenshots/cloud-video.png",
     fullPage: true,
   });
+  await expect(
+    page.getByRole("textbox", { name: "Title", exact: true }),
+  ).toHaveCount(0);
+  await expect(
+    page.getByText("Video number: 0001", { exact: true }),
+  ).toBeVisible();
   await page
-    .getByRole("textbox", { name: "Title", exact: true })
-    .fill("My cloud turn");
+    .getByRole("button", { name: "Choose labels", exact: true })
+    .click();
+  await page
+    .getByRole("textbox", { name: "Search labels", exact: true })
+    .fill("Artist A");
+  await page
+    .getByRole("button", { name: "Create “Artist A”", exact: true })
+    .click();
+  await page
+    .getByRole("button", { name: "Done choosing labels", exact: true })
+    .click();
   await page.getByRole("button", { name: "Save details", exact: true }).click();
   await page
     .getByRole("button", { name: "Library", exact: true })
@@ -330,48 +333,31 @@ test("user connects Salsa and Bachata folders → streams → edits → refresh 
     .first()
     .click();
   await page.getByRole("button", { name: "Done", exact: true }).click();
+  await page.getByRole("button", { name: "All storage", exact: true }).click();
   await expect(
-    page.getByRole("button", {
-      name: "Play 0001 — My cloud turn",
-      exact: true,
-    }),
+    page.getByRole("button", { name: "Play 0001", exact: true }),
+  ).toHaveCount(2);
+  await expect(
+    page.getByRole("button", { name: "Play 0002", exact: true }),
   ).toBeVisible();
   await expect(
-    page.getByRole("button", {
-      name: "Play 0001 — Bachata basics",
-      exact: true,
-    }),
-  ).toBeVisible();
-  await expect(
-    page.getByRole("button", {
-      name: "Play 0002 — Added outside",
-      exact: true,
-    }),
+    page.getByText("Artist A", { exact: false }).first(),
   ).toBeVisible();
   expect(
     renames.some(
-      (r) =>
-        r.from_path === "id:external" &&
-        r.to_path === "/salsa/0002 — Added outside.mp4",
+      (r) => r.from_path === "id:external" && r.to_path === "/salsa/0002.mp4",
     ),
   ).toBe(true);
-  expect(
-    renames.some((r) => r.to_path === "/bachata/0001 — Bachata basics.mp4"),
-  ).toBe(true);
+  expect(renames.some((r) => r.to_path === "/bachata/0001.mp4")).toBe(true);
   await page.getByRole("tab", { name: "Today", exact: true }).click();
   await page
     .getByRole("button", { name: "Update today’s picks", exact: true })
     .click();
   await expect(
-    page.getByRole("button", {
-      name: "Play 0001 — Bachata basics",
-      exact: true,
-    }),
-  ).toBeVisible();
+    page.getByRole("button", { name: /^Play 000[12]$/ }),
+  ).toHaveCount(2);
   await expect(
-    page.getByRole("button", {
-      name: /Play 000[12] — (My cloud turn|Added outside)/,
-    }),
+    page.getByText("Bachata class · Daily Pick", { exact: false }),
   ).toBeVisible();
   await expect(page.getByText("Unrated · treated as 5★").first()).toBeVisible();
   await page.screenshot({

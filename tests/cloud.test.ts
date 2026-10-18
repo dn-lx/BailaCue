@@ -146,7 +146,7 @@ describe("user-selected sources", () => {
       ]);
     },
   );
-  it("deduplicates a file across folders and preserves all user edits after rename/reconnect", () => {
+  it("deduplicates a file across folders and preserves labels and ratings with numeric titles after rename/reconnect", () => {
     let library = {
       ...emptyLibrary(),
       connections: [connection],
@@ -165,7 +165,7 @@ describe("user-selected sources", () => {
     ]);
     expect(library.videos).toHaveLength(1);
     expect(library.videos[0]).toMatchObject({
-      title: "0001 — My move",
+      title: "0001",
       labels: ["Personal"],
       importance: 5,
       remote: { sourceIds: ["s", "s2"] },

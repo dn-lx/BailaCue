@@ -1,3 +1,21 @@
+# Current handoff · BailaCue 0.2.9 (build12)
+
+Owner corrected the filename requirement: every source video must have a number-only
+name, with no original title. The library displays `0001`; source files and owned
+phone copies use `0001.mp4` (retaining the actual media extension). Each source has
+its own incremental sequence. Existing numbers are retained and descriptive suffixes
+removed on refresh. Stored titles normalize offline; source titles are read-only.
+Legacy saved upload sessions retain their paths and numbers; final confirmed files
+are renamed by stable ID. Both legacy and numeric staging names remain recognizable.
+No production database changes. Source pushes and Android prereleases remain authorized.
+
+Local134 tests/16 suites, type/lint and six browser journeys passed. Native/public results pending.
+See SOURCE-NUMBERING.md, VERIFICATION.md and releases/v0.2.9-preview.12.md.
+
+Historical build11 handoff follows.
+
+---
+
 # Current handoff · BailaCue 0.2.8 (build11)
 
 Owner requested upload Blob fix, preview before classification/destination,

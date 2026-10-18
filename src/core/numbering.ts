@@ -1,4 +1,4 @@
-import type { CloudFolder } from "./types";
+import type { CloudFolder, Library } from "./types";
 import type { RemoteVideo } from "../services/providers/types";
 export type NumberEntry = { number: number; originalName: string };
 export type SourceNumbering = {
@@ -19,21 +19,34 @@ export function safeVideoName(name: string) {
   }
   return `${result || "video"}${extension}`;
 }
+export function numberedTitle(number: number) {
+  return String(number).padStart(4, "0");
+}
 export function numberedName(number: number, original: string) {
+  const extension = /\.[a-z0-9]{1,8}$/i.exec(original)?.[0] ?? ".mp4";
+  return `${numberedTitle(number)}${extension}`;
+}
+// Retain recognition of pre-build12 upload sessions without changing their path.
+function legacyNumberedName(number: number, original: string) {
   return safeVideoName(
-    `${String(number).padStart(4, "0")} — ${original.replace(prefix, "") || "video.mp4"}`,
+    `${numberedTitle(number)} — ${original.replace(prefix, "") || "video.mp4"}`,
   );
+}
+function reservationNames(entry: NumberEntry) {
+  return [
+    numberedName(entry.number, entry.originalName),
+    legacyNumberedName(entry.number, entry.originalName),
+  ];
 }
 export function stagedUploadNames(source: CloudFolder) {
   return new Map(
     Object.entries(source.numbering?.files ?? {})
       .filter(([key]) => key.startsWith("upload:"))
-      .map(([key, entry]) => [
-        safeVideoName(
-          `${key.slice(7)}-${numberedName(entry.number, entry.originalName)}`,
+      .flatMap(([key, entry]) =>
+        reservationNames(entry).map(
+          (name) => [safeVideoName(`${key.slice(7)}-${name}`), entry] as const,
         ),
-        entry,
-      ]),
+      ),
   );
 }
 export function planNumbering(source: CloudFolder, files: RemoteVideo[]) {
@@ -52,10 +65,11 @@ export function planNumbering(source: CloudFolder, files: RemoteVideo[]) {
         ([key, entry]) =>
           key.startsWith("upload:") && !assignedNumbers.has(entry.number),
       )
-      .map(([key, entry]) => [
-        `${entry.number}:${numberedName(entry.number, entry.originalName)}`,
-        key,
-      ]),
+      .flatMap(([key, entry]) =>
+        reservationNames(entry).map(
+          (name) => [`${entry.number}:${name}`, key] as const,
+        ),
+      ),
   );
   const staged = stagedUploadNames(source);
   const used = new Set(Object.values(state.files).map((v) => v.number));
@@ -82,7 +96,7 @@ export function planNumbering(source: CloudFolder, files: RemoteVideo[]) {
       match &&
       Number.isSafeInteger(number) &&
       number > 0 &&
-      (!used.has(number) || reservation)
+      (!used.has(number) || (reservation && !assignedNumbers.has(number)))
     ) {
       state.files[file.fileId] = {
         number,
@@ -90,8 +104,10 @@ export function planNumbering(source: CloudFolder, files: RemoteVideo[]) {
       };
       if (reservation) {
         delete state.files[reservation];
-        reservations.delete(`${number}:${file.name}`);
+        for (const [name, key] of reservations)
+          if (key === reservation) reservations.delete(name);
       }
+      assignedNumbers.add(number);
       used.add(number);
       state.next = Math.max(state.next, number + 1);
     }
@@ -108,6 +124,29 @@ export function planNumbering(source: CloudFolder, files: RemoteVideo[]) {
     names.set(file.fileId, numberedName(entry.number, entry.originalName));
   }
   return { numbering: state, names };
+}
+// Normalize saved/restored titles even offline, using already allocated numbers.
+// No new allocation or file mutation occurs until a complete source scan.
+export function normalizeSourceTitles(library: Library): Library {
+  return {
+    ...library,
+    videos: library.videos.map((video) => {
+      if (!video.remote) return video;
+      const remote = video.remote;
+      const entry = library.sources
+        .filter(
+          (s) =>
+            s.connectionId === remote.connectionId &&
+            remote.sourceIds.includes(s.id),
+        )
+        .map((s) => s.numbering?.files[remote.fileId])
+        .find(Boolean);
+      const number = entry?.number ?? Number(prefix.exec(video.title)?.[1]);
+      return Number.isSafeInteger(number) && number > 0
+        ? { ...video, title: numberedTitle(number) }
+        : video;
+    }),
+  };
 }
 export function reserveUploadNumber(
   source: CloudFolder,

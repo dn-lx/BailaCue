@@ -422,10 +422,10 @@ export default function Storage() {
           />
           <Txt size={12} color={t.muted}>
             New videos start unrated (counting as 5★) with these labels. Each
-            source gets stable 0001-and-up filenames, preserving original
-            titles. Your own edits are preserved when a folder refreshes. Browse
-            shows top-level Dropbox folders; enter a path to choose a nested
-            folder.
+            source gets number-only titles and filenames: 0001.mp4, 0002.mp4,
+            and up. Existing videos are renamed too. Labels, ratings and notes
+            stay with each video when a folder refreshes. Browse shows top-level
+            Dropbox folders; enter a path to choose a nested folder.
           </Txt>
           <Button
             onPress={() => run("source", saveSource)}

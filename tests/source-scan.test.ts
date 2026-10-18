@@ -15,6 +15,7 @@ vi.mock("../src/services/phoneCopies", () => ({
 }));
 vi.mock("../src/services/media", () => ({ deleteMedia: remote.remove }));
 import { scanSource } from "../src/services/cloud/scan";
+import { reconcileSource } from "../src/core/sources";
 function fixture() {
   let library = emptyLibrary();
   library.connections = [
@@ -74,21 +75,21 @@ it("saves a numbering reservation before renaming the exact source file and disc
   await scanSource(store, "s");
   expect(remote.renameVideo).toHaveBeenCalledWith(
     file.fileId,
-    "0001 — Turn.mp4",
+    "0001.mp4",
     "folder",
   );
-  expect(store.getLibrary().videos[0].title).toBe("0001 — Turn");
+  expect(store.getLibrary().videos[0].title).toBe("0001");
   remote.renameVideo.mockResolvedValue(undefined);
   remote.listVideos.mockResolvedValue({
     videos: [
-      { ...file, name: "0001 — Turn.mp4" },
+      { ...file, name: "0001.mp4" },
       { ...file, fileId: "outside", name: "Outside.mp4" },
     ],
   });
   await scanSource(store, "s");
   expect(remote.renameVideo).toHaveBeenLastCalledWith(
     "outside",
-    "0002 — Outside.mp4",
+    "0002.mp4",
     "folder",
   );
   expect(store.getLibrary().videos).toHaveLength(2);
@@ -111,10 +112,10 @@ it("records remote rename failures for retry and commits phone references before
     "could not be numbered",
   );
   store.getLibrary().videos[0].offlineUri = "file:///owned/old.mp4";
-  remote.prepare.mockResolvedValue("file:///owned/0001 — Turn.mp4");
+  remote.prepare.mockResolvedValue("file:///owned/0001.mp4");
   remote.remove.mockImplementation(async () => {
     expect(store.getLibrary().videos[0].offlineUri).toBe(
-      "file:///owned/0001 — Turn.mp4",
+      "file:///owned/0001.mp4",
     );
   });
   remote.renameVideo.mockResolvedValue(undefined);
@@ -140,4 +141,31 @@ it("leaves completed legacy jobs at their saved path until resume registers the 
   );
   await scanSource(store, "s");
   expect(remote.renameVideo).not.toHaveBeenCalled();
+});
+
+it("renames every existing descriptive source file and cached phone copy to its allocated number only", async () => {
+  const store = fixture();
+  await store.commit((l) => reconcileSource(l, l.sources[0], [file]));
+  store.getLibrary().videos[0].title = "0001 — Old title";
+  store.getLibrary().videos[0].offlineUri = "file:///owned/0001 — Turn.mp4";
+  remote.listVideos.mockResolvedValue({
+    videos: [{ ...file, name: "0001 — Turn.mp4" }],
+  });
+  remote.prepare.mockResolvedValue("file:///owned/0001.mp4");
+  await scanSource(store, "s");
+  expect(remote.renameVideo).toHaveBeenCalledWith(
+    file.fileId,
+    "0001.mp4",
+    "folder",
+  );
+  expect(remote.prepare).toHaveBeenCalledWith(
+    "file:///owned/0001 — Turn.mp4",
+    "0001.mp4",
+    store.getLibrary().videos[0].id,
+  );
+  expect(store.getLibrary().videos[0]).toMatchObject({
+    title: "0001",
+    offlineUri: "file:///owned/0001.mp4",
+  });
+  expect(store.getLibrary().sources[0].numbering?.next).toBe(2);
 });

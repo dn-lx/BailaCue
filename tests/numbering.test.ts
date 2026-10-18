@@ -1,5 +1,11 @@
 import { expect, it } from "vitest";
-import { planNumbering, reserveUploadNumber } from "../src/core/numbering";
+import {
+  numberedName,
+  planNumbering,
+  reserveUploadNumber,
+  stagedUploadNames,
+} from "../src/core/numbering";
+import { createLibraryWriter } from "../src/services/libraryWriter";
 import { emptyLibrary, type CloudFolder } from "../src/core/types";
 import { reconcileSource } from "../src/core/sources";
 import { metadataSnapshot, restoreSnapshot } from "../src/core/sync";
@@ -24,19 +30,19 @@ const file = (fileId: string, name = fileId + ".mp4") => ({
 });
 it("assigns deterministic per-source numbers and never reuses removed identities", () => {
   let plan = planNumbering(source, [file("z"), file("a")]);
-  expect(plan.names.get("a")).toBe("0001 — a.mp4");
-  expect(plan.names.get("z")).toBe("0002 — z.mp4");
+  expect(plan.names.get("a")).toBe("0001.mp4");
+  expect(plan.names.get("z")).toBe("0002.mp4");
   plan = planNumbering({ ...source, numbering: plan.numbering }, [
     file("z"),
     file("outside"),
   ]);
-  expect(plan.names.get("z")).toBe("0002 — z.mp4");
-  expect(plan.names.get("outside")).toBe("0003 — outside.mp4");
+  expect(plan.names.get("z")).toBe("0002.mp4");
+  expect(plan.names.get("outside")).toBe("0003.mp4");
   expect(
     planNumbering({ ...source, id: "b", numbering: undefined }, [
       file("b"),
     ]).names.get("b"),
-  ).toBe("0001 — b.mp4");
+  ).toBe("0001.mp4");
 });
 it("adopts existing numeric prefixes and repairs duplicates without renumbering existing files", () => {
   const plan = planNumbering(source, [
@@ -68,7 +74,7 @@ it("pins a reserved upload number across retry and advances the next external di
   const next = planNumbering({ ...source, numbering: a.numbering }, [
     file("external"),
   ]);
-  expect(next.names.get("external")).toBe("0002 — external.mp4");
+  expect(next.names.get("external")).toBe("0002.mp4");
 });
 it("retains numbers, notes and explicit ratings on refresh and metadata restore", () => {
   const l = emptyLibrary();
@@ -86,7 +92,7 @@ it("retains numbers, notes and explicit ratings on refresh and metadata restore"
   ];
   let next = reconcileSource(l, source, [file("a")]);
   expect(next.videos[0]).toMatchObject({
-    title: "0001 — a",
+    title: "0001",
     style: "Salsa",
     importance: 5,
     ratingSet: false,
@@ -98,7 +104,7 @@ it("retains numbers, notes and explicit ratings on refresh and metadata restore"
     notes: [{ id: "n", text: "Keep", createdAt: "now" }],
   };
   next = reconcileSource(next, next.sources[0], [
-    file("a", "0001 — a.mp4"),
+    file("a", "0001.mp4"),
     file("outside"),
   ]);
   expect(next.videos[0]).toMatchObject({
@@ -133,5 +139,83 @@ it("adopts a completed Dropbox staging file's reserved number while retaining it
   ]);
   expect(plan.numbering.files.uploaded.number).toBe(1);
   expect(plan.numbering.files["upload:job"].number).toBe(1);
-  expect(plan.names.get("uploaded")).toBe("0001 — Turn.mp4");
+  expect(plan.names.get("uploaded")).toBe("0001.mp4");
+});
+
+it("migrates descriptive numbered names without reallocating and gives outside videos the next number", () => {
+  const old = {
+    ...source,
+    numbering: {
+      next: 13,
+      files: {
+        a: { number: 1, originalName: "My original title.MOV" },
+        removed: { number: 12, originalName: "Gone.mp4" },
+      },
+    },
+  };
+  const plan = planNumbering(old, [
+    file("a", "0001 — My original title.MOV"),
+    file("new", "Outside.mp4"),
+  ]);
+  expect([...plan.names.values()].sort()).toEqual(["0001.MOV", "0013.mp4"]);
+  expect(plan.numbering.next).toBe(14);
+  expect(numberedName(10000, "Another title.webm")).toBe("10000.webm");
+});
+
+it("recovers legacy upload staging/final names once and prevents a duplicate from claiming the same reservation", () => {
+  const reserved = reserveUploadNumber(source, "job", "Turn.mp4");
+  const old = { ...source, numbering: reserved.numbering };
+  expect(stagedUploadNames(old).has("job-0001 — Turn.mp4")).toBe(true);
+  expect(stagedUploadNames(old).has("job-0001.mp4")).toBe(true);
+  const staged = planNumbering(old, [file("done", "job-0001 — Turn.mp4")]);
+  expect(staged.names.get("done")).toBe("0001.mp4");
+  expect(staged.numbering.files.done.number).toBe(1);
+  const finished = planNumbering(old, [
+    file("a", "0001 — Turn.mp4"),
+    file("b", "0001.mp4"),
+  ]);
+  expect(
+    new Set([
+      finished.numbering.files.a.number,
+      finished.numbering.files.b.number,
+    ]).size,
+  ).toBe(2);
+  expect(finished.numbering.next).toBe(3);
+});
+
+it("normalizes stored titles offline and keeps numeric source titles on subsequent edits", async () => {
+  const l = emptyLibrary();
+  l.connections = [
+    {
+      id: "c",
+      provider: "google-drive",
+      accountId: "a",
+      name: "Dancer",
+      email: "test@example.com",
+      connected: true,
+      writable: true,
+    },
+  ];
+  l.sources = [source];
+  const old = reconcileSource(l, source, [file("a")]);
+  old.videos[0].title = "0001 — Old descriptive title";
+  const writer = createLibraryWriter(
+    async () => {},
+    () => {},
+    () => {},
+  );
+  writer.hydrate(old);
+  expect(writer.get().videos[0].title).toBe("0001");
+  await writer.commit((library) => ({
+    ...library,
+    videos: library.videos.map((v) => ({
+      ...v,
+      title: "Custom title",
+      labels: ["Artist A"],
+    })),
+  }));
+  expect(writer.get().videos[0]).toMatchObject({
+    title: "0001",
+    labels: ["Artist A"],
+  });
 });

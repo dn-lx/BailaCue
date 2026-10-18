@@ -817,7 +817,11 @@ function Player({ video, uri }: { video: Video; uri: VideoSource }) {
             <Txt size={22} weight="display">
               The little details
             </Txt>
-            <Field label="Title" value={title} onChangeText={setTitle} />
+            {video.remote ? (
+              <Txt>Video number: {video.title}</Txt>
+            ) : (
+              <Field label="Title" value={title} onChangeText={setTitle} />
+            )}
             <LabelPicker
               value={labels}
               options={libraryLabels(library)}
@@ -825,10 +829,10 @@ function Player({ video, uri }: { video: Video; uri: VideoSource }) {
             />
             <Button
               variant="soft"
-              disabled={!title.trim()}
+              disabled={!video.remote && !title.trim()}
               onPress={() =>
                 updateVideo(video.id, {
-                  title: title.trim(),
+                  title: video.remote ? video.title : title.trim(),
                   labels,
                 })
               }
@@ -840,7 +844,9 @@ function Player({ video, uri }: { video: Video; uri: VideoSource }) {
                 <Chip
                   key={style}
                   selected={style === video.style}
-                  onPress={() => updateVideo(video.id, { style, styleSet: true })}
+                  onPress={() =>
+                    updateVideo(video.id, { style, styleSet: true })
+                  }
                 >
                   {style}
                 </Chip>

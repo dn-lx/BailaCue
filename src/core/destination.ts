@@ -1,7 +1,7 @@
 import type { CloudFolder, Connection, Library, Video } from "./types";
 import type { PendingUpload } from "../services/cloud/uploadEngine";
 import type { RemoteVideo } from "../services/providers/types";
-import { numberedName, sourceStyle } from "./numbering";
+import { numberedTitle, sourceStyle } from "./numbering";
 import { remoteId } from "./sources";
 
 export type SaveDestination = {
@@ -81,9 +81,7 @@ export function registerUpload(
       {
         ...video,
         id,
-        title: number
-          ? numberedName(number, `${video.title}.mp4`).replace(/\.mp4$/, "")
-          : video.title,
+        title: number ? numberedTitle(number) : video.title,
         style: sourceStyle(source),
         styleSet: false,
         source: connection.provider,

@@ -1,4 +1,4 @@
-import { numberedName, planNumbering, sourceStyle } from "./numbering";
+import { numberedTitle, planNumbering, sourceStyle } from "./numbering";
 import { v5 } from "uuid";
 import type { CloudFolder, Connection, Library, Video } from "./types";
 import type { RemoteVideo } from "../services/providers/types";
@@ -46,12 +46,7 @@ export function reconcileSource(
       const v = videos[existing];
       videos[existing] = {
         ...v,
-        title: /^\d{4,}(?:\s+[—-]\s+|$)/.test(v.title)
-          ? v.title
-          : numberedName(
-              plan.numbering.files[file.fileId].number,
-              `${v.title}.mp4`,
-            ).replace(/\.mp4$/, ""),
+        title: numberedTitle(plan.numbering.files[file.fileId].number),
         style:
           v.styleSet !== true && v.style === source.defaultStyle
             ? sourceStyle(source)

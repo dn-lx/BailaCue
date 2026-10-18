@@ -49,44 +49,42 @@ beforeEach(() => {
 it("creates the actual numbered filename and preserves the old copy until durable caller cleanup", async () => {
   const uri = await prepareNamedCopy(
     "file:///owned/input.mp4",
-    "0001 — Turn.mp4",
+    "0001.mp4",
     "salsa-video",
   );
-  expect(uri).toBe(
-    "file:///owned/bailacue-numbered/salsa-video/0001 — Turn.mp4",
-  );
+  expect(uri).toBe("file:///owned/bailacue-numbered/salsa-video/0001.mp4");
   expect(io.files.get(uri)).toEqual(new Uint8Array([1, 2, 3]));
   expect(io.files.has("file:///owned/input.mp4")).toBe(true);
   expect(
     await prepareNamedCopy(
       "file:///owned/input.mp4",
-      "0001 — Turn.mp4",
+      "0001.mp4",
       "salsa-video",
     ),
   ).toBe(uri);
   const bachata = await prepareNamedCopy(
     "file:///owned/input.mp4",
-    "0001 — Turn.mp4",
+    "0001.mp4",
     "bachata-video",
   );
   expect(bachata).not.toBe(uri);
 });
 it("does not replace a different same-size file or remove the original after a failed copy", async () => {
-  const dest = "file:///owned/bailacue-numbered/v/0001 — Turn.mp4";
+  const dest = "file:///owned/bailacue-numbered/v/0001.mp4";
   io.files.set(dest, new Uint8Array([9, 9, 9]));
   await expect(
-    prepareNamedCopy("file:///owned/input.mp4", "0001 — Turn.mp4", "v"),
+    prepareNamedCopy("file:///owned/input.mp4", "0001.mp4", "v"),
   ).rejects.toThrow("different phone file");
   io.files.delete(dest);
   io.fail = true;
   await expect(
-    prepareNamedCopy("file:///owned/input.mp4", "0001 — Turn.mp4", "v"),
+    prepareNamedCopy("file:///owned/input.mp4", "0001.mp4", "v"),
   ).rejects.toThrow("Disk full");
   expect(io.files.has(dest)).toBe(false);
   expect(io.files.get("file:///owned/input.mp4")).toEqual(
     new Uint8Array([1, 2, 3]),
   );
   await expect(
-    prepareNamedCopy("file:///gallery/original.mp4", "0001 — Turn.mp4", "v"),
+    prepareNamedCopy("file:///gallery/original.mp4", "0001.mp4", "v"),
   ).rejects.toThrow("Only BailaCue");
 });

@@ -188,9 +188,12 @@ it.each([true, false])(
         canDownload: true,
       },
       keepCopy,
+      7,
+      "0007.mp4",
     );
     const saved = next.videos[0];
     expect(saved).toMatchObject({
+      title: "0007",
       labels: ["Artist edited during upload"],
       importance: 4,
       uri: "",

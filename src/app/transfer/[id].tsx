@@ -1,4 +1,4 @@
-import { reserveUploadNumber } from "../../core/numbering";
+import { numberedName, reserveUploadNumber } from "../../core/numbering";
 import { provider } from "../../services/cloud/provider";
 import { scanSource } from "../../services/cloud/scan";
 import { prepareNamedCopy } from "../../services/phoneCopies";
@@ -149,14 +149,15 @@ export default function Transfer() {
       );
       // Old saved jobs keep their original session/path across retry. Number
       // their confirmed file by stable ID after completion, without reuploading.
-      if (file.name !== current.name) {
+      const finalName = numberedName(current.sequenceNumber!, current.name);
+      if (file.name !== finalName) {
         try {
           await provider(connection).renameVideo(
             file.fileId,
-            current.name,
+            finalName,
             source.folderId,
           );
-          file.name = current.name;
+          file.name = finalName;
         } catch {
           setError(
             "Upload confirmed. Cloud filename numbering needs another refresh in Storage.",
@@ -168,7 +169,7 @@ export default function Transfer() {
       let phoneUri = video.uri;
       if (current.keepCopy) {
         try {
-          phoneUri = await prepareNamedCopy(video.uri, current.name, newId);
+          phoneUri = await prepareNamedCopy(video.uri, finalName, newId);
         } catch {
           setError(
             "Upload confirmed. The phone filename could not be updated; its original copy was kept.",
@@ -184,7 +185,7 @@ export default function Transfer() {
           file,
           true,
           current.sequenceNumber,
-          current.name,
+          finalName,
         );
         next.videos = next.videos.map((v) =>
           v.id === newId ? { ...v, offlineUri: phoneUri } : v,
@@ -331,9 +332,10 @@ export default function Transfer() {
               />
             </Row>
             <Txt size={12} color={t.muted}>
-              BailaCue assigns the next number in this folder and keeps the
-              title. It never overwrites a storage original. Upload jobs resume
-              after interruption using the same destination and identity.
+              BailaCue uses only the next number as the title and filename, such
+              as 0001.mp4. Each folder has its own increasing sequence. Upload
+              jobs resume after interruption using the same destination and
+              identity.
             </Txt>
           </Card>
           {job ? (

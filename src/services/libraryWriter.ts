@@ -1,4 +1,5 @@
 import { ensureDailyPick } from "../core/recommendations";
+import { normalizeSourceTitles } from "../core/numbering";
 import { emptyLibrary, type Library } from "../core/types";
 // Every mutation has one serialized durable write. commit rejects on write failure
 // so callers never delete a phone file before its online reference is saved.
@@ -14,7 +15,7 @@ export function createLibraryWriter(
     if (closed)
       return Promise.reject(new Error("This device library is closing."));
     const previous = current;
-    const next = ensureDailyPick(action(current));
+    const next = ensureDailyPick(normalizeSourceTitles(action(current)));
     current = next;
     changed(next);
     const write = tail.then(() => persist(next));
@@ -35,8 +36,8 @@ export function createLibraryWriter(
   return {
     get: () => current,
     hydrate: (library: Library) => {
-      current = library;
-      changed(library);
+      current = normalizeSourceTitles(library);
+      changed(current);
     },
     update: (action: (l: Library) => Library) => {
       void apply(action).catch(() => {});
