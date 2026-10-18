@@ -75,8 +75,8 @@ export function planNumbering(source: CloudFolder, files: RemoteVideo[]) {
   const used = new Set(Object.values(state.files).map((v) => v.number));
   for (const entry of Object.values(state.files))
     state.next = Math.max(state.next, entry.number + 1);
-  // Adopt existing numbered files before assigning new numbers. This also recovers
-  // identity after reconnect/new-device sync, without renumbering older files.
+  // Recover existing numbered files on first connection only. Once a registry
+  // exists, outside additions take the next number regardless of their old name.
   const sorted = [...files].sort(
     (a, b) =>
       a.name.localeCompare(b.name, "en") || a.fileId.localeCompare(b.fileId),
@@ -96,7 +96,8 @@ export function planNumbering(source: CloudFolder, files: RemoteVideo[]) {
       match &&
       Number.isSafeInteger(number) &&
       number > 0 &&
-      (!used.has(number) || (reservation && !assignedNumbers.has(number)))
+      ((!source.numbering && !used.has(number)) ||
+        (reservation && !assignedNumbers.has(number)))
     ) {
       state.files[file.fileId] = {
         number,

@@ -162,6 +162,17 @@ it("migrates descriptive numbered names without reallocating and gives outside v
   expect(numberedName(10000, "Another title.webm")).toBe("10000.webm");
 });
 
+it("uses the next allocation for an outside numeric filename rather than importing its number", () => {
+  const first = planNumbering(source, [file("a", "Turn.mp4")]);
+  const next = planNumbering({ ...source, numbering: first.numbering }, [
+    file("a", "0001.mp4"),
+    file("outside", "9999.mp4"),
+  ]);
+  expect(next.names.get("a")).toBe("0001.mp4");
+  expect(next.names.get("outside")).toBe("0002.mp4");
+  expect(next.numbering.next).toBe(3);
+});
+
 it("recovers legacy upload staging/final names once and prevents a duplicate from claiming the same reservation", () => {
   const reserved = reserveUploadNumber(source, "job", "Turn.mp4");
   const old = { ...source, numbering: reserved.numbering };

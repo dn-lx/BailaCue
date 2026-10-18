@@ -1,7 +1,7 @@
 {
   "version": "0.2.9",
-  "build": 12,
-  "unitTests": 134,
+  "build": 13,
+  "unitTests": 135,
   "unitSuites": 16,
   "typecheck": "passed",
   "lint": "passed",

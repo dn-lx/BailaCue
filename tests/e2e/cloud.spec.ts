@@ -132,8 +132,7 @@ test("user connects Salsa and Bachata folders → streams → edits → refresh 
                         {
                           ".tag": "file",
                           id: "id:external",
-                          name:
-                            renamed.get("id:external") ?? "Added outside.mp4",
+                          name: renamed.get("id:external") ?? "9999.mp4",
                           size: 1234,
                         },
                       ]

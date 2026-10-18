@@ -1,4 +1,4 @@
-# Current handoff · BailaCue 0.2.9 (build12)
+# Current handoff · BailaCue 0.2.9 (build13)
 
 Owner corrected the filename requirement: every source video must have a number-only
 name, with no original title. The library displays `0001`; source files and owned
@@ -9,8 +9,8 @@ Legacy saved upload sessions retain their paths and numbers; final confirmed fil
 are renamed by stable ID. Both legacy and numeric staging names remain recognizable.
 No production database changes. Source pushes and Android prereleases remain authorized.
 
-Local134 tests/16 suites, type/lint and six browser journeys passed. Native/public results pending.
-See SOURCE-NUMBERING.md, VERIFICATION.md and releases/v0.2.9-preview.12.md.
+Local135 tests/16 suites, type/lint and six browser journeys passed. Native/public results pending. Build12/run39170414260 was cancelled before publication to fix outside numeric filenames skipping the sequence.
+See SOURCE-NUMBERING.md, VERIFICATION.md and releases/v0.2.9-preview.13.md.
 
 Historical build11 handoff follows.
 

@@ -10,14 +10,14 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "app.bailacue.mobile",
-      "buildNumber": "12",
+      "buildNumber": "13",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
       "package": "app.bailacue.mobile",
-      "versionCode": 12,
+      "versionCode": 13,
       "permissions": [],
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",

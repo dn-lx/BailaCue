@@ -8,7 +8,9 @@ by filename/ID; subsequent discoveries take the next number without renumbering 
 old library. Removed videos and cancelled uploads do not free their numbers.
 
 Numbers are reserved durably before remote changes. Existing numeric prefixes are
-adopted on reconnect; duplicate prefixes receive a free number. Existing notes,
+adopted on an initial connection/reconnect without a registry; duplicate prefixes receive a free number.
+Once a source has a registry, every new outside identity takes the next number,
+even if its previous filename was already numeric (for example `9999.mp4`). Existing notes,
 explicit ratings, labels and practice history remain attached to stable IDs.
 Existing descriptive titles are replaced with the allocated number, including
 previous `0001 — Original title` names. Titles from saved registries are normalized
