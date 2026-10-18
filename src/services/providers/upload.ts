@@ -1,4 +1,8 @@
 import { ProviderError, type UploadJob } from "./types";
+// Native transport sends bounded byte buffers directly through expo/fetch.
+export type UploadChunk = Blob | Uint8Array<ArrayBuffer>;
+export const chunkSize = (chunk: UploadChunk) =>
+  chunk instanceof Uint8Array ? chunk.byteLength : chunk.size;
 // Persist after every server acknowledgement. Callers retain the job's preallocated
 // provider file ID across retries; a network failure must never allocate a new ID.
 export function acknowledgedOffset(response: Response, total: number): number {
@@ -17,7 +21,7 @@ export function acknowledgedOffset(response: Response, total: number): number {
 }
 export async function resumeUpload(
   job: UploadJob,
-  read: (start: number, end: number) => Promise<Blob>,
+  read: (start: number, end: number) => Promise<UploadChunk>,
   persist: (job: UploadJob) => Promise<void>,
   token: () => Promise<string>,
   request: typeof fetch = fetch,
@@ -40,7 +44,7 @@ export async function resumeUpload(
     throw new ProviderError("Invalid storage upload session.", "invalid");
   let current = { ...job };
   const isReady = () => current.status === "ready";
-  const send = async (body: Blob | undefined, range: string) =>
+  const send = async (body: UploadChunk | undefined, range: string) =>
     request(job.sessionUrl!, {
       method: "PUT",
       headers: {
@@ -100,7 +104,7 @@ export async function resumeUpload(
           "network",
         );
       const chunk = await read(before, end);
-      if (chunk.size !== end - before)
+      if (chunkSize(chunk) !== end - before)
         throw new ProviderError(
           "The selected file changed or is unavailable.",
           "invalid",

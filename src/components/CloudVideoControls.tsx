@@ -7,6 +7,7 @@ import type { Video } from "../core/types";
 import { verifyCollectionGrant } from "../services/account";
 import { provider } from "../services/cloud/provider";
 import { downloadVideo } from "../services/cloud/download";
+import { prepareNamedCopy } from "../services/phoneCopies";
 import { deleteMedia, saveToPhotos, shareMedia } from "../services/media";
 export function CloudVideoControls({
   video,
@@ -15,7 +16,7 @@ export function CloudVideoControls({
   video: Video;
   onChange?: () => void;
 }) {
-  const { library, updateVideo } = useLibrary();
+  const { library, updateVideo, commit } = useLibrary();
   const t = useTheme();
   const [busy, setBusy] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -51,13 +52,25 @@ export function CloudVideoControls({
         setProgress,
         controller.current!.signal,
       );
-      updateVideo(video.id, {
-        offlineUri: copy.uri,
-        storagePreference: "offline",
-        duration: copy.duration,
-        thumbnail: copy.thumbnail,
-        size: copy.size,
-      });
+      const numberedUri = video.remote.fileName
+        ? await prepareNamedCopy(copy.uri, video.remote.fileName, video.id)
+        : copy.uri;
+      await commit((l) => ({
+        ...l,
+        videos: l.videos.map((v) =>
+          v.id === video.id
+            ? {
+                ...v,
+                offlineUri: numberedUri,
+                storagePreference: "offline",
+                duration: copy.duration,
+                thumbnail: copy.thumbnail,
+                size: copy.size,
+              }
+            : v,
+        ),
+      }));
+      if (numberedUri !== copy.uri) await deleteMedia(copy.uri);
       setMessage(
         "Phone copy ready. You can practise offline or export a new trimmed clip.",
       );

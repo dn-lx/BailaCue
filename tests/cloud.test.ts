@@ -165,7 +165,7 @@ describe("user-selected sources", () => {
     ]);
     expect(library.videos).toHaveLength(1);
     expect(library.videos[0]).toMatchObject({
-      title: "My move",
+      title: "0001 — My move",
       labels: ["Personal"],
       importance: 5,
       remote: { sourceIds: ["s", "s2"] },
@@ -486,4 +486,42 @@ describe("local reminder plan", () => {
       reminderSchedule({ ...defaultReminders(), time: "25:00" }),
     ).toThrow(/HH:MM/);
   });
+});
+
+it("renames a Dropbox video inside its selected folder without overwrite or ownership transfer", async () => {
+  const request = vi
+    .fn()
+    .mockResolvedValueOnce(
+      response({
+        ".tag": "file",
+        id: "id:v",
+        path_display: "/Dance/Salsa/Turn.mp4",
+      }),
+    )
+    .mockResolvedValueOnce(response({ metadata: { id: "id:v" } }));
+  const adapter = new DropboxProvider(async () => "token", request);
+  await adapter.renameVideo("id:v", "0001 — Turn.mp4", "/dance/salsa");
+  expect(JSON.parse(request.mock.calls[1][1].body)).toEqual({
+    from_path: "id:v",
+    to_path: "/Dance/Salsa/0001 — Turn.mp4",
+    autorename: false,
+    allow_ownership_transfer: false,
+  });
+  const denied = vi
+    .fn()
+    .mockResolvedValue(
+      response({
+        ".tag": "file",
+        id: "id:v",
+        path_display: "/Elsewhere/Turn.mp4",
+      }),
+    );
+  await expect(
+    new DropboxProvider(async () => "token", denied).renameVideo(
+      "id:v",
+      "0001 — Turn.mp4",
+      "/Dance/Salsa",
+    ),
+  ).rejects.toMatchObject({ code: "invalid" });
+  expect(denied).toHaveBeenCalledTimes(1);
 });

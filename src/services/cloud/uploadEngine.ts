@@ -1,3 +1,4 @@
+import { safeVideoName } from "../../core/numbering";
 import { mapDriveVideo } from "../providers/googleDrive";
 import { mapDropboxVideo } from "../providers/dropbox";
 import {
@@ -5,7 +6,7 @@ import {
   type RemoteVideo,
   type UploadJob,
 } from "../providers/types";
-import { resumeUpload } from "../providers/upload";
+import { chunkSize, resumeUpload, type UploadChunk } from "../providers/upload";
 export type PendingUpload = {
   id: string;
   videoId: string;
@@ -15,6 +16,7 @@ export type PendingUpload = {
   accountId?: string;
   provider: "google-drive" | "dropbox";
   name: string;
+  sequenceNumber?: number;
   mimeType: string;
   size: number;
   fileId: string;
@@ -27,7 +29,7 @@ export type PendingUpload = {
 };
 type Transport = {
   token: () => Promise<string>;
-  read: (start: number, end: number) => Promise<Blob>;
+  read: (start: number, end: number) => Promise<UploadChunk>;
   persist: (job: PendingUpload) => Promise<void>;
   request?: typeof fetch;
   signal?: AbortSignal;
@@ -157,9 +159,9 @@ export async function uploadFile(
       return file;
     }
     if (!job.path) {
-      const safeName = job.name.replace(/[\\/\x00-\x1f]/g, "_").slice(0, 160);
+      const safeName = safeVideoName(job.name);
       await save({
-        path: `${folderId === "/" ? "" : folderId}/${job.id}-${safeName}`,
+        path: `${folderId === "/" ? "" : folderId}/${job.sequenceNumber ? "" : `${job.id}-`}${safeName}`,
       });
     }
     const metadata = await request(
@@ -181,7 +183,11 @@ export async function uploadFile(
       return file;
     }
     if (metadata.status !== 409) await ensure(metadata);
-    const content = async (endpoint: string, arg: unknown, body?: Blob) =>
+    const content = async (
+      endpoint: string,
+      arg: unknown,
+      body?: UploadChunk,
+    ) =>
       request(`https://content.dropboxapi.com/2/files/${endpoint}`, {
         method: "POST",
         headers: {
@@ -189,7 +195,7 @@ export async function uploadFile(
           "Content-Type": "application/octet-stream",
           "Dropbox-API-Arg": ascii(arg),
         },
-        body: body ?? new Blob([]),
+        body: body ?? new Uint8Array(0),
         signal,
       });
     if (!job.sessionId) {
@@ -206,7 +212,7 @@ export async function uploadFile(
       const before = job.offset,
         end = Math.min(job.size, before + 2 * 1024 * 1024);
       const body = await read(before, end);
-      if (body.size !== end - before)
+      if (chunkSize(body) !== end - before)
         throw new Error("The local video changed or is missing.");
       const response = await content(
         "upload_session/append_v2",

@@ -1,3 +1,4 @@
+import { effectiveRating } from "./ratings";
 import {
   uid,
   type Library,
@@ -21,7 +22,7 @@ export function filterVideos(videos: Video[], f: Filters) {
     (v) =>
       (!f.style || v.style === f.style) &&
       (!f.status || v.status === f.status) &&
-      v.importance >= (f.minImportance ?? 1) &&
+      effectiveRating(v) >= (f.minImportance ?? 1) &&
       terms.every((term) =>
         [v.title, ...v.labels, v.teacher, v.className, v.location]
           .join(" ")

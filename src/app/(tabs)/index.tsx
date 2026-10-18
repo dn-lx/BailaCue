@@ -22,6 +22,8 @@ import {
   rankCandidates,
   refreshDailyPicks,
   minimumPickRating,
+  dailySlots,
+  belongsToSlot,
 } from "../../core/recommendations";
 export default function Today() {
   const { library, update } = useLibrary();
@@ -137,7 +139,7 @@ export default function Today() {
           </Txt>
           <Txt size={13} color={t.muted}>
             {library.preferences.onePerStyle !== false
-              ? "One for each selected style, led by your ratings"
+              ? "One from each dance source · unrated counts as 5★"
               : "Your highest-rated eligible videos"}
           </Txt>
         </View>
@@ -146,18 +148,18 @@ export default function Today() {
       {library.preferences.picksEnabled &&
       !pick?.skipped &&
       library.preferences.onePerStyle !== false
-        ? [...new Set(library.preferences.styles)]
-            .filter((style) => !videos.some((v) => v.style === style))
-            .map((style) => (
-              <Card key={style}>
-                <Txt weight="bold">Your {style} pick is waiting</Txt>
+        ? dailySlots(library)
+            .filter((slot) => !videos.some((v) => belongsToSlot(v, slot)))
+            .map((slot) => (
+              <Card key={slot.key}>
+                <Txt weight="bold">Your {slot.name} pick is waiting</Txt>
                 <Txt size={13} color={t.muted}>
-                  Add an available {style} video rated{" "}
+                  Add or refresh an available video in {slot.name}, rated{" "}
                   {minimumPickRating(library)}★ or higher to complete your daily
                   mix.
                 </Txt>
                 <Button variant="soft" onPress={() => router.push("/upload")}>
-                  Add a {style} video
+                  Add a {slot.style} video
                 </Button>
               </Card>
             ))
@@ -178,6 +180,16 @@ export default function Today() {
       ) : videos.length ? (
         videos.map((video) => (
           <View key={video.id} style={{ gap: 12 }}>
+            {dailySlots(library).find((slot) => belongsToSlot(video, slot))
+              ?.sourceId ? (
+              <Txt weight="bold">
+                {
+                  dailySlots(library).find((slot) => belongsToSlot(video, slot))
+                    ?.name
+                }{" "}
+                · Daily Pick
+              </Txt>
+            ) : null}
             <VideoCard video={video} featured />
             <Txt size={13} color={t.muted}>
               {

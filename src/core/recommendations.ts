@@ -1,13 +1,19 @@
+import { effectiveRating, isUnrated } from "./ratings";
+import { sourceStyle } from "./numbering";
 import { localDay } from "./practice";
 import type { Library, Video } from "./types";
 const DAY = 86400000;
 export const minimumPickRating = (library: Library) =>
   Math.max(1, Math.min(5, library.preferences.minPickRating ?? 1));
 const eligible = (library: Library, video: Video) =>
-  video.available && video.importance >= minimumPickRating(library);
+  video.available && effectiveRating(video) >= minimumPickRating(library);
 const selectionKey = (library: Library) => {
   const p = library.preferences;
-  return `rating-first-v1:${p.onePerStyle !== false ? [...new Set(p.styles)].sort().join(",") : `total-${p.count}`}:${minimumPickRating(library)}`;
+  const sources = dailySlots(library)
+    .map((s) => `${s.key}:${s.style}`)
+    .sort()
+    .join(",");
+  return `source-rating-v2:${p.onePerStyle !== false ? [...new Set(p.styles)].sort().join(",") : `total-${p.count}`}:${minimumPickRating(library)}:${sources}`;
 };
 export function rankCandidates(
   library: Library,
@@ -55,28 +61,54 @@ export function rankCandidates(
       return {
         video,
         score,
-        reason: `${video.importance}-star ${video.style} · ${matches.length ? `Matches your ${matches[0].toLowerCase()} preference.` : video.status === "Learned" ? "A familiar move for review." : "Chosen for your practice mix."}`,
+        reason: `${isUnrated(video) ? "Unrated (counts as 5-star)" : `${video.importance}-star`} ${video.style} · ${matches.length ? `Matches your ${matches[0].toLowerCase()} preference.` : video.status === "Learned" ? "A familiar move for review." : "Chosen for your practice mix."}`,
       };
     })
     .sort(
       (a, b) =>
-        b.video.importance - a.video.importance ||
+        effectiveRating(b.video) - effectiveRating(a.video) ||
         b.score - a.score ||
         a.video.id.localeCompare(b.video.id),
     );
 }
+export type DailySlot = {
+  key: string;
+  name: string;
+  style: Video["style"];
+  sourceId?: string;
+};
+export function dailySlots(library: Library): DailySlot[] {
+  return [...new Set(library.preferences.styles)].flatMap<DailySlot>(
+    (style) => {
+      const sources = library.sources.filter((s) => sourceStyle(s) === style);
+      return sources.length
+        ? sources.map((source) => ({
+            key: `source:${source.id}`,
+            name: source.name,
+            style,
+            sourceId: source.id,
+          }))
+        : [{ key: `style:${style}`, name: style, style }];
+    },
+  );
+}
+export const belongsToSlot = (video: Video, slot: DailySlot) =>
+  slot.sourceId
+    ? !!video.remote?.sourceIds.includes(slot.sourceId)
+    : video.style === slot.style;
 export function choosePicks(library: Library, now = new Date()): string[] {
   let candidates = rankCandidates(library, now);
   if (library.preferences.onePerStyle !== false) {
     const fallback = rankCandidates(library, now, true);
-    // Cooldown fallback is independent for each style. Never substitute a second
-    // Salsa for a missing Bachata (or silently lower the user's minimum rating).
-    return [...new Set(library.preferences.styles)].flatMap((style) => {
-      const next =
-        candidates.find((c) => c.video.style === style) ??
-        fallback.find((c) => c.video.style === style);
-      return next ? [next.video.id] : [];
-    });
+    const chosen: string[] = [];
+    for (const slot of dailySlots(library)) {
+      const matches = (candidate: { video: Video }) =>
+        belongsToSlot(candidate.video, slot) &&
+        !chosen.includes(candidate.video.id);
+      const next = candidates.find(matches) ?? fallback.find(matches);
+      if (next) chosen.push(next.video.id);
+    }
+    return chosen;
   }
   if (!candidates.length) candidates = rankCandidates(library, now, true);
   const chosen: string[] = [];
@@ -85,7 +117,7 @@ export function choosePicks(library: Library, now = new Date()): string[] {
   while (chosen.length < library.preferences.count && candidates.length) {
     candidates.sort(
       (a, b) =>
-        b.video.importance - a.video.importance ||
+        effectiveRating(b.video) - effectiveRating(a.video) ||
         b.score -
           (usedStyles.has(b.video.style) ? 5 : 0) -
           b.video.labels.filter((x) => usedLabels.has(x)).length * 4 -
@@ -121,20 +153,43 @@ export function ensureDailyPick(library: Library, now = new Date()): Library {
   const day = localDay(now);
   const saved = library.picks.find((p) => p.day === day);
   if (saved?.skipped) return library;
+  const slots = dailySlots(library);
+  const usedSlots = new Set<string>();
+  const slotsValid =
+    library.preferences.onePerStyle === false ||
+    !saved ||
+    saved.videoIds.every((id) => {
+      const video = library.videos.find((v) => v.id === id);
+      const slot =
+        video &&
+        slots.find((s) => !usedSlots.has(s.key) && belongsToSlot(video, s));
+      if (!slot) return false;
+      usedSlots.add(slot.key);
+      return true;
+    });
   if (
+    slotsValid &&
     saved?.selectionKey === selectionKey(library) &&
     saved.videoIds.every((id) =>
       library.videos.some((v) => v.id === id && eligible(library, v)),
     )
   ) {
     if (library.preferences.onePerStyle !== false && saved.videoIds.length) {
-      const styles = new Set(
-        library.videos
-          .filter((v) => saved.videoIds.includes(v.id))
-          .map((v) => v.style),
+      const existing = library.videos.filter((v) =>
+        saved.videoIds.includes(v.id),
+      );
+      const missingSlots = dailySlots(library).filter(
+        (slot) => !existing.some((v) => belongsToSlot(v, slot)),
       );
       const additions = choosePicks(library, now).filter(
-        (id) => !styles.has(library.videos.find((v) => v.id === id)!.style),
+        (id) =>
+          !saved.videoIds.includes(id) &&
+          missingSlots.some((slot) =>
+            belongsToSlot(
+              library.videos.find((v) => v.id === id)!,
+              slot,
+            ),
+          ),
       );
       if (additions.length)
         return {

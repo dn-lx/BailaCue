@@ -115,6 +115,8 @@ export function Txt({
           fontSize: size,
           lineHeight: size * 1.4,
           color: color ?? t.ink,
+          flexShrink: 1,
+          minWidth: 0,
         },
         style,
       ]}
@@ -129,7 +131,16 @@ export function Row({
 }: React.PropsWithChildren<{ style?: ViewStyle }>) {
   return (
     <View
-      style={[{ flexDirection: "row", alignItems: "center", gap: 10 }, style]}
+      style={[
+        {
+          flexDirection: "row",
+          flexWrap: "wrap",
+          alignItems: "center",
+          gap: 10,
+          minWidth: 0,
+        },
+        style,
+      ]}
     >
       {children}
     </View>
@@ -145,6 +156,8 @@ export function Card({
       style={[
         {
           backgroundColor: t.surface,
+          minWidth: 0,
+          maxWidth: "100%",
           borderRadius: 24,
           padding: 20,
           borderWidth: 1,
@@ -203,6 +216,8 @@ export function Button({
       style={({ pressed }) => [
         {
           minHeight: 48,
+          maxWidth: "100%",
+          flexShrink: 1,
           paddingHorizontal: 18,
           paddingVertical: 12,
           borderRadius: 16,
@@ -221,7 +236,11 @@ export function Button({
       ) : icon ? (
         <Icon name={icon} color={color} size={20} />
       ) : null}
-      <Txt weight="bold" color={color}>
+      <Txt
+        weight="bold"
+        color={color}
+        style={{ textAlign: "center", flexShrink: 1 }}
+      >
         {children}
       </Txt>
     </Pressable>
@@ -240,6 +259,8 @@ export function Chip({
       onPress={onPress}
       style={{
         minHeight: 44,
+        maxWidth: "100%",
+        justifyContent: "center",
         paddingHorizontal: 15,
         paddingVertical: 11,
         borderRadius: 24,
@@ -263,6 +284,7 @@ export function Badge({
     <View
       style={{
         alignSelf: "flex-start",
+        maxWidth: "100%",
         borderRadius: 8,
         paddingHorizontal: 9,
         paddingVertical: 5,
@@ -337,8 +359,10 @@ export function Screen({
           alignSelf: "center",
         }}
       >
-        <Row style={{ justifyContent: "space-between" }}>
-          <View style={{ flex: 1, gap: 4 }}>
+        <Row
+          style={{ justifyContent: "space-between", alignItems: "flex-start" }}
+        >
+          <View style={{ flex: 1, minWidth: 0, gap: 4 }}>
             <Txt size={34} weight="display">
               {title}
             </Txt>

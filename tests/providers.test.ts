@@ -162,3 +162,44 @@ describe("resumable upload transport", () => {
     ).rejects.toMatchObject({ code: "invalid" });
   });
 });
+
+it("renames Drive metadata by stable ID only after confirming the selected parent and rename permission", async () => {
+  const request = vi
+    .fn()
+    .mockResolvedValueOnce(
+      new Response(
+        JSON.stringify({
+          parents: ["folder"],
+          capabilities: { canRename: true },
+        }),
+      ),
+    )
+    .mockResolvedValueOnce(
+      new Response(JSON.stringify({ id: "file", name: "0001 — Turn.mp4" })),
+    );
+  const adapter = new GoogleDriveProvider(async () => "token", request);
+  await adapter.renameVideo("file", "0001 — Turn.mp4", "folder");
+  expect(request.mock.calls[1][1]).toMatchObject({
+    method: "PATCH",
+    body: JSON.stringify({ name: "0001 — Turn.mp4" }),
+  });
+  expect(request.mock.calls[1][0]).not.toContain("uploadType");
+  const denied = vi
+    .fn()
+    .mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          parents: ["elsewhere"],
+          capabilities: { canRename: true },
+        }),
+      ),
+    );
+  await expect(
+    new GoogleDriveProvider(async () => "token", denied).renameVideo(
+      "file",
+      "0001 — Turn.mp4",
+      "folder",
+    ),
+  ).rejects.toMatchObject({ code: "permission" });
+  expect(denied).toHaveBeenCalledTimes(1);
+});

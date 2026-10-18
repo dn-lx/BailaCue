@@ -1,3 +1,4 @@
+import { CloudDiscovery } from "../components/CloudDiscovery";
 import React, { useEffect } from "react";
 import { Stack, router } from "expo-router";
 import { View, ActivityIndicator, AppState } from "react-native";
@@ -46,6 +47,7 @@ function Shell() {
     );
   return (
     <PrivacyGate>
+      <CloudDiscovery />
       <StatusBar style={t.dark ? "light" : "dark"} />
       {error ? (
         <View style={{ backgroundColor: t.soft, padding: 12 }}>

@@ -1,3 +1,4 @@
+import { numberedName, planNumbering, sourceStyle } from "./numbering";
 import { v5 } from "uuid";
 import type { CloudFolder, Connection, Library, Video } from "./types";
 import type { RemoteVideo } from "../services/providers/types";
@@ -20,6 +21,7 @@ export function reconcileSource(
   );
   if (!connection)
     throw new Error("This storage account is no longer connected.");
+  const plan = planNumbering(source, files);
   const seen = new Set(files.map((f) => f.fileId));
   const videos: Video[] = library.videos.map((v) => {
     if (
@@ -36,13 +38,24 @@ export function reconcileSource(
       remote: { ...v.remote, sourceIds },
     };
   });
+  const indexes = new Map(videos.map((v, index) => [v.id, index]));
   for (const file of files) {
     const id = remoteId(connection, file.fileId);
-    const existing = videos.findIndex((v) => v.id === id);
+    const existing = indexes.get(id) ?? -1;
     if (existing >= 0) {
       const v = videos[existing];
       videos[existing] = {
         ...v,
+        title: /^\d{4,}(?:\s+[—-]\s+|$)/.test(v.title)
+          ? v.title
+          : numberedName(
+              plan.numbering.files[file.fileId].number,
+              `${v.title}.mp4`,
+            ).replace(/\.mp4$/, ""),
+        style:
+          v.styleSet !== true && v.style === source.defaultStyle
+            ? sourceStyle(source)
+            : v.style,
         available: true,
         duration: file.duration || v.duration,
         size: file.size,
@@ -50,21 +63,25 @@ export function reconcileSource(
         remote: {
           connectionId: connection.id,
           fileId: file.fileId,
+          fileName: plan.names.get(file.fileId),
           sourceIds: [...new Set([...(v.remote?.sourceIds ?? []), source.id])],
           canDownload: file.canDownload,
         },
       };
-    } else
+    } else {
+      indexes.set(id, videos.length);
       videos.push({
         id,
-        title: file.name.replace(/\.[^.]+$/, ""),
+        title: plan.names.get(file.fileId)!.replace(/\.[^.]+$/, ""),
         uri: "",
         mimeType: file.mimeType,
         duration: file.duration,
         size: file.size,
-        style: source.defaultStyle,
+        style: sourceStyle(source),
+        styleSet: false,
         labels: [...source.defaultLabels],
-        importance: 3,
+        importance: 5,
+        ratingSet: false,
         status: "To learn",
         teacher: "",
         className: source.name,
@@ -81,17 +98,24 @@ export function reconcileSource(
         remote: {
           connectionId: connection.id,
           fileId: file.fileId,
+          fileName: plan.names.get(file.fileId),
           sourceIds: [source.id],
           canDownload: file.canDownload,
         },
       });
+    }
   }
   return {
     ...library,
     videos,
     sources: library.sources.map((s) =>
       s.id === source.id
-        ? { ...source, lastSyncedAt: now, error: undefined }
+        ? {
+            ...source,
+            numbering: plan.numbering,
+            lastSyncedAt: now,
+            error: source.error,
+          }
         : s,
     ),
   };

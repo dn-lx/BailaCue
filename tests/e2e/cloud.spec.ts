@@ -25,6 +25,9 @@ test("user connects Salsa and Bachata folders → streams → edits → refresh 
   page,
   context,
 }) => {
+  let outsideAdded = false;
+  const renamed = new Map<string, string>();
+  const renames: { from_path: string; to_path: string }[] = [];
   const errors: string[] = [];
   page.on("pageerror", (e) => errors.push(e.message));
   await context.route(
@@ -63,7 +66,19 @@ test("user connects Salsa and Bachata folders → streams → edits → refresh 
   await context.route(
     "https://api.dropboxapi.com/2/files/get_metadata",
     (r) => {
-      const bachata = r.request().postDataJSON().path === "/bachata";
+      const path = r.request().postDataJSON().path;
+      if (path.startsWith("id:")) {
+        const parent = path === "id:bachata-video" ? "/bachata" : "/salsa";
+        return r.fulfill({
+          json: {
+            ".tag": "file",
+            id: path,
+            name: renamed.get(path) ?? "Original.mp4",
+            path_display: `${parent}/${renamed.get(path) ?? "Original.mp4"}`,
+          },
+        });
+      }
+      const bachata = path === "/bachata";
       return r.fulfill({
         json: {
           ".tag": "folder",
@@ -74,6 +89,21 @@ test("user connects Salsa and Bachata folders → streams → edits → refresh 
       });
     },
   );
+  await context.route("https://api.dropboxapi.com/2/files/move_v2", (r) => {
+    const args = r.request().postDataJSON();
+    expect(args.autorename).toBe(false);
+    renames.push(args);
+    renamed.set(args.from_path, args.to_path.split("/").pop());
+    return r.fulfill({
+      json: {
+        metadata: {
+          ".tag": "file",
+          id: args.from_path,
+          name: renamed.get(args.from_path),
+        },
+      },
+    });
+  });
   await context.route(
     "https://api.dropboxapi.com/2/files/list_folder",
     async (r) => {
@@ -97,6 +127,17 @@ test("user connects Salsa and Bachata folders → streams → edits → refresh 
                   },
                 ]
               : [
+                  ...(outsideAdded && data.path === "/salsa"
+                    ? [
+                        {
+                          ".tag": "file",
+                          id: "id:external",
+                          name:
+                            renamed.get("id:external") ?? "Added outside.mp4",
+                          size: 1234,
+                        },
+                      ]
+                    : []),
                   {
                     ".tag": "file",
                     id:
@@ -104,9 +145,14 @@ test("user connects Salsa and Bachata folders → streams → edits → refresh 
                         ? "id:bachata-video"
                         : "id:video",
                     name:
-                      data.path === "/bachata"
+                      renamed.get(
+                        data.path === "/bachata"
+                          ? "id:bachata-video"
+                          : "id:video",
+                      ) ??
+                      (data.path === "/bachata"
                         ? "Bachata basics.mp4"
-                        : "Cloud turn.mp4",
+                        : "Cloud turn.mp4"),
                     size: 1234,
                     media_info: {
                       ".tag": "metadata",
@@ -206,23 +252,35 @@ test("user connects Salsa and Bachata folders → streams → edits → refresh 
   await expect(
     page.getByText("Tuesday class", { exact: true }).first(),
   ).toBeVisible();
+  await expect(
+    page.getByRole("button", {
+      name: "Connect folder & find videos",
+      exact: true,
+    }),
+  ).toBeEnabled();
   await page.goto("/library");
   // Credentials are intentionally memory-only on web; SPA navigation retains this test connection.
   // Reloading the browser requires reconnecting. Return through in-app navigation below.
   await expect(
-    page.getByRole("button", { name: "Play Cloud turn", exact: true }),
+    page.getByRole("button", { name: "Play 0001 — Cloud turn", exact: true }),
   ).toBeVisible();
   await expect(
-    page.getByRole("button", { name: "Play Bachata basics", exact: true }),
+    page.getByRole("button", {
+      name: "Play 0001 — Bachata basics",
+      exact: true,
+    }),
   ).toBeVisible();
   await page
     .getByRole("button", { name: "Bachata class", exact: true })
     .click();
   await expect(
-    page.getByRole("button", { name: "Play Bachata basics", exact: true }),
+    page.getByRole("button", {
+      name: "Play 0001 — Bachata basics",
+      exact: true,
+    }),
   ).toBeVisible();
   await expect(
-    page.getByRole("button", { name: "Play Cloud turn", exact: true }),
+    page.getByRole("button", { name: "Play 0001 — Cloud turn", exact: true }),
   ).toHaveCount(0);
   await page.getByRole("button", { name: "All storage", exact: true }).click();
   // Reconnect after this explicit full navigation; real phone credentials use SecureStore.
@@ -240,7 +298,7 @@ test("user connects Salsa and Bachata folders → streams → edits → refresh 
   ).toBeVisible();
   await page.getByRole("button", { name: "Done", exact: true }).click();
   await page
-    .getByRole("button", { name: "Play Cloud turn", exact: true })
+    .getByRole("button", { name: "Play 0001 — Cloud turn", exact: true })
     .click();
   await expect(page.getByText("ONLINE VIDEO", { exact: true })).toBeVisible();
   await expect
@@ -266,17 +324,60 @@ test("user connects Salsa and Bachata folders → streams → edits → refresh 
   await page
     .getByRole("button", { name: "Connect storage", exact: true })
     .click();
+  outsideAdded = true;
   await page
     .getByRole("button", { name: "Refresh videos", exact: true })
     .first()
     .click();
   await page.getByRole("button", { name: "Done", exact: true }).click();
   await expect(
-    page.getByRole("button", { name: "Play My cloud turn", exact: true }),
+    page.getByRole("button", {
+      name: "Play 0001 — My cloud turn",
+      exact: true,
+    }),
   ).toBeVisible();
   await expect(
-    page.getByRole("button", { name: "Play Bachata basics", exact: true }),
+    page.getByRole("button", {
+      name: "Play 0001 — Bachata basics",
+      exact: true,
+    }),
   ).toBeVisible();
+  await expect(
+    page.getByRole("button", {
+      name: "Play 0002 — Added outside",
+      exact: true,
+    }),
+  ).toBeVisible();
+  expect(
+    renames.some(
+      (r) =>
+        r.from_path === "id:external" &&
+        r.to_path === "/salsa/0002 — Added outside.mp4",
+    ),
+  ).toBe(true);
+  expect(
+    renames.some((r) => r.to_path === "/bachata/0001 — Bachata basics.mp4"),
+  ).toBe(true);
+  await page.getByRole("tab", { name: "Today", exact: true }).click();
+  await page
+    .getByRole("button", { name: "Update today’s picks", exact: true })
+    .click();
+  await expect(
+    page.getByRole("button", {
+      name: "Play 0001 — Bachata basics",
+      exact: true,
+    }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("button", {
+      name: /Play 000[12] — (My cloud turn|Added outside)/,
+    }),
+  ).toBeVisible();
+  await expect(page.getByText("Unrated · treated as 5★").first()).toBeVisible();
+  await page.screenshot({
+    path: "artifacts/screenshots/source-daily-picks.png",
+    fullPage: true,
+  });
   // Imports explicitly choose their folder, independent of style or labels.
   await page.getByRole("tab", { name: "Add video", exact: true }).click();
   const chooser = page.waitForEvent("filechooser");
@@ -284,6 +385,22 @@ test("user connects Salsa and Bachata folders → streams → edits → refresh 
     .getByRole("button", { name: "Choose a video", exact: true })
     .click();
   await (await chooser).setFiles(fixture);
+  await page.getByRole("button", { name: "Play preview", exact: true }).click();
+  await expect
+    .poll(() =>
+      page
+        .locator("video")
+        .last()
+        .evaluate((v: HTMLVideoElement) => v.currentTime),
+    )
+    .toBeGreaterThan(0);
+  await page
+    .getByRole("button", { name: "Pause preview", exact: true })
+    .click();
+  await page.screenshot({
+    path: "artifacts/screenshots/import-preview.png",
+    fullPage: true,
+  });
   await page
     .getByRole("textbox", { name: "Video title", exact: true })
     .fill("New Bachata upload");

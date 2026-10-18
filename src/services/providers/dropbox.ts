@@ -9,6 +9,7 @@ type Entry = {
   id: string;
   name: string;
   path_lower?: string;
+  path_display?: string;
   size?: number;
   server_modified?: string;
   sharing_info?: { read_only?: boolean };
@@ -115,6 +116,28 @@ export class DropboxProvider implements VideoProvider {
         )
         .map(mapDropboxVideo),
     };
+  }
+  async renameVideo(fileId: string, name: string, folderId: string) {
+    const file = (await this.call("files/get_metadata", {
+      path: fileId,
+    })) as Entry;
+    const path = file.path_display ?? file.path_lower;
+    const parent = path?.slice(0, path.lastIndexOf("/"));
+    if (
+      file.id !== fileId ||
+      parent?.toLowerCase() !== folderId.replace(/\/$/, "").toLowerCase() ||
+      !path
+    )
+      throw new ProviderError(
+        "This video moved out of the selected folder. Refresh before renaming.",
+        "invalid",
+      );
+    await this.call("files/move_v2", {
+      from_path: fileId,
+      to_path: `${parent}/${name}`,
+      autorename: false,
+      allow_ownership_transfer: false,
+    });
   }
   async playback(fileId: string) {
     const result = (await this.call("files/get_temporary_link", {

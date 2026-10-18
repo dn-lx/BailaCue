@@ -1,41 +1,32 @@
-# Daily Picks: rating-led Salsa and Bachata practice
+# Daily Picks · source mix and unrated videos
 
-The default is **one video per selected style**. With Salsa and Bachata selected,
-Today shows one of each when eligible videos exist. Select styles in Settings.
-An older library receives this balanced default without losing its saved video data.
-An old day's pre-update selection is migrated once to the new policy, unless skipped.
+Build10 chooses one video from each Salsa/Bachata source by default. Source
+membership determines the slot even if a legacy video's style is wrong. A source
+whose name clearly says Salsa or Bachata uses that dance; otherwise its default
+style applies. Without a matching source, the mix uses phone videos of that style.
+Select the styles in Settings; turn off **One video per dance source or style**
+for an explicit overall count of1–3.
 
-1. Exclude unavailable videos and anything below **Minimum star rating for picks**.
-2. For each selected style, prefer videos not selected during the last three days
-   (the current saved day is excluded from cooldown history).
-3. Within the remaining pool, rank by stars first: 5★ before4★, and so on.
-4. Break equal-star ties using preferred labels, learning status, last practice and
-   explicit More/Less feedback. Those bonuses cannot outweigh a higher star rating.
-5. If every eligible video of a particular style is on cooldown, choose from that
-   style ignoring cooldown. Never lower the minimum rating or substitute styles.
-6. Save the chosen IDs for the local day. Ordinary rating/label/feedback changes
-   affect the next selection. **Update today’s picks** applies them immediately.
+Unrated videos count as5★ until rated. New imports/folder discoveries record the
+unrated state separately from explicit stars. Existing scanned cloud videos that
+were automatically assigned3★ without a rating marker are treated as unrated; choose
+3★ again if intended. Invalid/missing ratings also count as unrated. Explicit1–5★
+choices remain in force and can be changed on the video detail screen.
 
-Changing the requested style mix, total-count mode/count or minimum rating updates
-the plan. Loss of availability or a rating dropping below the minimum replaces an
-ineligible pick. Adding a previously missing style fills that slot without replacing
-existing valid choices. **Skip today** remains a scheduling choice, not a dislike.
-Explicitly updating today's picks clears Skip and generates a new eligible selection.
+The minimum star threshold is never silently reduced. Among eligible videos not
+recently picked, stars rank first; labels, learning status, recency and More/Less
+feedback break equal-star ties. Cooldown fallback is independent for each source
+(or phone-only style). If every eligible video in that slot is recent, its best
+eligible video can repeat. Missing sources/styles show a clear empty slot instead
+of a second video from another source. A shared file is not selected twice.
 
-A slot stays empty when no video qualifies; Today explains the missing style and
-minimum rating. If only one suitable video exists for a style, it can repeat on
-successive days. A high rating is a priority, not a promise to select the same video
-every day regardless of cooldown. Use a higher minimum to avoid lower-rated picks.
+Valid daily choices remain stable until **Update today’s picks** or the next day.
+Changing the minimum/mix, removing eligibility or upgrading the selection strategy
+replans; a newly available missing slot fills without replacing other valid choices.
+Skip today remains respected. Source/style keys migrate build9 selections once.
 
-The existing star control now says **Your rating · Daily Picks priority**. This is
-your importance rating. More/Less feedback remains separate and never changes stars.
-
-The picker is deterministic for the same library/history/day. This is metadata-based
-selection, not video-content or automatic dance analysis. Picks are stored locally
-and included in manual metadata sync; automatic server-stable scheduling across
-unsynced devices remains pending. Recommendations do not mark a video watched;
-opening/playing a video still drives its practice history.
-
-Turn off **One video per selected style** to choose an overall count of1–3 instead.
-That mode still ranks stars first and uses diversity only within equal ratings.
-The minimum-rating requirement still applies.
+[Source discovery and numbering](SOURCE-NUMBERING.md) runs on open/resume, at five
+minute intervals while active, or manual Refresh in Storage. Recommendations do not
+mark a video watched; practice recording remains a separate explicit action. Manual
+metadata snapshots retain preference/rating markers and picks. Automatic cross-device
+merge/sync and server-side push remain pending.

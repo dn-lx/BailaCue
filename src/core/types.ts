@@ -1,3 +1,4 @@
+import type { SourceNumbering } from "./numbering";
 import { defaultReminders, type ReminderPreferences } from "./reminders";
 export type DanceStyle = "Bachata" | "Salsa" | "Other";
 export type LearningStatus = "To learn" | "Practising" | "Learned";
@@ -18,8 +19,10 @@ export type Video = {
   duration: number;
   size: number;
   style: DanceStyle;
+  styleSet?: boolean;
   labels: string[];
   importance: number;
+  ratingSet?: boolean;
   status: LearningStatus;
   teacher: string;
   className: string;
@@ -36,6 +39,7 @@ export type Video = {
   remote?: {
     connectionId: string;
     fileId: string;
+    fileName?: string;
     sourceIds: string[];
     canDownload: boolean;
   };
@@ -86,6 +90,7 @@ export type CloudFolder = {
   defaultStyle: DanceStyle;
   defaultLabels: string[];
   writable: boolean;
+  numbering?: SourceNumbering;
   lastSyncedAt?: string;
   error?: string;
 };

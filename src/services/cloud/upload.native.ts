@@ -25,9 +25,9 @@ export async function uploadVideo(
       token: () => accessToken(connection),
       read: async (start, end) => {
         handle.offset = start;
-        return new Blob([await handle.readBytes(end - start)], {
-          type: job.mimeType,
-        });
+        // React Native Blob rejects ArrayBuffer/ArrayBufferView parts. Expo fetch
+        // accepts bytes directly; reads stay bounded to the 2 MiB chunk size.
+        return await handle.readBytes(end - start);
       },
       persist: async (next) => {
         await vault.set(`upload-${job.id}`, JSON.stringify(next));

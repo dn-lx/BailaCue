@@ -4,17 +4,18 @@ import React, {
   useCallback,
   useContext,
   useEffect,
-  useRef,
   useState,
 } from "react";
 import { emptyLibrary, type Library, type Video } from "../core/types";
-import { ensureDailyPick } from "../core/recommendations";
+import { createLibraryWriter } from "./libraryWriter";
 const KEY = "bailacue:device-library:v1";
 type Store = {
   library: Library;
   ready: boolean;
   error: string;
   update: (action: (l: Library) => Library) => void;
+  getLibrary: () => Library;
+  commit: (action: (l: Library) => Library) => Promise<Library>;
   updateVideo: (id: string, changes: Partial<Video>) => void;
   clearDeviceLibrary: () => Promise<void>;
 };
@@ -27,8 +28,16 @@ export function LibraryProvider({
   const [library, setLibrary] = useState(emptyLibrary);
   const [ready, setReady] = useState(false);
   const [error, setError] = useState("");
-  const clearing = useRef(false);
-  const writeQueue = useRef(Promise.resolve());
+  const [writer] = useState(() =>
+    createLibraryWriter(
+      async (next) => AsyncStorage.setItem(storageKey, JSON.stringify(next)),
+      setLibrary,
+      () =>
+        setError(
+          "Changes could not be saved. Free some device storage and try again.",
+        ),
+    ),
+  );
   useEffect(() => {
     AsyncStorage.getItem(storageKey)
       .then((raw) => {
@@ -36,7 +45,7 @@ export function LibraryProvider({
           const parsed = JSON.parse(raw);
           if (parsed.version !== 1 || !Array.isArray(parsed.videos))
             throw new Error("Unrecognised library format.");
-          setLibrary({
+          writer.hydrate({
             ...emptyLibrary(),
             ...parsed,
             cloudSettings: {
@@ -52,22 +61,8 @@ export function LibraryProvider({
           "Your saved library could not be opened. Restart the app; your files have not been removed.",
         ),
       );
-  }, [storageKey]);
-  useEffect(() => {
-    if (!ready || clearing.current) return;
-    writeQueue.current = writeQueue.current
-      .then(() => AsyncStorage.setItem(storageKey, JSON.stringify(library)))
-      .catch(() =>
-        setError(
-          "Changes could not be saved. Free some device storage and try again.",
-        ),
-      );
-  }, [library, ready, storageKey]);
-  const update = useCallback(
-    (action: (l: Library) => Library) =>
-      setLibrary((l) => ensureDailyPick(action(l))),
-    [],
-  );
+  }, [storageKey, writer]);
+  const update = writer.update;
   const updateVideo = useCallback(
     (id: string, changes: Partial<Video>) =>
       update((l) => ({
@@ -84,9 +79,10 @@ export function LibraryProvider({
         error,
         update,
         updateVideo,
+        getLibrary: writer.get,
+        commit: writer.commit,
         clearDeviceLibrary: async () => {
-          clearing.current = true;
-          await writeQueue.current;
+          await writer.close();
           await AsyncStorage.removeItem(storageKey);
         },
       }}

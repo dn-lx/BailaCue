@@ -1,3 +1,4 @@
+import { ImportPreview } from "../../components/ImportPreview";
 import { SaveDestinationPicker } from "../../components/SaveDestinationPicker";
 import { phoneDestination, uploadDestination } from "../../core/destination";
 import { LabelPicker } from "../../components/LabelPicker";
@@ -38,7 +39,8 @@ export default function Upload() {
   const [location, setLocation] = useState("");
   const [date, setDate] = useState("");
   const [notes, setNotes] = useState("");
-  const [importance, setImportance] = useState(3);
+  const [importance, setImportance] = useState(5);
+  const [ratingSet, setRatingSet] = useState(false);
   const saved = useRef(false);
   async function pick(record = false) {
     if (busy) return;
@@ -84,6 +86,7 @@ export default function Upload() {
           style,
           labels,
           importance,
+          ratingSet,
           status: "To learn",
           teacher,
           className,
@@ -168,6 +171,7 @@ export default function Upload() {
             </Row>
             <Txt>{media.name}</Txt>
           </Card>
+          <ImportPreview key={media.uri} uri={media.uri} />
           <Field label="Video title" value={title} onChangeText={setTitle} />
           <View style={layout.wrap}>
             {(["Bachata", "Salsa", "Other"] as const).map((s) => (
@@ -182,12 +186,20 @@ export default function Upload() {
             onChange={setLabels}
           />
           <Txt weight="bold">Your rating · Daily Picks priority</Txt>
+          {!ratingSet ? (
+            <Txt size={13}>
+              Unrated videos count as 5★ until you choose a rating.
+            </Txt>
+          ) : null}
           <Row>
             {[1, 2, 3, 4, 5].map((n) => (
               <Chip
                 key={n}
-                selected={n === importance}
-                onPress={() => setImportance(n)}
+                selected={ratingSet && n === importance}
+                onPress={() => {
+                  setImportance(n);
+                  setRatingSet(true);
+                }}
               >
                 {n} ★
               </Chip>

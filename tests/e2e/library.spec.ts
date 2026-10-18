@@ -423,7 +423,7 @@ test("Daily Picks chooses one rated video per style, supports a minimum rating a
   await page.getByRole("tab", { name: "Settings", exact: true }).click();
   await expect(
     page.getByRole("switch", {
-      name: "One video per selected style",
+      name: "One video per dance source or style",
       exact: true,
     }),
   ).toBeChecked();

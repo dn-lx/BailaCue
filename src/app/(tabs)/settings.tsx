@@ -88,9 +88,9 @@ export default function Settings() {
           }
         />
         <Row style={{ justifyContent: "space-between" }}>
-          <Txt style={{ flex: 1 }}>One video per selected style</Txt>
+          <Txt style={{ flex: 1 }}>One video per dance source or style</Txt>
           <Switch
-            accessibilityLabel="One video per selected style"
+            accessibilityLabel="One video per dance source or style"
             value={p.onePerStyle !== false}
             onValueChange={(onePerStyle) => set({ onePerStyle })}
             trackColor={{ true: t.primary }}
@@ -98,7 +98,7 @@ export default function Settings() {
         </Row>
         <Txt size={13} color={t.muted}>
           {p.onePerStyle !== false
-            ? "Select Salsa and Bachata for one of each every day. A missing style is left empty, never replaced by another style."
+            ? "Select Salsa and Bachata for one video from each matching source. Without a source, phone videos use their dance style. Unrated videos count as 5★ until you rate them."
             : "Choose the total number of videos for your daily selection."}
         </Txt>
         {p.onePerStyle === false ? (
@@ -293,7 +293,9 @@ export default function Settings() {
       </Card>
       <Card>
         <Row style={{ justifyContent: "space-between" }}>
-          <Txt weight="bold">Protect BailaCue with device lock</Txt>
+          <Txt weight="bold" style={{ flex: 1 }}>
+            Protect BailaCue with device lock
+          </Txt>
           <Switch
             accessibilityLabel="Protect BailaCue with device lock"
             value={library.deviceLock}
@@ -332,6 +334,36 @@ export default function Settings() {
         <Button variant="ghost" onPress={() => router.push("/sharing")}>
           Shared collections
         </Button>
+        {library.sources.map((source) => (
+          <View
+            key={source.id}
+            style={{
+              gap: 5,
+              padding: 14,
+              borderWidth: 1,
+              borderColor: t.border,
+              borderRadius: 16,
+            }}
+          >
+            <Txt weight="bold">{source.name}</Txt>
+            <Txt size={13} color={t.muted}>
+              {source.provider === "dropbox" ? "Dropbox" : "Google Drive"} ·{" "}
+              {
+                library.videos.filter((v) =>
+                  v.remote?.sourceIds.includes(source.id),
+                ).length
+              }{" "}
+              videos
+            </Txt>
+            <Txt size={12} color={t.muted}>
+              {
+                library.connections.find((c) => c.id === source.connectionId)
+                  ?.email
+              }
+            </Txt>
+            {source.error ? <Txt size={12}>{source.error}</Txt> : null}
+          </View>
+        ))}
         <Button icon="folder" onPress={() => router.push("/storage")}>
           Manage video storage
         </Button>

@@ -147,3 +147,62 @@ it("uses new balanced defaults for an older library without the optional setting
   l.videos = [video("s", "Salsa", 5), video("b", "Bachata", 4)];
   expect(choosePicks(l, now)).toEqual(["b", "s"]);
 });
+
+it("treats unrated videos as five stars while preserving explicit lower ratings", () => {
+  const l = emptyLibrary();
+  l.preferences.minPickRating = 5;
+  l.videos = [
+    video("unrated", "Salsa", 0, { ratingSet: false }),
+    video("rated", "Salsa", 3, { ratingSet: true }),
+    video("bachata", "Bachata", 5, { ratingSet: false }),
+  ];
+  expect(choosePicks(l, now)).toEqual(["bachata", "unrated"]);
+});
+it("chooses one video from each dance source even when all legacy video styles say Bachata", () => {
+  const l = emptyLibrary();
+  l.sources = [
+    {
+      id: "s",
+      connectionId: "c",
+      provider: "google-drive",
+      folderId: "s",
+      name: "Salsa",
+      defaultStyle: "Bachata",
+      defaultLabels: [],
+      writable: true,
+    },
+    {
+      id: "b",
+      connectionId: "c",
+      provider: "google-drive",
+      folderId: "b",
+      name: "Bachata",
+      defaultStyle: "Bachata",
+      defaultLabels: [],
+      writable: true,
+    },
+  ];
+  l.videos = [
+    video("salsa", "Bachata", 3, {
+      remote: {
+        connectionId: "c",
+        fileId: "s",
+        sourceIds: ["s"],
+        canDownload: true,
+      },
+    }),
+    video("bachata", "Bachata", 3, {
+      remote: {
+        connectionId: "c",
+        fileId: "b",
+        sourceIds: ["b"],
+        canDownload: true,
+      },
+    }),
+    video("local", "Salsa", 5),
+  ];
+  l.preferences.minPickRating = 5;
+  expect(choosePicks(l, now)).toEqual(["bachata", "salsa"]);
+  l.videos[0].ratingSet = true;
+  expect(choosePicks(l, now)).toEqual(["bachata"]);
+});

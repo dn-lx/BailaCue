@@ -39,6 +39,7 @@ import { resolveVideo, RevokedAccess } from "../../services/cloud/playback";
 import Timeline from "../../components/Timeline";
 import { VideoArea } from "../../components/VideoArea";
 import { SaveDestinationPicker } from "../../components/SaveDestinationPicker";
+import { isUnrated } from "../../core/ratings";
 import { clipDestination, uploadDestination } from "../../core/destination";
 import { trimRange } from "../../core/editing";
 import { formatTime, parseTime, validateSegment } from "../../core/practice";
@@ -839,7 +840,7 @@ function Player({ video, uri }: { video: Video; uri: VideoSource }) {
                 <Chip
                   key={style}
                   selected={style === video.style}
-                  onPress={() => updateVideo(video.id, { style })}
+                  onPress={() => updateVideo(video.id, { style, styleSet: true })}
                 >
                   {style}
                 </Chip>
@@ -852,8 +853,12 @@ function Player({ video, uri }: { video: Video; uri: VideoSource }) {
               {[1, 2, 3, 4, 5].map((importance) => (
                 <Chip
                   key={importance}
-                  selected={importance === video.importance}
-                  onPress={() => updateVideo(video.id, { importance })}
+                  selected={
+                    !isUnrated(video) && importance === video.importance
+                  }
+                  onPress={() =>
+                    updateVideo(video.id, { importance, ratingSet: true })
+                  }
                 >
                   {importance} ★
                 </Chip>

@@ -1,6 +1,7 @@
 import type { CloudFolder, Connection, Library, Video } from "./types";
 import type { PendingUpload } from "../services/cloud/uploadEngine";
 import type { RemoteVideo } from "../services/providers/types";
+import { numberedName, sourceStyle } from "./numbering";
 import { remoteId } from "./sources";
 
 export type SaveDestination = {
@@ -68,6 +69,7 @@ export function registerUpload(
   connection: Connection,
   file: RemoteVideo,
   keepCopy: boolean,
+  number?: number,
 ): Library {
   const video = library.videos.find((v) => v.id === videoId);
   if (!video) throw new Error("The phone video is no longer in this library.");
@@ -78,6 +80,11 @@ export function registerUpload(
       {
         ...video,
         id,
+        title: number
+          ? numberedName(number, `${video.title}.mp4`).replace(/\.mp4$/, "")
+          : video.title,
+        style: sourceStyle(source),
+        styleSet: false,
         source: connection.provider,
         uri: "",
         offlineUri: keepCopy ? video.uri : undefined,
@@ -86,6 +93,7 @@ export function registerUpload(
         remote: {
           connectionId: connection.id,
           fileId: file.fileId,
+          fileName: file.name,
           sourceIds: [source.id],
           canDownload: file.canDownload,
         },
@@ -93,6 +101,30 @@ export function registerUpload(
       },
       ...library.videos.filter((v) => v.id !== videoId && v.id !== id),
     ],
+    sources: number
+      ? library.sources.map((s) =>
+          s.id === source.id
+            ? {
+                ...s,
+                numbering: {
+                  next: Math.max(s.numbering?.next ?? 1, number + 1),
+                  files: {
+                    ...Object.fromEntries(
+                      Object.entries(s.numbering?.files ?? {}).filter(
+                        ([key, entry]) =>
+                          !key.startsWith("upload:") || entry.number !== number,
+                      ),
+                    ),
+                    [file.fileId]: {
+                      number,
+                      originalName: file.name.replace(/^\d{4,}\s+[—-]\s+/, ""),
+                    },
+                  },
+                },
+              }
+            : s,
+        )
+      : library.sources,
     playlists: library.playlists.map((p) => ({
       ...p,
       videoIds: [...new Set(p.videoIds.map((v) => (v === videoId ? id : v)))],

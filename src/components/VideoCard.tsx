@@ -1,8 +1,9 @@
+import { ratingCaption } from "../core/ratings";
 import { Image, Pressable, View } from "react-native";
 import { router } from "expo-router";
 import { type Video } from "../core/types";
 import { formatTime } from "../core/practice";
-import { Badge, Icon, Row, Txt } from "./ui";
+import { Badge, Icon, Txt } from "./ui";
 import { useTheme } from "./theme";
 export function VideoCard({
   video,
@@ -73,14 +74,12 @@ export function VideoCard({
         </View>
       </View>
       <View style={{ padding: 18, gap: 9 }}>
-        <Row style={{ justifyContent: "space-between" }}>
-          <Txt size={19} weight="display" style={{ flex: 1 }}>
-            {video.title}
-          </Txt>
-          <Txt size={13} color={t.primary}>
-            ★ {video.importance}
-          </Txt>
-        </Row>
+        <Txt size={19} weight="display">
+          {video.title}
+        </Txt>
+        <Txt size={13} color={t.primary}>
+          {ratingCaption(video)}
+        </Txt>
         <Txt size={13} color={t.muted}>
           {[
             video.status,

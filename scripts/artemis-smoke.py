@@ -144,6 +144,11 @@ async def main():
             if not any("BailaCue-ARTEMIS" in label(e) for e in elements):
                 await locate("Download",attempts=5)
         await locate("BailaCue-ARTEMIS",attempts=8)
+        await locate("Play preview",scrolls=5)
+        elements = await observe("import-preview-playing")
+        if not any("Pause preview" in label(e) for e in elements): raise AssertionError("Import preview did not play")
+        await locate("Pause preview",scrolls=2)
+        report["checks"].append({"check":"Native import preview plays before classification and destination selection", "result":"passed"})
         await field("Video title","ARTEMIS practice")
         await locate("Choose labels",scrolls=3)
         await field("Search labels","ARTEMIS Artist")
@@ -152,6 +157,8 @@ async def main():
         if not any("Remove label ARTEMIS Artist" in label(e) for e in elements):
             raise AssertionError("Created artist label was not selected")
         await locate("Done choosing labels",scrolls=2)
+        # Keep this earlier practice import below the later explicitly rated Daily Picks.
+        await locate("1 ★",scrolls=3)
         await locate("Add to my library",scrolls=10)
         for _ in range(20):
             elements = await observe("imported-video")

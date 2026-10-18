@@ -1,3 +1,31 @@
+# Current handoff · BailaCue 0.2.7 (build10)
+
+Owner requested upload Blob fix, preview before classification/destination,
+sequential numbering in actual Drive/Dropbox files and app-owned phone copies,
+external additions discovery, unrated=5★, one Daily Pick per Salsa/Bachata source,
+and alignment fixes across screens. Changes implemented; native/publication pending.
+Name remains BailaCue. Source pushes and APK prereleases remain authorized, no merge,
+store submission, paid actions, TinyFish or unrelated Me+ production changes.
+
+See SOURCE-NUMBERING.md and DAILY-PICKS.md for exact policies. Numbering retains
+original descriptive filenames, reserves durably, uses stable IDs, and reports
+rename failures without overwriting content. Foreground discovery on open/resume
+and every five minutes; manual Refresh always scans. No closed-app discovery or
+central multi-device sequence lock. Old build9 upload sessions retain destination
+and identity on resume. Legacy automatically assigned cloud3★ is treated unrated;
+explicit new ratings have a separate marker. Upload saves wait for durable metadata
+before phone cleanup. Numbered phone copies are staged before reference changes.
+
+Local validation:128 tests /16 suites, six browser journeys, type/lint and web export.
+114.5MiB transfer regression uses mocked HTTP/native handles and rejects Blob buffers;
+real provider transfers/renames are not claimed. Layout checks include long labels
+across seven screens at320/360/412px. Native harness adds import-preview playback;
+ARTEMIS build10 and exact public APK verification still required.
+
+Historical build9 handoff follows; its source/test details are historical only.
+
+---
+
 # Current handoff · BailaCue 0.2.6 (build9)
 
 Source `feat/bailacue-mobile-foundation`, draft PR#1. New release tag

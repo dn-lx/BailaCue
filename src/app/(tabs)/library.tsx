@@ -139,7 +139,7 @@ export default function LibraryScreen() {
       {library.playlists.map((p) => (
         <Card key={p.id}>
           <Row style={{ justifyContent: "space-between" }}>
-            <View>
+            <View style={{ flex: 1, minWidth: 0 }}>
               <Txt size={19} weight="display">
                 {p.name}
               </Txt>

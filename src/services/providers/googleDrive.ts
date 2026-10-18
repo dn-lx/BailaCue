@@ -113,6 +113,35 @@ export class GoogleDriveProvider implements VideoProvider {
     } while (cursor);
     return { videos: [...new Map(videos.map((v) => [v.fileId, v])).values()] };
   }
+  async renameVideo(fileId: string, name: string, folderId: string) {
+    const metadata = (await this.get(
+      `/files/${encodeURIComponent(fileId)}?fields=id,parents,capabilities(canRename)&supportsAllDrives=true`,
+    )) as { parents?: string[]; capabilities?: { canRename?: boolean } };
+    if (
+      !metadata.parents?.includes(folderId) ||
+      metadata.capabilities?.canRename !== true
+    )
+      throw new ProviderError(
+        "This video cannot be renamed in the selected folder.",
+        "permission",
+      );
+    const response = await this.request(
+      `${API}/files/${encodeURIComponent(fileId)}?supportsAllDrives=true&fields=id,name`,
+      {
+        method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${await this.token()}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ name }),
+      },
+    );
+    if (!response.ok)
+      throw new ProviderError(
+        "Drive could not rename this video. Refresh to retry.",
+        response.status === 401 ? "reauth" : "permission",
+      );
+  }
   async playback(fileId: string) {
     const metadata = (await this.get(
       `/files/${encodeURIComponent(fileId)}?fields=id,capabilities(canDownload)&supportsAllDrives=true`,

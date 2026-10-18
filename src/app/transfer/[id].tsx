@@ -1,3 +1,8 @@
+import { reserveUploadNumber } from "../../core/numbering";
+import { provider } from "../../services/cloud/provider";
+import { scanSource } from "../../services/cloud/scan";
+import { prepareNamedCopy } from "../../services/phoneCopies";
+import { ImportPreview } from "../../components/ImportPreview";
 import {
   assertUploadDestination,
   registerUpload,
@@ -35,7 +40,7 @@ export default function Transfer() {
     keepCopy?: string;
     autoUpload?: string;
   }>();
-  const { library, update } = useLibrary();
+  const { library, commit, getLibrary } = useLibrary();
   const t = useTheme();
   const video = library.videos.find((v) => v.id === id);
   const [sourceId, setSourceId] = useState(destination ?? "");
@@ -81,7 +86,9 @@ export default function Transfer() {
     setError("");
     abort.current = new AbortController();
     try {
-      const { source, connection } = uploadDestination(library, sourceId);
+      if (!job?.sequenceNumber)
+        await scanSource({ commit, getLibrary }, sourceId);
+      const { source, connection } = uploadDestination(getLibrary(), sourceId);
       const extension =
         /\.(mov|m4v|webm|mkv|avi|3gp)$/i.exec(video.uri)?.[1]?.toLowerCase() ??
         "mp4";
@@ -110,6 +117,24 @@ export default function Transfer() {
         status: "queued",
         keepCopy,
       };
+      if (!current.sequenceNumber) {
+        await commit((l) => {
+          const latest = uploadDestination(l, sourceId).source;
+          const reserved = reserveUploadNumber(
+            latest,
+            current.id,
+            current.name,
+          );
+          current.name = reserved.name;
+          current.sequenceNumber = reserved.number;
+          return {
+            ...l,
+            sources: l.sources.map((s) =>
+              s.id === sourceId ? { ...s, numbering: reserved.numbering } : s,
+            ),
+          };
+        });
+      }
       assertUploadDestination(current, source, connection);
       await vault.set(`upload-for-${id}`, current.id);
       await vault.set(`upload-${current.id}`, JSON.stringify(current));
@@ -122,10 +147,47 @@ export default function Transfer() {
         setJob,
         abort.current.signal,
       );
+      // Old saved jobs keep their original session/path across retry. Number
+      // their confirmed file by stable ID after completion, without reuploading.
+      if (file.name !== current.name) {
+        try {
+          await provider(connection).renameVideo(
+            file.fileId,
+            current.name,
+            source.folderId,
+          );
+          file.name = current.name;
+        } catch {
+          setError(
+            "Upload confirmed. Cloud filename numbering needs another refresh in Storage.",
+          );
+        }
+      }
       const newId = remoteId(connection, file.fileId);
       // Keep the owned phone file referenced until cleanup succeeds.
-      update((l) => {
-        const next = registerUpload(l, id, source, connection, file, true);
+      let phoneUri = video.uri;
+      if (current.keepCopy) {
+        try {
+          phoneUri = await prepareNamedCopy(video.uri, current.name, newId);
+        } catch {
+          setError(
+            "Upload confirmed. The phone filename could not be updated; its original copy was kept.",
+          );
+        }
+      }
+      await commit((l) => {
+        const next = registerUpload(
+          l,
+          id,
+          source,
+          connection,
+          file,
+          true,
+          current.sequenceNumber,
+        );
+        next.videos = next.videos.map((v) =>
+          v.id === newId ? { ...v, offlineUri: phoneUri } : v,
+        );
         if (!current.keepCopy)
           next.videos = next.videos.map((v) =>
             v.id === newId ? { ...v, storagePreference: "online" } : v,
@@ -133,6 +195,13 @@ export default function Transfer() {
         return next;
       });
       setConfirmedId(newId);
+      if (current.keepCopy && phoneUri !== video.uri) {
+        try {
+          await deleteMedia(video.uri);
+        } catch {
+          /* Numbered copy is already durable. */
+        }
+      }
       if (!current.keepCopy) {
         try {
           await deleteMedia(video.uri);
@@ -143,7 +212,7 @@ export default function Transfer() {
               /* Thumbnail cleanup can be retried separately. */
             }
           }
-          update((l) => ({
+          await commit((l) => ({
             ...l,
             videos: l.videos.map((v) =>
               v.id === newId
@@ -165,7 +234,7 @@ export default function Transfer() {
     } finally {
       setBusy(false);
     }
-  }, [video, busy, library, sourceId, keepCopy, job, id, update]);
+  }, [video, busy, sourceId, keepCopy, job, id, commit, getLibrary]);
   useEffect(() => {
     if (autoUpload === "1" && restored && video && !autoStarted.current) {
       autoStarted.current = true;
@@ -215,6 +284,7 @@ export default function Transfer() {
               until storage confirms the upload.
             </Txt>
           </Card>
+          <ImportPreview key={video.uri} uri={video.uri} />
           <Card>
             <Txt weight="bold">Destination folder</Txt>
             {sourceId ? (
@@ -251,7 +321,7 @@ export default function Transfer() {
               Connect or manage folders
             </Button>
             <Row style={{ justifyContent: "space-between" }}>
-              <Txt>Keep a phone copy after upload</Txt>
+              <Txt style={{ flex: 1 }}>Keep a phone copy after upload</Txt>
               <Switch
                 accessibilityLabel="Keep a phone copy after upload"
                 value={job?.keepCopy ?? keepCopy}
@@ -260,9 +330,9 @@ export default function Transfer() {
               />
             </Row>
             <Txt size={12} color={t.muted}>
-              BailaCue creates a uniquely named file. It never overwrites a
-              storage original. Upload jobs resume after interruption using the
-              same destination and identity.
+              BailaCue assigns the next number in this folder and keeps the
+              title. It never overwrites a storage original. Upload jobs resume
+              after interruption using the same destination and identity.
             </Txt>
           </Card>
           {job ? (

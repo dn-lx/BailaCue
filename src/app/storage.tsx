@@ -20,7 +20,9 @@ import { useTheme } from "../components/theme";
 import { useLibrary } from "../services/store";
 import { connectAccount, disconnectAccount } from "../services/cloud/accounts";
 import { provider } from "../services/cloud/provider";
-import { parseFolder, reconcileSource } from "../core/sources";
+import { sourceStyle } from "../core/numbering";
+import { scanSource } from "../services/cloud/scan";
+import { parseFolder } from "../core/sources";
 import {
   uid,
   type CloudFolder,
@@ -29,7 +31,7 @@ import {
 } from "../core/types";
 import { deleteMedia } from "../services/media";
 export default function Storage() {
-  const { library, update } = useLibrary();
+  const { library, update, commit, getLibrary } = useLibrary();
   const t = useTheme();
   const [busy, setBusy] = useState("");
   const [error, setError] = useState("");
@@ -79,16 +81,7 @@ export default function Storage() {
     });
   }
   async function refresh(source: CloudFolder) {
-    const connection = library.connections.find(
-      (c) => c.id === source.connectionId,
-    );
-    if (!connection) throw new Error("Reconnect this account first.");
-    const adapter = provider(connection);
-    const info = await adapter.inspectFolder(source.folderId);
-    const result = await adapter.listVideos(source);
-    update((l) =>
-      reconcileSource(l, { ...source, writable: info.writable }, result.videos),
-    );
+    await scanSource({ commit, getLibrary }, source.id);
   }
   function edit(source: CloudFolder) {
     setAccountId(source.connectionId);
@@ -123,6 +116,9 @@ export default function Storage() {
       defaultStyle: style,
       defaultLabels: labels,
       writable: info.writable,
+      numbering: editId
+        ? library.sources.find((s) => s.id === editId)?.numbering
+        : undefined,
     };
     if (editId) {
       const old = library.sources.find((s) => s.id === editId)!;
@@ -131,17 +127,11 @@ export default function Storage() {
           "To choose a different account or folder, add a new source. Existing video associations are preserved.",
         );
     }
-    const result = await adapter.listVideos(source);
-    update((l) =>
-      reconcileSource(
-        {
-          ...l,
-          sources: [...l.sources.filter((s) => s.id !== source.id), source],
-        },
-        source,
-        result.videos,
-      ),
-    );
+    await commit((l) => ({
+      ...l,
+      sources: [...l.sources.filter((s) => s.id !== source.id), source],
+    }));
+    await scanSource({ commit, getLibrary }, source.id);
     setFolder("");
     setName("");
     setEditId("");
@@ -234,7 +224,7 @@ export default function Storage() {
             icon="folder"
             loading={busy === "google-drive"}
             disabled={!!busy}
-            onPress={() => connect("google-drive")}
+            onPress={() => connect("google-drive", true)}
           >
             Connect Google Drive
           </Button>
@@ -312,7 +302,7 @@ export default function Storage() {
             <Button
               variant="ghost"
               disabled={!!busy}
-              onPress={() => connect(connection.provider)}
+              onPress={() => connect(connection.provider, connection.writable)}
             >
               Reconnect
             </Button>
@@ -381,6 +371,12 @@ export default function Storage() {
                   onPress={() => {
                     setFolder(f.id);
                     if (!name) setName(f.name);
+                    setStyle(
+                      sourceStyle({
+                        name: f.name,
+                        defaultStyle: style,
+                      } as CloudFolder),
+                    );
                   }}
                 >
                   {f.name}
@@ -400,6 +396,7 @@ export default function Storage() {
                 : "/Dance/Salsa"
             }
             value={folder}
+            editable={!busy}
             onChangeText={setFolder}
             autoCapitalize="none"
           />
@@ -407,6 +404,7 @@ export default function Storage() {
             label="Folder name in BailaCue"
             placeholder="Tuesday Salsa"
             value={name}
+            editable={!busy}
             onChangeText={setName}
           />
           <View style={layout.wrap}>
@@ -423,9 +421,11 @@ export default function Storage() {
             onChange={setLabels}
           />
           <Txt size={12} color={t.muted}>
-            New videos start with these labels and importance 3 ★. Your own
-            edits are preserved when a folder refreshes. Browse shows top-level
-            Dropbox folders; enter a path to choose a nested folder.
+            New videos start unrated (counting as 5★) with these labels. Each
+            source gets stable 0001-and-up filenames, preserving original
+            titles. Your own edits are preserved when a folder refreshes. Browse
+            shows top-level Dropbox folders; enter a path to choose a nested
+            folder.
           </Txt>
           <Button
             onPress={() => run("source", saveSource)}
@@ -448,15 +448,44 @@ export default function Storage() {
           ) : null}
         </Card>
       ) : null}
+      {library.sources.length ? (
+        <Txt size={13} color={t.muted}>
+          New files added outside BailaCue are discovered when you reopen the
+          app, then every five minutes while it is active. Use Refresh videos to
+          check now. Numbering changes filenames, not video contents.
+        </Txt>
+      ) : null}
       {library.sources.map((source) => (
         <Card key={source.id}>
-          <Row style={{ justifyContent: "space-between" }}>
-            <Txt size={21} weight="display" style={{ flex: 1 }}>
-              {source.name}
-            </Txt>
-            <Badge tone={source.writable ? "lime" : "soft"}>
-              {source.writable ? "WRITABLE" : "READ ONLY"}
+          <Txt size={21} weight="display">
+            {source.name}
+          </Txt>
+          <Row>
+            <Badge
+              tone={
+                source.writable &&
+                library.connections.some(
+                  (c) =>
+                    c.id === source.connectionId && c.connected && c.writable,
+                )
+                  ? "lime"
+                  : "soft"
+              }
+            >
+              {!library.connections.some(
+                (c) => c.id === source.connectionId && c.connected,
+              )
+                ? "DISCONNECTED"
+                : source.writable &&
+                    library.connections.some(
+                      (c) => c.id === source.connectionId && c.writable,
+                    )
+                  ? "WRITABLE"
+                  : "READ ONLY"}
             </Badge>
+            <Txt size={12} color={t.muted}>
+              {source.provider === "dropbox" ? "Dropbox" : "Google Drive"}
+            </Txt>
           </Row>
           <Txt color={t.muted}>
             {
@@ -464,14 +493,19 @@ export default function Storage() {
                 v.remote?.sourceIds.includes(source.id),
               ).length
             }{" "}
-            videos · {source.defaultStyle} · {source.defaultLabels.join(", ")}
+            videos · {sourceStyle(source)} · {source.defaultLabels.join(", ")}
           </Txt>
           <Txt size={12} color={t.muted}>
             {source.lastSyncedAt
               ? `Last refreshed ${new Date(source.lastSyncedAt).toLocaleString()}`
               : "Not refreshed yet"}
           </Txt>
-          <Row>
+          {source.error ? (
+            <Txt size={13} accessibilityRole="alert" color={t.primary}>
+              {source.error}
+            </Txt>
+          ) : null}
+          <View style={{ gap: 10 }}>
             <Button
               variant="soft"
               disabled={!!busy}
@@ -480,13 +514,18 @@ export default function Storage() {
             >
               Refresh videos
             </Button>
-            <Button variant="ghost" onPress={() => edit(source)}>
-              Edit folder
-            </Button>
-            <Button variant="ghost" onPress={() => setRemoveFolder(source.id)}>
-              Disconnect folder
-            </Button>
-          </Row>
+            <Row>
+              <Button variant="ghost" onPress={() => edit(source)}>
+                Edit folder
+              </Button>
+              <Button
+                variant="ghost"
+                onPress={() => setRemoveFolder(source.id)}
+              >
+                Disconnect folder
+              </Button>
+            </Row>
+          </View>
           {removeFolder === source.id ? (
             <>
               <Txt>
@@ -511,7 +550,9 @@ export default function Storage() {
       ))}
       <Card>
         <Row style={{ justifyContent: "space-between" }}>
-          <Txt weight="bold">Download only on Wi-Fi</Txt>
+          <Txt weight="bold" style={{ flex: 1 }}>
+            Download only on Wi-Fi
+          </Txt>
           <Switch
             accessibilityLabel="Download only on Wi-Fi"
             value={library.cloudSettings.wifiOnly}
