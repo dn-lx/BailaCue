@@ -1,3 +1,19 @@
+# Current acceptance · BailaCue 0.2.9/build14
+
+All12 Google ARTEMIS native checks passed in
+[run39172854949](https://github.com/dn-lx/BailaCue/actions/runs/39172854949).
+App source f3885fa595b7802ad094de9e7cd70482b28e7831; helper1.2.0. Public APK
+SHA256 `18ade8ba0e623e9f8f871cecb2d39e9e9edee8f7634add7433d9b828389aa7bf`
+(70,231,089bytes) equals the native-tested artifact. Checksum, APKv2 signature,
+package/version and unchanged signing identity were independently verified.
+[Report](verification/android-build14/report.json) · [Details](VERIFICATION.md).
+Cloud numbering/renaming tests use mocked providers; native checks use synthetic
+phone videos through the actual controller/helper, without an autonomous model.
+
+Earlier acceptance records and setup follow.
+
+---
+
 # Google ARTEMIS · build11 acceptance
 
 [Acceptance run39166069113](https://github.com/dn-lx/BailaCue/actions/runs/39166069113)

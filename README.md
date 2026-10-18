@@ -7,11 +7,11 @@ and iOS, built with React Native, TypeScript and Expo SDK 58.
 
 ## Install Android
 
-Download [BailaCue 0.2.8 for Android](https://github.com/dn-lx/BailaCue/releases/download/v0.2.8-preview.11/BailaCue-v0.2.8-build11-preview.apk)
-or open [release notes](https://github.com/dn-lx/BailaCue/releases/tag/v0.2.8-preview.11).
+Download [BailaCue 0.2.9 for Android](https://github.com/dn-lx/BailaCue/releases/download/v0.2.9-preview.14/BailaCue-v0.2.9-build14-preview.apk)
+or open [release notes](https://github.com/dn-lx/BailaCue/releases/tag/v0.2.9-preview.14).
 Open it on an Android phone and allow installation from your browser/files app when
 Android asks. This is an internal preview signed with a test certificate, not a
-Play Store release. Version **0.2.8 (11)**; minimum Android 7/API 24.
+Play Store release. Version **0.2.9 (14)**; minimum Android 7/API 24.
 
 No Metro server or Expo Go is needed for the APK. iOS needs a separate signed build
 with an Apple Developer account; an Android APK cannot be installed on an iPhone.
@@ -19,14 +19,14 @@ with an Apple Developer account; an Android APK cannot be installed on an iPhone
 Preview publication is gated on Google ARTEMIS native checks, including actual
 resize/trim-handle gestures, real import, new-file trimming, original-byte preservation,
 saving to Photos, artist-label creation/reuse and rated Salsa/Bachata Daily Picks.
-Build11 passed all12 ARTEMIS checks, including preview playback. The public APK
+Build14 passed all12 ARTEMIS checks, including preview playback. The public APK
 exactly matches the accepted bytes; checksum/signature/version were independently verified.
 [Verification and screenshots](docs/VERIFICATION.md) record exact scope and remaining
 live-provider/iOS setup. The release verification records the final native and public-download evidence.
 
 ## What is implemented
 
-- [Sequential source filenames](docs/SOURCE-NUMBERING.md), external-file discovery and matching phone-copy names.
+- [Number-only incremental source filenames](docs/SOURCE-NUMBERING.md), external-file discovery and matching phone-copy names.
 - Preview an imported video before choosing its dance style and destination.
 - Modern dancing-partner icon, adaptive icon, splash, brand badges, light/dark themes and accessible controls.
 - [Rating-led Daily Picks](docs/DAILY-PICKS.md): one video from each Salsa/Bachata source by default, with unrated videos counted as 5★,
@@ -100,7 +100,7 @@ npm run build:android
 ```
 
 The script generates Android from Expo config and builds a bundled release-mode APK
-at `artifacts/BailaCue-v0.2.8-build11-preview.apk` with SHA-256. Native media code is
+at `artifacts/BailaCue-v0.2.9-build14-preview.apk` with SHA-256. Native media code is
 committed under `modules/baila-media`; generated root `android/` and `ios/` are ignored.
 The generated internal debug certificate is used for previews; configure your own
 release signing before store publication. Never commit signing keys.

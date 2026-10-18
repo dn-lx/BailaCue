@@ -12,7 +12,9 @@ the confirmed ID and repairs legacy conflicts durably; saved Dropbox IDs allow r
 after renaming without reuploading. Intended numeric filenames are used for phone
 downloads even if the provider rename needs retry. No production database changes. Source pushes and Android prereleases remain authorized.
 
-Local140 tests/16 suites, type/lint and six browser journeys passed. Native/public results pending. Build13/run39171131452 was also cancelled before publication for reservation collision and post-rename retry corrections. Build12/run39170414260 was cancelled before publication to fix outside numeric filenames skipping the sequence.
+Local140 tests/16 suites, type/lint and six browser journeys passed. Published v0.2.9-preview.14. Build/native/publication run39172854949 passed; all12 ARTEMIS checks passed with helper1.2.0. The public APK matches the tested artifact:70,231,089bytes, SHA25618ade8ba0e623e9f8f871cecb2d39e9e9edee8f7634add7433d9b828389aa7bf. Public APKv2 signature/version and unchanged signer verified. Evidence is in verification/android-build14/. Build13/run39171131452 was also cancelled before publication for reservation collision and post-rename retry corrections. Build12/run39170414260 was cancelled before publication to fix outside numeric filenames skipping the sequence.
+App source f3885fa595b7802ad094de9e7cd70482b28e7831; tagv0.2.9-preview.14.
+Build run39172854949; source checks39172852220 passed.
 See SOURCE-NUMBERING.md, VERIFICATION.md and releases/v0.2.9-preview.14.md.
 
 Historical build11 handoff follows.
