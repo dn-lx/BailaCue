@@ -37,6 +37,7 @@ export default function Storage() {
   const [folders, setFolders] = useState<{ id: string; name: string }[]>([]);
   const [editId, setEditId] = useState("");
   const [confirmDisconnect, setConfirmDisconnect] = useState("");
+  const [removeFolder, setRemoveFolder] = useState("");
   const [setup, setSetup] = useState(false);
   const [appKey, setAppKey] = useState(library.cloudSettings.dropboxAppKey);
   const selected = library.connections.find((c) => c.id === accountId);
@@ -145,6 +146,40 @@ export default function Storage() {
     setName("");
     setEditId("");
     setFolders([]);
+  }
+  async function detach(source: CloudFolder) {
+    const orphaned = library.videos.filter(
+      (v) =>
+        v.remote?.sourceIds.includes(source.id) &&
+        v.remote.sourceIds.length === 1 &&
+        !v.sharedGrantId,
+    );
+    for (const video of orphaned) {
+      if (video.offlineUri) await deleteMedia(video.offlineUri);
+      if (video.thumbnail?.startsWith("file:"))
+        await deleteMedia(video.thumbnail);
+    }
+    const ids = new Set(orphaned.map((v) => v.id));
+    update((l) => ({
+      ...l,
+      sources: l.sources.filter((s) => s.id !== source.id),
+      videos: l.videos.map((v) =>
+        v.remote?.sourceIds.includes(source.id)
+          ? {
+              ...v,
+              available: ids.has(v.id) ? false : v.available,
+              offlineUri: ids.has(v.id) ? undefined : v.offlineUri,
+              thumbnail: ids.has(v.id) ? undefined : v.thumbnail,
+              remote: {
+                ...v.remote,
+                sourceIds: v.remote.sourceIds.filter((s) => s !== source.id),
+              },
+            }
+          : v,
+      ),
+    }));
+    setRemoveFolder("");
+    if (editId === source.id) setEditId("");
   }
   async function disconnect(connection: Connection) {
     for (const video of library.videos.filter(
@@ -424,7 +459,30 @@ export default function Storage() {
             <Button variant="ghost" onPress={() => edit(source)}>
               Edit folder
             </Button>
+            <Button variant="ghost" onPress={() => setRemoveFolder(source.id)}>
+              Disconnect folder
+            </Button>
           </Row>
+          {removeFolder === source.id ? (
+            <>
+              <Txt>
+                Disconnect this folder and remove downloads used only by it?
+                Notes and ratings stay in your library. Online originals remain
+                in storage.
+              </Txt>
+              <Row>
+                <Button
+                  disabled={!!busy}
+                  onPress={() => run("detach", () => detach(source))}
+                >
+                  Confirm folder disconnect
+                </Button>
+                <Button variant="soft" onPress={() => setRemoveFolder("")}>
+                  Keep folder
+                </Button>
+              </Row>
+            </>
+          ) : null}
         </Card>
       ))}
       <Card>

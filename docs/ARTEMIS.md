@@ -29,3 +29,13 @@ output duration → save/share → relaunch persistence. Then use registered OAu
 for personal folder connection, online playback, selected download, airplane mode,
 upload interruption/retry, permission denial/reconnect and reminder deep links.
 The repository's browser mocks do not replace these native journeys.
+
+Further actual attempts: streaming helper installation timed out after 30 seconds.
+A pushed install reached Android PackageInstaller but failed because its
+PackageManagerInternal was still null while the software-emulated system booted.
+These are environment failures, not passed application tests.
+
+`scripts/artemis-smoke.py` provides deterministic native UI assertions using
+ARTEMIS's actual controller/observation API. This mode does not invoke Gemini.
+It requires a fully booted device and working helper and does not substitute for
+the autonomous runner or video-editing acceptance journey.

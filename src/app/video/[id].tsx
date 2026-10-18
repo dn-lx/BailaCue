@@ -868,21 +868,29 @@ export default function VideoDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { library, updateVideo } = useLibrary();
   const video = library.videos.find((v) => v.id === id);
-  const [source, setSource] = useState<{ id: string; uri: VideoSource }>();
-  const [error, setError] = useState("");
+  const [source, setSource] = useState<{ key: string; uri: VideoSource }>();
+  const [failure, setFailure] = useState<{ key: string; message: string }>();
   const videoId = video?.id;
   const videoUri = video?.uri;
   const offlineUri = video?.offlineUri;
   const preference = video?.storagePreference;
   const connections = library.connections;
+  const playbackKey = JSON.stringify([
+    videoId,
+    videoUri,
+    offlineUri,
+    preference,
+    connections.map((c) => [c.id, c.connected]),
+  ]);
+  const error = failure?.key === playbackKey ? failure.message : "";
   useEffect(() => {
     let alive = true;
     if (video && videoId)
       resolveVideo(video, library)
         .then((uri) => {
           if (alive) {
-            setSource({ id: videoId, uri });
-            setError("");
+            setSource({ key: playbackKey, uri });
+            setFailure(undefined);
           }
         })
         .catch((e) => {
@@ -894,7 +902,7 @@ export default function VideoDetail() {
                 storagePreference: "online",
                 available: false,
               });
-            setError(e.message);
+            setFailure({ key: playbackKey, message: e.message });
           }
         });
     return () => {
@@ -902,7 +910,7 @@ export default function VideoDetail() {
     };
     // Metadata edits do not reopen a playing video.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [videoId, videoUri, offlineUri, preference, connections]);
+  }, [playbackKey]);
   if (!video || error)
     return (
       <SafeAreaView style={{ flex: 1, padding: 24, gap: 18 }}>
@@ -918,17 +926,11 @@ export default function VideoDetail() {
         </Button>
       </SafeAreaView>
     );
-  if (!source || source.id !== video.id)
+  if (!source || source.key !== playbackKey)
     return (
       <SafeAreaView style={{ flex: 1, padding: 24 }}>
         <Txt>Opening your video…</Txt>
       </SafeAreaView>
     );
-  return (
-    <Player
-      key={`${video.id}-${preference}-${offlineUri}`}
-      video={video}
-      uri={source.uri}
-    />
-  );
+  return <Player key={playbackKey} video={video} uri={source.uri} />;
 }

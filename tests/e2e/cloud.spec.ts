@@ -168,6 +168,9 @@ test("user connects Dropbox → selects folder → streams → edits rating → 
   await expect(
     page.getByText("dancer@example.com", { exact: true }).first(),
   ).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Browse my folders", exact: true }),
+  ).toBeVisible();
   await page.getByRole("button", { name: "Done", exact: true }).click();
   await page
     .getByRole("button", { name: "Play Cloud turn", exact: true })
