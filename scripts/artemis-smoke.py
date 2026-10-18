@@ -64,6 +64,8 @@ async def main():
             continue
         if any("BailaCue isn't responding" in label(e) for e in elements):
             raise AssertionError("BailaCue native application is not responding")
+        if any("BailaCue keeps stopping" in label(e) or "BailaCue has stopped" in label(e) for e in elements):
+            raise AssertionError("BailaCue crashed during native startup; see device-logcat.txt")
         if any("Find your rhythm" in label(e) for e in elements):
             break
         await asyncio.sleep(3)

@@ -1,14 +1,10 @@
 name: ARTEMIS preview acceptance
 on:
-  push:
-    paths:
-      - scripts/artemis-smoke.py
-      - .github/workflows/artemis-android.yml
   workflow_dispatch:
     inputs:
       tag:
         description: Published Android preview tag
-        default: v0.2.1-preview.3
+        default: v0.2.2-preview.4
 permissions:
   contents: read
   actions: read
@@ -33,7 +29,7 @@ jobs:
       - name: Download preview and create synthetic video
         env:
           GH_TOKEN: ${{ github.token }}
-          PREVIEW_TAG: ${{ inputs.tag || 'v0.2.1-preview.3' }}
+          PREVIEW_TAG: ${{ inputs.tag || 'v0.2.2-preview.4' }}
         run: |
           mkdir -p artifacts
           gh release download "$PREVIEW_TAG" --repo "$GITHUB_REPOSITORY" --pattern '*.apk' --pattern '*.sha256' --dir artifacts

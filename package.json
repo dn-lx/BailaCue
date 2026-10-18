@@ -1,6 +1,6 @@
 {
   "name": "bailacue",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "main": "expo-router/entry",
   "dependencies": {
     "@expo-google-fonts/dm-sans": "^0.4.2",
@@ -10,6 +10,7 @@
     "expo": "~58.0.14",
     "expo-auth-session": "~58.0.13",
     "expo-background-task": "~58.0.11",
+    "expo-build-properties": "~58.0.11",
     "expo-constants": "~58.0.12",
     "expo-crypto": "~58.0.7",
     "expo-dev-client": "~58.0.14",

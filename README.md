@@ -7,10 +7,11 @@ and iOS, built with React Native, TypeScript and Expo SDK 58.
 
 ## Install Android
 
-Download the APK from [GitHub Releases](https://github.com/dn-lx/BailaCue/releases).
+Download [BailaCue 0.2.1 for Android](https://github.com/dn-lx/BailaCue/releases/download/v0.2.2-preview.4/BailaCue-v0.2.2-build4-preview.apk)
+or open [release notes](https://github.com/dn-lx/BailaCue/releases/tag/v0.2.2-preview.4).
 Open it on an Android phone and allow installation from your browser/files app when
 Android asks. This is an internal preview signed with a test certificate, not a
-Play Store release. Version **0.2.1 (3)**; minimum Android 7/API 24.
+Play Store release. Version **0.2.2 (4)**; minimum Android 7/API 24.
 
 No Metro server or Expo Go is needed for the APK. iOS needs a separate signed build
 with an Apple Developer account; an Android APK cannot be installed on an iPhone.
@@ -32,7 +33,7 @@ with an Apple Developer account; an Android APK cannot be installed on an iPhone
   configurable local reminders/quiet hours and optional biometric/device lock.
 - Deployed Me+ username/password gateway, BailaCue-scoped sessions, recovery/password
   change, owner-isolated manual metadata sync with revision conflicts, collection
-  grants and BailaCue-only account cleanup. Enabled on mobile in build 3.
+  grants and BailaCue-only account cleanup. Enabled on mobile in build 4.
 
 Each user connects their own video repository. OAuth still requires the app's
 one-time Google/Dropbox registration: see [cloud setup](docs/CLOUD-STORAGE.md).
@@ -76,7 +77,7 @@ npm run build:android
 ```
 
 The script generates Android from Expo config and builds a bundled release-mode APK
-at `artifacts/BailaCue-v0.2.1-build3-preview.apk` with SHA-256. Native media code is
+at `artifacts/BailaCue-v0.2.2-build4-preview.apk` with SHA-256. Native media code is
 committed under `modules/baila-media`; generated root `android/` and `ios/` are ignored.
 The generated internal debug certificate is used for previews; configure your own
 release signing before store publication. Never commit signing keys.
@@ -90,7 +91,7 @@ Linux cannot compile/sign it locally. No store submission is performed by CI.
 The original additive BailaCue schema is already applied to the user-approved shared
 Me+ project. Existing Me+ health tables, functions and auth settings are untouched.
 The owner separately approved deployment; the additional private-table migrations
-and scoped Edge Function are now live. Mobile build 3 uses the scoped API. Real
+and scoped Edge Function are now live. Mobile build 4 uses the scoped API. Real
 registration/confirmation and two-user acceptance still need verification.
 
 [Account API setup](docs/ACCOUNT-API.md) covers deployment, session boundaries, sync,
