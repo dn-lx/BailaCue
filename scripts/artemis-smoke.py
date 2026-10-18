@@ -206,6 +206,9 @@ async def main():
             await asyncio.sleep(1)
         if not saved: raise AssertionError("Native Photos save was not confirmed")
         report["checks"].append({"check":"Explicit native Save new clip to Photos", "result":"passed"})
+        # The confirmation is a native Alert, which must close before the
+        # remaining label controls below the player become accessible.
+        await locate("OK",attempts=3)
         await locate("Remove label ARTEMIS Artist",scrolls=12)
         await locate("Choose labels",scrolls=2)
         await field("Search labels","artemis artist")
