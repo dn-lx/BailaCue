@@ -1,4 +1,32 @@
-# Google ARTEMIS · build8 acceptance
+# Google ARTEMIS · build9 acceptance
+
+[Build9 run39120175502](https://github.com/dn-lx/BailaCue/actions/runs/39120175502)
+passed **all11 native checks** on Android API35 using the real pinned ARTEMIS
+controller/helper1.2.0. The additional check imports rated Salsa and Bachata videos
+through DocumentsUI and asserts both Daily Picks. Existing resize, both timeline
+trim handles, import, labels, looping, separate MP4 export and Photos checks pass.
+No autonomous Gemini session or real provider account was used.
+
+[Report](verification/android-build9/report.json) ·
+[Today](verification/android-build9/today.jpg) ·
+[Daily mix](verification/android-build9/daily-mix.jpg) ·
+[Trim](verification/android-build9/timeline-trim.jpg) ·
+[Player resize](verification/android-build9/player-resized.jpg) ·
+[Photos saved](verification/android-build9/photos-saved.jpg).
+Screenshots retain original ARTEMIS JPEG bytes with corrected extensions. The daily
+mix image shows the Bachata card and the start of the Salsa card; assertions also
+use the native accessibility hierarchy. The browser journey separately verifies
+highest-rated selection, both styles, threshold exclusion and saved-day behavior.
+
+The public APK, build artifact and native report share SHA256
+`1bbd27d402e047f1dfa0f677d239e17ae221837b4274a387ed7bb04792d78c66`.
+The public checksum, APKv2 signature, package and version were independently verified.
+The 1–4s export was independently measured at3.017075s and both original hashes match.
+The complete evidence remains in the run artifact. This run passed on its first
+attempt; no application assertion was skipped. See [verification](VERIFICATION.md)
+for remaining live-provider, physical-device and iOS boundaries.
+
+## Historical build8 acceptance
 
 [Build8 run39115739082](https://github.com/dn-lx/BailaCue/actions/runs/39115739082)
 passed **all ten native checks** and published the tested APK. Real native resize-grip

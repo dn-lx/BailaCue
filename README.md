@@ -18,7 +18,8 @@ with an Apple Developer account; an Android APK cannot be installed on an iPhone
 
 Preview publication is gated on Google ARTEMIS native checks, including actual
 resize/trim-handle gestures, real import, new-file trimming, original-byte preservation,
-saving to Photos and artist-label creation/reuse.
+saving to Photos, artist-label creation/reuse and rated Salsa/Bachata Daily Picks.
+Build9 passed all11 native checks; the public APK exactly matches the tested bytes.
 [Verification and screenshots](docs/VERIFICATION.md) record exact scope and remaining
 live-provider/iOS setup. The release verification records the final native and public-download evidence.
 
@@ -27,7 +28,7 @@ live-provider/iOS setup. The release verification records the final native and p
 - Modern dancing-partner icon, adaptive icon, splash, brand badges, light/dark themes and accessible controls.
 - [Rating-led Daily Picks](docs/DAILY-PICKS.md): one Salsa and one Bachata by default,
   independent cooldowns, minimum stars and an explicit update-today action.
-- [Product/reliability audit](docs/audits/2026-10-18.html) with prioritized improvements
+- [Product/reliability audit PDF](docs/audits/BailaCue-Audit-2026-10-18.pdf) with prioritized improvements
   and evidence; other recommendations remain open.
 - Searchable [label dropdowns](docs/LABELS.md): choose existing video-type/artist labels or
   create new ones in imports, video details and cloud-folder defaults.

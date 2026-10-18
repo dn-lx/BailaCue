@@ -1,8 +1,13 @@
 # Current handoff · BailaCue 0.2.6 (build9)
 
 Source `feat/bailacue-mobile-foundation`, draft PR#1. New release tag
-`v0.2.6-preview.9`; compilation/native acceptance/publication pending.
-Previous build8 remains published. See VERIFICATION-0.2.5.md for its exact evidence.
+`v0.2.6-preview.9` is published from source commit
+`30a389b7f9e6d8db999b3aeaf0658473193003ec`. Release run39120175502 passed all11
+native checks. Public APK SHA256
+`1bbd27d402e047f1dfa0f677d239e17ae221837b4274a387ed7bb04792d78c66`
+(70,197,869 bytes) equals the built artifact and native report. APKv2 signature
+and version verified; signing identity remains the same as build8.
+See VERIFICATION.md and verification/android-build9/.
 
 ## Latest owner requests
 
@@ -15,11 +20,11 @@ migration of older daily choices. See DAILY-PICKS.md. Ratings now have clearer l
 The icon is a modern abstract dancing-partner mark in coral/cream on plum.
 It updates launcher/adaptive/splash/favicon/in-app mark. The opaque selected master
 is assets/brand/dance-icon-source.png; scripts/brand.mjs packages sizes without
-redrawing it. Unsuccessful transparent drafts are not included. Name, IDs, data,
+redrawing it. Name, IDs, data,
 OAuth and backend are unchanged. No native dependency changes or generated-root edits.
 
 110 unit/database tests, five browser journeys, type/lint and web export passed
-after final asset integration. Android native release pending. ARTEMIS harness now also imports rated Salsa
+after final asset integration. Android build9 passed ARTEMIS and published. The harness also imports rated Salsa
 and Bachata videos through UI and verifies both daily picks. Its root-bootstrap script
 handles adbd transport restarts with bounded checks rather than rebuilding the app.
 
@@ -32,7 +37,8 @@ using real functions with synthetic metadata/injected errors, with no production
 private media access. No broad fixes were authorized or silently implemented.
 Other findings cover snapshot validation, auth-expiry/cache behavior, scaling,
 thumbnails, onboarding, player density, labels, accessibility, timer recovery,
-app-switcher privacy and dependency triage. Actual npm audit reported29 affected
+app-switcher privacy, shared-identity reset revocation, lock/picker draft preservation
+and dependency triage. Actual npm audit reported29 affected
 entries rooted in three advisories, mostly propagated tooling; no exploit was run.
 Do not apply force downgrades that break Expo58 compatibility.
 
