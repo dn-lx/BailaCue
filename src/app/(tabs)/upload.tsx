@@ -212,8 +212,8 @@ export default function Upload() {
               <View style={{ flex: 1 }}>
                 <Txt weight="bold">Destination: This device</Txt>
                 <Txt size={13} color={t.muted}>
-                  A private local copy. Cloud uploads aren’t available in this
-                  version.
+                  A private local copy. Open it after saving to upload to a
+                  folder you choose.
                 </Txt>
               </View>
             </Row>
@@ -244,10 +244,10 @@ export default function Upload() {
             One library. Different places.
           </Txt>
           <Txt color={t.muted}>
-            Cloud folder connections will be available in a future update. For
-            now, keep your favourite clips privately on your device.
+            Connect your own Google Drive or Dropbox folders. Stream online or
+            download videos to your phone.
           </Txt>
-          <Button variant="ghost" onPress={() => router.push("/settings")}>
+          <Button variant="ghost" onPress={() => router.push("/storage")}>
             View storage setup
           </Button>
         </Card>

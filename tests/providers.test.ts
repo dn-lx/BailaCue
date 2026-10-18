@@ -77,16 +77,14 @@ describe("Google Drive adapter (mock HTTP)", () => {
   it("reports read-only folders", async () => {
     const adapter = new GoogleDriveProvider(
       async () => "token",
-      vi
-        .fn()
-        .mockResolvedValue(
-          response({
-            id: "folder",
-            name: "Class",
-            mimeType: "application/vnd.google-apps.folder",
-            capabilities: { canAddChildren: false },
-          }),
-        ),
+      vi.fn().mockResolvedValue(
+        response({
+          id: "folder",
+          name: "Class",
+          mimeType: "application/vnd.google-apps.folder",
+          capabilities: { canAddChildren: false },
+        }),
+      ),
     );
     expect((await adapter.inspectFolder("folder")).writable).toBe(false);
   });

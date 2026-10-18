@@ -68,6 +68,11 @@ export function videoFromExport(
     bookmarks: [],
     segments: [],
     source: "device",
+    mimeType: "video/mp4",
+    remote: undefined,
+    sharedGrantId: undefined,
+    offlineUri: undefined,
+    storagePreference: undefined,
     available: true,
   };
 }

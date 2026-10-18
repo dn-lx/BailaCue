@@ -29,6 +29,17 @@ export default function PlaylistScreen() {
         </Button>
       }
     >
+      <Button
+        variant="soft"
+        onPress={() =>
+          router.push({
+            pathname: "/sharing",
+            params: { playlist: playlist.id },
+          })
+        }
+      >
+        Share collection
+      </Button>
       {playlist.videoIds.length ? (
         playlist.videoIds.map((videoId, index) => {
           const video = library.videos.find((v) => v.id === videoId);

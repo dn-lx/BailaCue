@@ -1,3 +1,4 @@
+import { defaultReminders, type ReminderPreferences } from "./reminders";
 export type DanceStyle = "Bachata" | "Salsa" | "Other";
 export type LearningStatus = "To learn" | "Practising" | "Learned";
 export type Segment = { id: string; name: string; start: number; end: number };
@@ -13,6 +14,7 @@ export type Video = {
   title: string;
   uri: string;
   thumbnail?: string;
+  mimeType?: string;
   duration: number;
   size: number;
   style: DanceStyle;
@@ -30,7 +32,16 @@ export type Video = {
   bookmarks: Bookmark[];
   notes: Note[];
   available: boolean;
-  source: "device";
+  source: "device" | "google-drive" | "dropbox";
+  remote?: {
+    connectionId: string;
+    fileId: string;
+    sourceIds: string[];
+    canDownload: boolean;
+  };
+  sharedGrantId?: string;
+  offlineUri?: string;
+  storagePreference?: "online" | "offline";
   parentId?: string;
 };
 export type PracticeSession = {
@@ -50,8 +61,34 @@ export type Preferences = {
   cooldownDays: number;
   count: number;
 };
+export type Connection = {
+  id: string;
+  provider: "google-drive" | "dropbox";
+  accountId: string;
+  email: string;
+  name: string;
+  writable: boolean;
+  connected: boolean;
+};
+export type CloudFolder = {
+  id: string;
+  connectionId: string;
+  provider: "google-drive" | "dropbox";
+  folderId: string;
+  name: string;
+  defaultStyle: DanceStyle;
+  defaultLabels: string[];
+  writable: boolean;
+  lastSyncedAt?: string;
+  error?: string;
+};
 export type Library = {
   version: 1;
+  deviceLock: boolean;
+  reminders: ReminderPreferences;
+  connections: Connection[];
+  sources: CloudFolder[];
+  cloudSettings: { dropboxAppKey: string; wifiOnly: boolean };
   videos: Video[];
   sessions: PracticeSession[];
   playlists: Playlist[];
@@ -61,6 +98,14 @@ export type Library = {
 };
 export const emptyLibrary = (): Library => ({
   version: 1,
+  deviceLock: false,
+  reminders: defaultReminders(),
+  connections: [],
+  sources: [],
+  cloudSettings: {
+    dropboxAppKey: process.env.EXPO_PUBLIC_DROPBOX_APP_KEY ?? "",
+    wifiOnly: true,
+  },
   videos: [],
   sessions: [],
   playlists: [],

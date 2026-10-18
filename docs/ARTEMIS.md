@@ -1,0 +1,31 @@
+# Google ARTEMIS testing
+
+Requested framework: [google/artemis](https://github.com/google/artemis), cloned and
+installed locally with Python 3.12 and `uv sync --no-dev`. Its setup script was not
+run because it rewrites global IDE/agent configuration. No private videos/accounts
+or provider credentials were supplied to ARTEMIS.
+
+The initial `uv run artemis doctor --json` found two blockers: no connected Android
+device and no model API credential (GEMINI_API_KEY / equivalent). Android SDK emulator
+and API 35 Google APIs x86_64 image were installed. Hardware virtualisation/KVM is
+unavailable; the emulator is being attempted with forced TCG software emulation.
+
+```sh
+export PATH="$ANDROID_HOME/platform-tools:$PATH"
+uv run artemis doctor --json
+uv run artemis helper install --serial emulator-5554
+```
+
+The helper is an accessibility service on the isolated test emulator. It reads screen
+layouts through an authenticated loopback endpoint. Initial installation failed while
+Android's package service was still unavailable during boot. Device testing is not
+claimed until recorded in VERIFICATION.md. Autonomous ARTEMIS Gemini runs also require
+a configured model credential in the environment; no secret is requested in chat.
+
+For a hardware-accelerated emulator or connected test phone, install the preview APK
+and use ARTEMIS to exercise: launch → import the synthetic clip → play/seek/speed/mirror
+→ save/loop 1–4 seconds → export new clip → verify original checksum and separate
+output duration → save/share → relaunch persistence. Then use registered OAuth apps
+for personal folder connection, online playback, selected download, airplane mode,
+upload interruption/retry, permission denial/reconnect and reminder deep links.
+The repository's browser mocks do not replace these native journeys.

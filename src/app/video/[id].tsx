@@ -9,12 +9,11 @@ import {
   Pressable,
 } from "react-native";
 import { useLocalSearchParams, router } from "expo-router";
-import { useVideoPlayer, VideoView } from "expo-video";
+import { useVideoPlayer, VideoView, type VideoSource } from "expo-video";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { seek, setRate } from "../../services/playback";
 import { useLibrary } from "../../services/store";
 import {
-  resolveMedia,
   exportClip,
   deleteMedia,
   saveToPhotos,
@@ -33,11 +32,13 @@ import {
   layout,
 } from "../../components/ui";
 import { useTheme } from "../../components/theme";
+import { CloudVideoControls } from "../../components/CloudVideoControls";
+import { resolveVideo, RevokedAccess } from "../../services/cloud/playback";
 import Timeline from "../../components/Timeline";
 import { formatTime, parseTime, validateSegment } from "../../core/practice";
 import { uid, type Video } from "../../core/types";
 import { removeVideo, videoFromExport } from "../../core/library";
-function Player({ video, uri }: { video: Video; uri: string }) {
+function Player({ video, uri }: { video: Video; uri: VideoSource }) {
   const { update, updateVideo } = useLibrary();
   const t = useTheme();
   const [fullscreen, setFullscreen] = useState(false);
@@ -66,7 +67,9 @@ function Player({ video, uri }: { video: Video; uri: string }) {
   const [beat, setBeat] = useState("1");
   const lastSaved = useRef(0);
   const current = useRef(video.resume);
-  const resolved = useRef(uri);
+  const resolved = useRef(
+    video.remote ? video.offlineUri : typeof uri === "string" ? uri : video.uri,
+  );
   const resumeAtOpen = useRef(video.resume);
   const player = useVideoPlayer(uri, (p) => {
     p.timeUpdateEventInterval = 0.1;
@@ -77,19 +80,27 @@ function Player({ video, uri }: { video: Video; uri: string }) {
   });
   const playerReady = playerStatus === "readyToPlay";
   useEffect(() => {
-    const loaded = player.addListener("sourceLoad", () =>
+    const loaded = player.addListener("sourceLoad", (event) => {
+      if (
+        Number.isFinite(event.duration) &&
+        event.duration > 0 &&
+        Math.abs(event.duration - video.duration) > 0.1
+      ) {
+        updateVideo(video.id, { duration: event.duration });
+        setEnd(event.duration.toFixed(2));
+      }
       seek(
         player,
         Math.min(resumeAtOpen.current, Math.max(0, video.duration - 0.1)),
-      ),
-    );
+      );
+    });
     if (player.status === "readyToPlay")
       seek(
         player,
         Math.min(resumeAtOpen.current, Math.max(0, video.duration - 0.1)),
       );
     return () => loaded.remove();
-  }, [video.duration, player]);
+  }, [video.duration, video.id, player, updateVideo]);
 
   useEffect(() => {
     const timer = player.addListener("timeUpdate", (event) => {
@@ -167,6 +178,10 @@ function Player({ video, uri }: { video: Video; uri: string }) {
   async function trim() {
     try {
       const range = section();
+      if (!resolved.current)
+        throw new Error(
+          "Download this cloud video to your phone before exporting a new clip.",
+        );
       player.pause();
       setBusy(true);
       setError("");
@@ -190,7 +205,9 @@ function Player({ video, uri }: { video: Video; uri: string }) {
     try {
       player.pause();
       await player.replaceAsync(null);
-      await deleteMedia(video.uri);
+      if (video.remote) {
+        if (video.offlineUri) await deleteMedia(video.offlineUri);
+      } else await deleteMedia(video.uri);
       if (video.thumbnail?.startsWith("file:"))
         await deleteMedia(video.thumbnail);
       update((l) => removeVideo(l, video.id));
@@ -339,6 +356,7 @@ function Player({ video, uri }: { video: Video; uri: string }) {
             </Chip>
             <Chip onPress={() => setFullscreen(true)}>Full screen</Chip>
           </Row>
+          <CloudVideoControls video={video} />
           {error ? (
             <Card>
               <Txt color={t.primary} accessibilityRole="alert">
@@ -848,16 +866,19 @@ function Player({ video, uri }: { video: Video; uri: string }) {
 }
 export default function VideoDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { library } = useLibrary();
+  const { library, updateVideo } = useLibrary();
   const video = library.videos.find((v) => v.id === id);
-  const [source, setSource] = useState<{ id: string; uri: string }>();
+  const [source, setSource] = useState<{ id: string; uri: VideoSource }>();
   const [error, setError] = useState("");
   const videoId = video?.id;
   const videoUri = video?.uri;
+  const offlineUri = video?.offlineUri;
+  const preference = video?.storagePreference;
+  const connections = library.connections;
   useEffect(() => {
     let alive = true;
-    if (videoUri && videoId)
-      resolveMedia(videoUri)
+    if (video && videoId)
+      resolveVideo(video, library)
         .then((uri) => {
           if (alive) {
             setSource({ id: videoId, uri });
@@ -865,12 +886,23 @@ export default function VideoDetail() {
           }
         })
         .catch((e) => {
-          if (alive) setError(e.message);
+          if (alive) {
+            if (e instanceof RevokedAccess)
+              updateVideo(videoId, {
+                offlineUri: undefined,
+                thumbnail: undefined,
+                storagePreference: "online",
+                available: false,
+              });
+            setError(e.message);
+          }
         });
     return () => {
       alive = false;
     };
-  }, [videoId, videoUri]);
+    // Metadata edits do not reopen a playing video.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [videoId, videoUri, offlineUri, preference, connections]);
   if (!video || error)
     return (
       <SafeAreaView style={{ flex: 1, padding: 24, gap: 18 }}>
@@ -880,6 +912,10 @@ export default function VideoDetail() {
         <Button onPress={() => router.replace("/library")}>
           Back to library
         </Button>
+        {video ? <CloudVideoControls video={video} /> : null}
+        <Button variant="soft" onPress={() => router.push("/storage")}>
+          Manage storage
+        </Button>
       </SafeAreaView>
     );
   if (!source || source.id !== video.id)
@@ -888,5 +924,11 @@ export default function VideoDetail() {
         <Txt>Opening your video…</Txt>
       </SafeAreaView>
     );
-  return <Player key={video.id} video={video} uri={source.uri} />;
+  return (
+    <Player
+      key={`${video.id}-${preference}-${offlineUri}`}
+      video={video}
+      uri={source.uri}
+    />
+  );
 }

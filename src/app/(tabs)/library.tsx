@@ -24,13 +24,23 @@ export default function LibraryScreen() {
   const [style, setStyle] = useState<DanceStyle>();
   const [status, setStatus] = useState<LearningStatus>();
   const [important, setImportant] = useState(false);
+  const [sourceId, setSourceId] = useState("");
   const [name, setName] = useState("");
-  const videos = filterVideos(library.videos, {
-    query,
-    style,
-    status,
-    minImportance: important ? 4 : 1,
-  });
+  const videos = filterVideos(
+    library.videos.filter(
+      (v) =>
+        !sourceId ||
+        (sourceId === "phone"
+          ? v.source === "device" || !!v.offlineUri
+          : v.remote?.sourceIds.includes(sourceId)),
+    ),
+    {
+      query,
+      style,
+      status,
+      minImportance: important ? 4 : 1,
+    },
+  );
   return (
     <Screen
       title="Your dance library"
@@ -75,6 +85,27 @@ export default function LibraryScreen() {
         <Chip selected={important} onPress={() => setImportant(!important)}>
           ★ Priority 4–5
         </Chip>
+      </View>
+      <View style={layout.wrap}>
+        <Chip selected={!sourceId} onPress={() => setSourceId("")}>
+          All storage
+        </Chip>
+        <Chip
+          selected={sourceId === "phone"}
+          onPress={() => setSourceId("phone")}
+        >
+          On my phone
+        </Chip>
+        {library.sources.map((s) => (
+          <Chip
+            key={s.id}
+            selected={sourceId === s.id}
+            onPress={() => setSourceId(s.id)}
+          >
+            {s.name}
+          </Chip>
+        ))}
+        <Chip onPress={() => router.push("/storage")}>Connect storage</Chip>
       </View>
       {videos.length ? (
         videos.map((video) => <VideoCard key={video.id} video={video} />)

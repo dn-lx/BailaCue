@@ -1,7 +1,9 @@
+import { router } from "expo-router";
 import { useState } from "react";
 import { View, Switch } from "react-native";
 import {
   Screen,
+  Button,
   Card,
   Txt,
   Row,
@@ -14,11 +16,21 @@ import {
 } from "../../components/ui";
 import { useLibrary } from "../../services/store";
 import { useTheme } from "../../components/theme";
+import {
+  requestReminderPermission,
+  syncReminders,
+} from "../../services/reminders";
+import { reminderSchedule } from "../../core/reminders";
+import { unlock } from "../../services/lock";
 import type { Preferences, DanceStyle } from "../../core/types";
 export default function Settings() {
   const { library, update } = useLibrary();
   const t = useTheme();
   const p = library.preferences;
+  const [notice, setNotice] = useState("");
+  const [reminderTime, setReminderTime] = useState(library.reminders.time);
+  const [quietStart, setQuietStart] = useState(library.reminders.quietStart);
+  const [quietEnd, setQuietEnd] = useState(library.reminders.quietEnd);
   const [labels, setLabels] = useState(p.labels.join(", "));
   function set(changes: Partial<Preferences>) {
     update((l) => ({ ...l, preferences: { ...l.preferences, ...changes } }));
@@ -125,32 +137,158 @@ export default function Settings() {
         </View>
       </Card>
       <Card>
+        <Txt size={21} weight="display">
+          A gentle nudge to practise
+        </Txt>
+        <Txt>
+          Choose local reminders. Quiet hours move reminders to the next allowed
+          time.
+        </Txt>
+        <Row style={{ flexWrap: "wrap" }}>
+          {["S", "M", "T", "W", "T", "F", "S"].map((day, index) => (
+            <Chip
+              key={index}
+              selected={library.reminders.weekdays.includes(index + 1)}
+              onPress={() =>
+                update((l) => ({
+                  ...l,
+                  reminders: {
+                    ...l.reminders,
+                    weekdays: l.reminders.weekdays.includes(index + 1)
+                      ? l.reminders.weekdays.filter((d) => d !== index + 1)
+                      : [...l.reminders.weekdays, index + 1],
+                  },
+                }))
+              }
+            >
+              {day}
+            </Chip>
+          ))}
+        </Row>
+        <Field
+          label="Reminder time (HH:MM)"
+          value={reminderTime}
+          onChangeText={setReminderTime}
+        />
+        <Row>
+          <Field
+            label="Quiet hours start"
+            value={quietStart}
+            onChangeText={setQuietStart}
+          />
+          <Field
+            label="Quiet hours end"
+            value={quietEnd}
+            onChangeText={setQuietEnd}
+          />
+        </Row>
+        <Row>
+          {(["practice", "picks"] as const).map((kind) => (
+            <Chip
+              key={kind}
+              selected={library.reminders.kind === kind}
+              onPress={() =>
+                update((l) => ({ ...l, reminders: { ...l.reminders, kind } }))
+              }
+            >
+              {kind === "practice" ? "Practice" : "Daily Picks"}
+            </Chip>
+          ))}
+        </Row>
+        <Button
+          onPress={async () => {
+            try {
+              const reminders = {
+                ...library.reminders,
+                enabled: true,
+                time: reminderTime,
+                quietStart,
+                quietEnd,
+              };
+              reminderSchedule(reminders);
+              if (!reminders.weekdays.length)
+                throw new Error("Choose at least one day.");
+              if (!(await requestReminderPermission()))
+                throw new Error(
+                  "Notifications are disabled in your phone’s settings. Daily Picks are still available in the app.",
+                );
+              await syncReminders(reminders);
+              update((l) => ({ ...l, reminders }));
+              setNotice("Reminders saved in your phone’s local timezone.");
+            } catch (e) {
+              setNotice((e as Error).message);
+            }
+          }}
+        >
+          Save & enable reminders
+        </Button>
+        {library.reminders.enabled ? (
+          <Button
+            variant="ghost"
+            onPress={async () => {
+              const reminders = { ...library.reminders, enabled: false };
+              await syncReminders(reminders);
+              update((l) => ({ ...l, reminders }));
+              setNotice("Reminders cancelled.");
+            }}
+          >
+            Turn reminders off
+          </Button>
+        ) : null}
+        <Txt size={12} color={t.muted}>
+          Your phone schedules these offline reminders in local time. Delivery
+          may be delayed by battery settings or Do Not Disturb. Open the app to
+          refresh today’s picks. New-video push alerts require the server
+          scheduler and are not enabled in this preview.
+        </Txt>
+      </Card>
+      <Card>
+        <Row style={{ justifyContent: "space-between" }}>
+          <Txt weight="bold">Protect BailaCue with device lock</Txt>
+          <Switch
+            accessibilityLabel="Protect BailaCue with device lock"
+            value={library.deviceLock}
+            onValueChange={async (deviceLock) => {
+              try {
+                await unlock();
+                update((l) => ({ ...l, deviceLock }));
+              } catch (e) {
+                setNotice((e as Error).message);
+              }
+            }}
+          />
+        </Row>
+        <Txt size={12} color={t.muted}>
+          Requires your phone’s fingerprint, face or screen lock when reopening
+          BailaCue. Imported copies remain in the app’s private storage.
+        </Txt>
+      </Card>
+      {notice ? (
+        <Card>
+          <Txt accessibilityRole="alert">{notice}</Txt>
+        </Card>
+      ) : null}
+      <Card>
         <Badge tone="soft">STORAGE & ACCOUNTS</Badge>
         <Txt size={21} weight="display">
           Connected when you’re ready
         </Txt>
         <Txt color={t.muted}>
-          This version saves your videos on this device. Account sync and
-          connected folders aren’t available yet.
+          Connect your own Drive or Dropbox folders. Stream online or keep
+          selected videos on your phone.
         </Txt>
-        <Row>
-          <Icon name="folder" />
-          <View style={{ flex: 1 }}>
-            <Txt weight="bold">This device</Txt>
-            <Txt size={13} color={t.muted}>
-              {library.videos.length} videos ·{" "}
-              {(
-                library.videos.reduce((n, v) => n + v.size, 0) / 1048576
-              ).toFixed(1)}{" "}
-              MB
-            </Txt>
-          </View>
-          <Badge tone="lime">AVAILABLE</Badge>
-        </Row>
+        <Button variant="soft" onPress={() => router.push("/account")}>
+          Account & metadata sync
+        </Button>
+        <Button variant="ghost" onPress={() => router.push("/sharing")}>
+          Shared collections
+        </Button>
+        <Button icon="folder" onPress={() => router.push("/storage")}>
+          Manage video storage
+        </Button>
         <Txt size={13} color={t.muted}>
-          Google Drive is the first planned connection. Dropbox and other
-          sources use the same provider interface. Multiple folders will each
-          have their own name and default labels.
+          {library.sources.length} folders ·{" "}
+          {library.videos.filter((v) => v.offlineUri).length} phone downloads
         </Txt>
       </Card>
       <Card>
@@ -180,7 +318,7 @@ export default function Settings() {
             BailaCue.
           </Txt>
           <Txt size={12} color={t.muted}>
-            Watch. Practise. Repeat. · v0.1.0 (1)
+            Watch. Practise. Repeat. · v0.2.0 (2)
           </Txt>
         </View>
       </Row>

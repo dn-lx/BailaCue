@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - "app.json"
+      - "app.config.ts"
       - "package-lock.json"
       - "src/**"
       - "modules/**"
@@ -35,6 +36,8 @@ jobs:
           log-accepted-android-sdk-licenses: false
       - run: npm ci
       - run: npm run build:android
+        env:
+          BAILACUE_ARCHS: arm64-v8a,x86_64
       - uses: actions/upload-artifact@v4
         with:
           name: BailaCue-Android-internal-preview

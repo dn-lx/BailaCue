@@ -5,6 +5,19 @@ a claim of native device validation. `[x]` means implemented with recorded local
 verification; `[ ]` means still pending, including implemented code awaiting its
 necessary integration/device validation. See VERIFICATION.md for exact evidence.
 
+## 0.2.0 continuation
+
+Implemented: Drive/Dropbox account and folder UI, native credentials/PKCE, paginated
+scans, defaults/deduplication/reconnect preservation, source filters, streaming,
+selective phone copies, recoverable uploads, Photos/file saves, comparison, reminders,
+quiet hours and device lock. The scoped account/sync/sharing API and additive migration
+are implemented and locally tested; production deployment is pending. See
+[CLOUD-STORAGE.md](CLOUD-STORAGE.md) and [ACCOUNT-API.md](ACCOUNT-API.md).
+
+The unchecked milestone acceptance below remains unchecked where live registration,
+server deployment or device validation is still required. WebDAV/S3, automatic sync,
+server-generated picks and remote new-video push remain implementation work.
+
 ## M1 · Foundation and first local vertical slice
 
 - [x] Shared TypeScript Android/iOS project; tab navigation; routed video details.

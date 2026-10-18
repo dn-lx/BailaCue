@@ -84,7 +84,14 @@ export function VideoCard({
         <Txt size={13} color={t.muted}>
           {[
             video.status,
-            video.teacher || "On this device",
+            video.teacher ||
+              (video.remote
+                ? video.offlineUri && video.storagePreference === "offline"
+                  ? "Phone copy"
+                  : video.source === "dropbox"
+                    ? "Dropbox · online"
+                    : "Drive · online"
+                : "On this device"),
             video.labels.slice(0, 2).join(" · "),
           ]
             .filter(Boolean)

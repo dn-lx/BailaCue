@@ -1,49 +1,23 @@
-# Current handoff
+# Current handoff · 0.2.0
 
-Task: BailaCue mobile foundation and first working vertical slice.
-Branch: `feat/bailacue-mobile-foundation`; base: `main`.
-Draft PR: https://github.com/dn-lx/BailaCue/pull/1.
-Version: 0.1.0 / Android versionCode 1 / iOS buildNumber 1.
+Work remains on `feat/bailacue-mobile-foundation`, draft PR #1. Original 0.1.0 native
+build and initial shared Me+ migration remain historical verified evidence.
 
-## Completed and verified
+This continuation adds personal Drive/Dropbox source configuration, native Google
+sign-in / Dropbox PKCE, discovery/reconciliation, online playback, selected downloads,
+Wi-Fi preference, secure resumable uploads, comparison, local reminders/quiet hours,
+device lock, and prepared scoped account/sync/sharing server + UI.
 
-Original BailaCue identity and mobile UI; local library/import, search and editing
-metadata, practice sections/loop controls, notes, bookmarks, collections,
-explainable Daily Picks, timer/journal/goals and theme preferences. Native trim,
-Photos/share and camera code exists and requires native verification. Browser
-journeys and 33 automated tests pass; Expo Doctor 20/20; production web bundle.
+Read README, CLOUD-STORAGE.md, ACCOUNT-API.md, VERIFICATION.md and ARTEMIS.md before
+claiming availability. Live OAuth requires app registration independent of user
+accounts. New API production deployment has not been performed. New-video remote push,
+automatic sync/merge, server-generated picks and WebDAV/S3 remain pending.
 
-## External actions and owner decisions
+Never send broad shared Me+ Supabase Auth tokens to BailaCue. Do not read health data,
+alter existing Me+ objects or delete auth.users for BailaCue account deletion.
+Private backend session/rate/snapshot/grant tables have no direct client grants.
 
-- GitHub read access/ownership confirmed for `dn-lx/BailaCue` and read-only Me+
-  architecture inspection under `dn-lx/me-plus`. No Me+ repo edits.
-- Owner explicitly confirmed: “use the shared … everything is in prod.”
-- Applied additive `bailacue_isolated_metadata` migration to the connected shared
-  Me+ Supabase project on 2026-10-18, with no edits to existing Me+ objects/auth.
-- Verified 23 new tables with owner RLS/policies, 42 validated FKs, three timestamp
-  triggers and no anonymous grants. Advisor baseline compared: no new BailaCue
-  security finding; unused new indexes are expected informational notices.
-- No user data rows, health data, OAuth tokens or production app deployments.
-- No app store publication, paid service purchase or changes to provider files.
-
-## Current build work
-
-Android SDK 37/build tools 37/NDK 27.1 and full JDK 21 provisioned. Release-mode
-ARM64 preview built successfully and packaged at
-`artifacts/BailaCue-v0.1.0-build1-preview.apk` with SHA-256. APK signature v2,
-package/version/build number and bundled Hermes/native libraries verified.
-Full evidence and hash are in VERIFICATION.md. Linux has no physical device/KVM
-or Xcode: no native runtime/export device tests or iOS build/signing were run.
-
-## Next connected slice
-
-Use a BailaCue-scoped trusted backend session while reusing Me+ Supabase Auth for
-password verification. Do not ship broad Me+ Auth sessions that can reach Me+
-health APIs. Implement username resolution, rate limits, recovery and secure
-sessions. Wire metadata adapters to the new tables with revision conflict handling.
-Configure actual platform OAuth clients/PKCE/callbacks and secure token vault.
-Then connect two Drive folders, discovery and explicit-destination resumable
-uploads. The existing adapter and upload transport are mock-tested building
-blocks, not a connected integration. Dropbox/other storage needs its own adapter.
-Keep every unimplemented brief feature in BACKLOG.md; do not mark the connected
-journey, notifications, offline provider cache, comparison, sharing or biometrics done.
+Native source is under modules; generated root android/ios and artifacts are ignored.
+Use scripts/build-android.sh with JDK 21/Android SDK. Universal preview uses
+BAILACUE_ARCHS=arm64-v8a,x86_64. Validate final release bytes/version/signature and record
+actual device/ARTEMIS evidence before uploading the APK to a GitHub prerelease.

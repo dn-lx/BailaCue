@@ -8,11 +8,21 @@ const connection = "20000000-0000-0000-0000-000000000001",
   video = "30000000-0000-0000-0000-000000000001";
 beforeAll(async () => {
   await db.exec(
-    `create schema auth; create table auth.users(id uuid primary key); create role anon; create role authenticated; grant usage on schema public,auth to authenticated; create function auth.uid() returns uuid language sql stable as $$ select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid $$; insert into auth.users values('${alice}'),('${bob}');`,
+    `create schema auth; create table auth.users(id uuid primary key); create role anon; create role authenticated; create role service_role bypassrls; grant usage on schema public,auth to authenticated; create function auth.uid() returns uuid language sql stable as $$ select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid $$; insert into auth.users values('${alice}'),('${bob}');`,
   );
   await db.exec(
     readFileSync(
       "supabase/migrations/20261018032846_bailacue_isolated_metadata.sql",
+      "utf8",
+    ),
+  );
+  // Supabase's managed service role has table privileges; emulate that baseline.
+  await db.exec(
+    "grant usage on schema public,auth to service_role; grant all on all tables in schema public to service_role;",
+  );
+  await db.exec(
+    readFileSync(
+      "supabase/migrations/20261018040818_bailacue_scoped_sessions_sync.sql",
       "utf8",
     ),
   );
@@ -80,7 +90,7 @@ describe("additive PostgreSQL schema with actual RLS", () => {
     const result = await db.query<{ relrowsecurity: boolean }>(
       "select relrowsecurity from pg_class where relname like 'bailacue_%' and relkind='r'",
     );
-    expect(result.rows).toHaveLength(23);
+    expect(result.rows).toHaveLength(27);
     expect(result.rows.every((r) => r.relrowsecurity)).toBe(true);
   });
   it("rejects unauthenticated reads", async () => {
@@ -91,5 +101,60 @@ describe("additive PostgreSQL schema with actual RLS", () => {
     await db.exec(
       `reset role; set role authenticated; set request.jwt.claim.sub='${alice}';`,
     );
+  });
+  it("keeps scoped sessions/snapshots inaccessible even to their authenticated owner", async () => {
+    await db.exec(
+      `reset role; insert into public.bailacue_app_sessions(token_hash,user_id,expires_at) values(repeat('a',64),'${alice}',now()+interval '1 day'); set role authenticated;`,
+    );
+    await expect(
+      db.exec("select * from public.bailacue_app_sessions"),
+    ).rejects.toThrow(/permission denied/);
+    await expect(
+      db.exec("select * from public.bailacue_sync_snapshots"),
+    ).rejects.toThrow(/permission denied/);
+    await expect(
+      db.exec("select public.bailacue_rate_limit('key',10)"),
+    ).rejects.toThrow(/permission denied/);
+  });
+  it("atomically limits repeated authentication attempts and rejects stale revisions", async () => {
+    await db.exec("reset role; set role service_role;");
+    expect(
+      (await db.query("select public.bailacue_rate_limit('test',1) as allowed"))
+        .rows[0],
+    ).toEqual({ allowed: true });
+    expect(
+      (await db.query("select public.bailacue_rate_limit('test',1) as allowed"))
+        .rows[0],
+    ).toEqual({ allowed: false });
+    await db.exec(
+      `insert into public.bailacue_sync_snapshots(user_id) values('${alice}');`,
+    );
+    const first = await db.query(
+      `update public.bailacue_sync_snapshots set revision=1 where user_id='${alice}' and revision=0 returning revision`,
+    );
+    const stale = await db.query(
+      `update public.bailacue_sync_snapshots set revision=1 where user_id='${alice}' and revision=0 returning revision`,
+    );
+    expect(first.rows).toHaveLength(1);
+    expect(stale.rows).toHaveLength(0);
+  });
+  it("deletes only the selected user's BailaCue data and preserves shared auth identities", async () => {
+    await db.exec(
+      `reset role; insert into public.bailacue_profiles(user_id,username) values('${bob}','bob'); set role service_role; select public.bailacue_delete_app_data('${alice}'); reset role;`,
+    );
+    expect((await db.query("select * from auth.users")).rows).toHaveLength(2);
+    expect(
+      (await db.query("select * from public.bailacue_profiles")).rows,
+    ).toHaveLength(1);
+    expect(
+      (await db.query("select * from public.bailacue_app_sessions")).rows,
+    ).toHaveLength(0);
+    expect(
+      (
+        await db.query(
+          `select * from public.bailacue_notes where user_id='${alice}'`,
+        )
+      ).rows,
+    ).toHaveLength(0);
   });
 });

@@ -33,7 +33,7 @@ export class GoogleDriveProvider implements VideoProvider {
   // OAuth tokens come from the account's secure credential service, never app passwords.
   constructor(
     private token: () => Promise<string>,
-    private request: typeof fetch = fetch,
+    private request: typeof fetch = (...args) => fetch(...args),
   ) {}
   private async get(path: string) {
     const response = await this.request(`${API}${path}`, {
@@ -60,6 +60,27 @@ export class GoogleDriveProvider implements VideoProvider {
         "network",
       );
     return response.json();
+  }
+  async folders() {
+    const folders: { id: string; name: string }[] = [];
+    let cursor: string | undefined;
+    do {
+      const params = new URLSearchParams({
+        q: "trashed = false and mimeType = 'application/vnd.google-apps.folder'",
+        fields: "nextPageToken,files(id,name)",
+        pageSize: "100",
+        supportsAllDrives: "true",
+        includeItemsFromAllDrives: "true",
+      });
+      if (cursor) params.set("pageToken", cursor);
+      const page = (await this.get(`/files?${params}`)) as {
+        files: { id: string; name: string }[];
+        nextPageToken?: string;
+      };
+      folders.push(...page.files);
+      cursor = page.nextPageToken;
+    } while (cursor);
+    return folders;
   }
   async inspectFolder(folderId: string) {
     const file = (await this.get(

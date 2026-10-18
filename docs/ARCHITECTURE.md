@@ -1,118 +1,76 @@
-# BailaCue architecture · 0.1.0
+# BailaCue architecture · 0.2.0
 
-Shared Android/iOS UI: Expo SDK 58, React Native 0.88, TypeScript, Expo Router.
-The browser target is a development preview with a real IndexedDB video library;
-it is not the target for native video export.
+Expo SDK 58 / React Native 0.88 / TypeScript, Expo Router and a shared Android/iOS UI.
+Routes in `src/app` use `LibraryProvider`, domain functions and platform services.
+Metadata persists through a serial write queue. Guest/account libraries have distinct
+keys and keyed provider lifetimes. OAuth credentials and upload sessions use native
+SecureStore; browser previews keep credentials in memory. Metadata contains no tokens.
 
-## First vertical slice
+## Media and providers
 
-`src/app` routes → reusable UI and theme → `LibraryProvider` → domain functions.
-Only source metadata and explicit user edits reach the local store. Video files
-are copied into app-private document storage on mobile. Browser previews store
-video Blobs in IndexedDB and metadata in browser storage. Local changes serialize
-through one write queue to avoid out-of-order persistence. Storage failure is
-visible; corrupted metadata is not silently overwritten. This is single-device
-storage, not authenticated multi-user storage or metadata sync.
+`VideoProvider` adapters isolate Drive/Dropbox listing, folder capabilities and playback.
+Sources contain a user connection, folder reference, friendly name and defaults. Complete
+paginated scans reconcile deterministic provider/account/file IDs and memberships;
+refresh/reconnect preserves user-owned title/labels/rating/notes/sections. Failed scans
+leave availability unchanged. A full scan, rather than incremental provider cursors,
+is currently used. Sources scan their immediate folder, not descendants implicitly.
 
-Expo Video handles playback. Saved practice sections are nondestructive metadata.
-`modules/baila-media` is an autolinked local Expo module. Android uses Media3
-Transformer 1.9.1 (matching Expo Video's Media3 version); iOS uses AVFoundation.
-Successful clips are registered as separate local library videos, with fresh
-identifiers/thumbnails and no inherited out-of-range notes or sections.
-The module validates real asset duration and app-private file paths, uses unique
-MP4 filenames, and deletes partial exports on failure/cancellation. Exports are
-foreground work. They do not modify originals. Playback speed, count and mirror
-are practice overlays; they are NOT baked into trimmed exports. Trim output may
-be transcoded; supported codecs, speed, precision and HDR handling depend on the
-device. Unsupported files surface an actionable error.
+Drive uses native Google sign-in with readonly access and explicit write escalation.
+Dropbox uses browser OAuth PKCE/state and device-secured refresh tokens. One-time app
+registrations are required independently of each user's account; see CLOUD-STORAGE.md.
+Remote playback resolves fresh addresses/headers with caching disabled. Selected phone
+copies use bounded native download progress, validation and partial cleanup. Native
+uploads read bounded chunks and securely persist provider-acknowledged progress.
+Drive reserves its file ID before starting a session; Dropbox keeps a stable unique
+path, strict conflict checks and session cursors. Retry first reconciles completion.
 
-## Me+ integration findings
+Expo Video handles independent practice/comparison players. `modules/baila-media` is
+an autolinked Expo module: Android Media3 Transformer 1.9.1, iOS AVFoundation. Import
+retains a private copy; export validates canonical private paths and real duration,
+creates a unique MP4 and registers a separate video with fresh metadata. No source
+overwrite. Cancel/failure deletes partial output. Export is foreground work; playback
+speed, mirror and count are not baked into output. iOS source has not been compiled here.
 
-Read-only inspection on 2026-10-18 found `dn-lx/me-plus`, whose mobile client
-uses `@supabase/supabase-js` and Supabase Auth. The connected Me+ project was
-verified by name/ref and schema catalog only. No private table rows, credentials,
-or health records were read. It contains `auth.users` and a populated application
-schema; no isolated development branch exists. After the owner explicitly confirmed the shared production project as the target,
-the additive BailaCue migration was applied on 2026-10-18. Existing Me+ tables and
-authentication settings were not changed; no application data rows were written.
+## Scoped Me+ backend
 
-Reuse `auth.users` for identity. Add only `public.bailacue_*` tables. The migration
-has no dependency on Me+ health/profile/domain tables. Every owner relationship
-uses composite foreign keys. All 23 exposed tables have RLS and explicit grants.
-Sharing is deliberately owner-only until a provider-aware server endpoint can
-verify both the collection grant and underlying file access. RLS is tested using
-real PostgreSQL in PGlite with simulated authenticated/anonymous roles. That
-checks the migration, not the deployed Supabase instance or Auth service.
+The original 23-table owner-isolated migration is live in the explicitly approved Me+
+project. The new service-only sessions/snapshots/rate-limits/collection-grants migration
+and `bailacue-api` function are prepared, not deployed. See ACCOUNT-API.md.
 
-Live catalog verification found 23/23 tables with owner RLS, 42 validated foreign
-keys, three validation triggers and no anonymous grants. Security advisors found
-no BailaCue findings; new unused indexes are informational. Before connecting
-accounts, perform real two-account isolation tests and verify Me+ existing
-authentication and row policies are compatible. Adding BailaCue RLS cannot revoke
-any pre-existing Me+ grants: review the shared project's existing policies before
-releasing a BailaCue client authenticated against it. Never weaken Me+ auth.
+The gateway verifies credentials through Supabase Auth and returns only a custom
+random BailaCue session. Me+ Auth JWT/refresh tokens stay server-side. Owner IDs derive
+from hashed, unexpired sessions, never request bodies. The app has no health-domain
+access path. RLS/grants forbid client access to private gateway tables. Cleanup targets
+an allowlist of BailaCue tables and does not remove the shared `auth.users` identity.
 
-Existing Me+ authenticated APIs cover other personal domains. Keep BailaCue
-mobile sessions scoped through a trusted backend rather than shipping a broad
-Me+ access token into the app.
+Metadata snapshots use compare-and-swap revisions and explicit user resolution. Device
+paths, thumbnails, OAuth credentials, upload sessions, lock/reminder state are excluded.
+Sync is manual; no automatic merging is claimed. Collection grants expose allowlisted
+provider references/titles. Each recipient must prove provider access with its own
+credentials. Revocation is checked online; offline remote-wipe is not promised.
 
-The planned username flow needs a rate-limited trusted endpoint that resolves a
-BailaCue username server-side and delegates password verification to Supabase
-Auth. No client-readable email/credential lookup and no password hashes in app
-profile tables. Reuse the existing Supabase password/recovery policy, SecureStore
-sessions, refresh/revocation, password change and account cleanup. Username
-registration/login and recovery are not wired into this version.
+## Practice
 
-## Storage sources and jobs
+Only available videos enter deterministic Daily Picks. Score: 12/preferred label,
+8/preferred style, 3 × importance, To learn 8 / Practising 6 / Learned −8, never-practised
+6, up to 10 for time since practice, and 6 × bounded user feedback. Cooldown defaults
+to three days; diversity discounts repeated style/labels. Stable-day picks survive
+preference edits. Skip is a day flag. Manual sync can transfer the saved selection;
+server-generated daily selection and automatic cross-device merge are pending.
 
-`VideoProvider` separates provider file discovery, folder capabilities and playback.
-The Google Drive adapter implements folder inspection, paginated discovery,
-file-ID deduplication and authenticated media URLs. It is unit-tested with mock
-HTTP, not connected to a user's account. No other provider is implemented.
-A resumable-upload transport probes server progress, persists acknowledgements,
-retains a preallocated file ID across retries, supports AbortSignal cancellation,
-and rejects unexpected session origins/results. Upload initiation, secure job
-persistence, token refresh, UI wiring and remote completion reconciliation remain
-milestone 2 work. Do not describe this transport as a working Drive uploader.
+Weekly native notification triggers use local time. Quiet-hour calculations adjust
+day rollover, deterministic identifiers prevent duplicates, and changes cancel the
+previous plan. Contextual permission is requested only when enabling. App foreground
+reconciliation handles schedule/timezone changes; OS delivery limits still apply.
+New-video remote checks need separately consented server provider credentials and
+scheduler/push infrastructure. Background device execution is not substituted for it.
+Optional LocalAuthentication protects reopening the app. The count overlay is manual
+BPM/pattern/offset; comparison uses manual alignment, not exact synchronisation.
 
-Each configured source has a distinct folder ID, connection, friendly name,
-permissions, default dance style and labels. Several sources may share an account,
-and the same file may appear in several sources with one video identity. Provider
-metadata seeds filename/duration; source defaults seed editable labels. Ratings
-are user-entered 1–5 importance. No automatic semantic video analysis or inferred
-ratings are claimed. Dropbox/WebDAV/S3 are future adapters, not integrations.
+## Verification boundaries
 
-For existing arbitrary Drive folder discovery, `drive.file` alone is insufficient.
-Read access can use `https://www.googleapis.com/auth/drive.readonly`; write access
-to arbitrary existing folders may require the restricted `drive` scope and Google
-verification. Keep read-only discovery and write escalation separate, and validate
-the final folder-picker workflow before settling scopes. Refresh tokens belong
-in the backend vault or secure device storage; never in source metadata.
-
-## Daily Picks v1
-
-Only available videos are candidates. Score = 12 per preferred label match + 8
-for preferred style + 3 × importance + 8 for To learn / 6 for Practising / −8 for
-Learned + 6 if never practised + min(days since practice,30)/3 + 6 × explicit
-feedback (bounded −3…3). Ties use stable video ID order. Selection applies a
-3-day cooldown; if no candidates remain it allows review from the available
-library. Each additional pick discounts repeated style by 5 and repeated label
-by 4. Empty libraries yield no pick. The first imported video starts a selection.
-Picks persist for the local calendar day and survive preference edits. Loss of
-access permits replacement. Skip is a schedule flag, not dislike feedback.
-Current selections are device-local; backend daily uniqueness is prepared but
-cross-device stable selection is not implemented. Notifications, weekdays,
-frequency, teacher/level preferences and explicit reroll remain in the backlog.
-
-## Documentation sources checked
-
-- https://docs.expo.dev/versions/v58.0.0/sdk/video/
-- https://docs.expo.dev/versions/v58.0.0/sdk/filesystem/
-- https://docs.expo.dev/modules/get-started/
-- https://docs.expo.dev/modules/native-module-tutorial/
-- https://docs.expo.dev/router/introduction/
-- https://developer.android.com/media/implement/editing-app
-- https://developer.android.com/media/media3/transformer/transformations
-- https://developer.apple.com/documentation/avfoundation/avassetexportsession
-- https://supabase.com/changelog.md
-- https://supabase.com/docs/guides/auth/quickstarts/react-native
+Actual PostgreSQL tests exercise both migrations, negative grants/ownership and cleanup;
+mock gateway/provider tests exercise network failures, identity/revision boundaries and
+retry behaviour. Browser journeys exercise rendered UI and real synthetic playback.
+Live OAuth and two real Me+ accounts, large-file stress and device accessibility/codec
+acceptance remain distinct from these results. See VERIFICATION.md and ARTEMIS.md.
