@@ -110,16 +110,24 @@ async def main():
             raise AssertionError(f"Native journey could not locate {text}")
         async def field(text,value):
             await locate(text,scrolls=6)
-            # The upstream driver's --meta keyevent clear command is rejected
-            # by API35, leaving the old value intact. Use a real Ctrl+A chord.
-            await controller.driver.execute_shell("input keycombination 113 29")
-            await controller.driver.execute_shell("input keyevent 67")
-            if not await controller.type_text(value,clear_existing=False):
-                raise AssertionError(f"Could not edit {text}")
-            elements = await observe("field-value")
-            if not any("EditText" in e.get("class", "") and text.lower() in label(e).lower() and e.get("text") == value for e in elements):
-                raise AssertionError(f"Native text entry did not replace {text} with {value}")
+            # Use ARTEMIS's focused-input accessibility API, avoiding the
+            # driver's unsupported --meta keyboard-clear sequence on API35.
+            client = controller.ctx.ui_adb_client
+            if not await asyncio.to_thread(client.clear_text):
+                raise AssertionError(f"ARTEMIS could not clear {text}")
+            await asyncio.to_thread(client.send_text, value)
             await controller.go_back()
+            # The IME can cover the focused field; inspect after it closes.
+            for attempt in range(5):
+                elements = await observe("field-value")
+                fields = [e for e in elements if "EditText" in e.get("class", "") and text.lower() in label(e).lower()]
+                if fields:
+                    if not any(e.get("text") == value for e in fields):
+                        raise AssertionError(f"Native text entry did not replace {text} with {value}")
+                    return
+                screen = await controller.get_screen_data()
+                await controller.swipe_coords(screen.width//2,int(screen.height*.78),screen.width//2,int(screen.height*.48),350)
+            raise AssertionError(f"Could not verify the entered value for {text}")
         await locate("Add video")
         await locate("Choose a video")
         # Wait for the external picker rather than inspecting the previous app
