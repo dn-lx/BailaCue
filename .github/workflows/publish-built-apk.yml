@@ -1,0 +1,47 @@
+name: Attach built Android APKs
+on:
+  push:
+    paths: [.github/workflows/publish-built-apk.yml]
+  workflow_dispatch:
+permissions:
+  contents: write
+  actions: read
+jobs:
+  attach:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - tag: v0.2.0-preview.2
+            build_run: '39097247535'
+          - tag: v0.2.1-preview.3
+            build_run: '39097892415'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Wait for existing build and retrieve its artifact
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BUILD_RUN: ${{ matrix.build_run }}
+        run: |
+          gh run watch "$BUILD_RUN" --repo "$GITHUB_REPOSITORY" --interval 15
+          gh run download "$BUILD_RUN" --repo "$GITHUB_REPOSITORY" --name BailaCue-published-preview --dir artifacts
+          (cd artifacts && sha256sum --check *.sha256)
+      - name: Attach APK to the prepared draft and publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PREVIEW_TAG: ${{ matrix.tag }}
+        run: |
+          set -euo pipefail
+          is_draft=$(gh release view "$PREVIEW_TAG" --json isDraft --jq .isDraft)
+          if [ "$is_draft" != true ]; then
+            echo 'Release already published; preserving immutable assets.'
+            exit 0
+          fi
+          gh release upload "$PREVIEW_TAG" artifacts/*.apk artifacts/*.sha256 --clobber
+          cp "docs/releases/$PREVIEW_TAG.md" /tmp/bailacue-release-notes.md
+          printf '\nActual uploaded APK SHA-256:\n\n```text\n' >> /tmp/bailacue-release-notes.md
+          cat artifacts/*.sha256 >> /tmp/bailacue-release-notes.md
+          printf '```\n' >> /tmp/bailacue-release-notes.md
+          gh release edit "$PREVIEW_TAG" --draft=false --prerelease --notes-file /tmp/bailacue-release-notes.md
