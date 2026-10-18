@@ -7,17 +7,17 @@ and iOS, built with React Native, TypeScript and Expo SDK 58.
 
 ## Install Android
 
-Download [BailaCue 0.2.3 for Android](https://github.com/dn-lx/BailaCue/releases/download/v0.2.3-preview.5/BailaCue-v0.2.3-build5-preview.apk)
-or open [release notes](https://github.com/dn-lx/BailaCue/releases/tag/v0.2.3-preview.5).
+Download [BailaCue 0.2.4 for Android](https://github.com/dn-lx/BailaCue/releases/download/v0.2.4-preview.7/BailaCue-v0.2.4-build7-preview.apk)
+or open [release notes](https://github.com/dn-lx/BailaCue/releases/tag/v0.2.4-preview.7).
 Open it on an Android phone and allow installation from your browser/files app when
 Android asks. This is an internal preview signed with a test certificate, not a
-Play Store release. Version **0.2.3 (5)**; minimum Android 7/API 24.
+Play Store release. Version **0.2.4 (7)**; minimum Android 7/API 24.
 
 No Metro server or Expo Go is needed for the APK. iOS needs a separate signed build
 with an Apple Developer account; an Android APK cannot be installed on an iPhone.
 
-The published APK passed seven Google ARTEMIS native checks, including real import,
-new-file trimming, original-byte preservation and saving to Photos.
+The published APK passed eight Google ARTEMIS native checks, including real import,
+new-file trimming, original-byte preservation, saving to Photos and artist-label creation/reuse.
 [Verification and screenshots](docs/VERIFICATION.md) record exact scope and remaining
 live-provider/iOS setup. The public download's checksum, signature and version were
 verified separately.
@@ -25,7 +25,9 @@ verified separately.
 ## What is implemented
 
 - Original icon, adaptive icon, splash, brand badges, light/dark themes and accessible controls.
-- Local import/camera recording, editable labels/importance/status, search/source filters,
+- Searchable [label dropdowns](docs/LABELS.md): choose existing video-type/artist labels or
+  create new ones in imports, video details and cloud-folder defaults.
+- Local import/camera recording, editable importance/status, search/source filters,
   notes/bookmarks, ordered collections, Daily Picks and practice timer/history/goals.
 - Native player with speed/pitch, mirror, full screen, seeking and named A–B loops.
 - **New trimmed MP4 files** as separate library entries: Save to Photos, Share / Save
@@ -43,7 +45,9 @@ verified separately.
 
 Each user connects their own video repository. OAuth still requires the app's
 one-time Google/Dropbox registration: see [cloud setup](docs/CLOUD-STORAGE.md).
-The preview contains no invented credentials. Without provider registration, import
+Google registration errors now offer a clear explanation, Files import and setup help;
+**Drive sign-in still requires Google Cloud OAuth registration.** The preview contains
+no invented credentials. Without provider registration, import
 videos from installed cloud apps through the phone's Files picker. Local use needs
 no BailaCue account. Ratings are user choices; labels start from folder defaults,
 not automatic video-content analysis.

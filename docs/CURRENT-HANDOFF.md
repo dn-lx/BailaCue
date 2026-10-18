@@ -1,58 +1,58 @@
-# Current handoff · BailaCue0.2.3 (build5)
+# Current handoff · BailaCue0.2.4 (build7)
 
 Source: `feat/bailacue-mobile-foundation`, draft PR#1. App source tag
-`v0.2.3-preview.5` points to3cf916c1c811ecd238f5920b236cc718559adfec. Later commits
-improve the native acceptance harness, publication gates and documentation only.
+`v0.2.4-preview.7` points to `6c2e0fb40486a16fddc3c423d95db708c38ba9fe`.
+Later commits update documentation/evidence only.
 
-## Delivered
+## Current Android delivery
 
-Original icon/brand/badges/themes; personal Drive/Dropbox account/folder configuration,
-refresh/reconciliation, labels/ratings/notes/collections, authenticated streaming or
-phone copies, recoverable uploads to explicit writable sources, native practice
-player/loops, separate trimmed MP4s with Photos/share/upload, comparison, local
-reminders/quiet hours and device lock. See README and the full BACKLOG ledger.
+https://github.com/dn-lx/BailaCue/releases/tag/v0.2.4-preview.7
+APK `BailaCue-v0.2.4-build7-preview.apk`, 68,515,481 bytes.
+SHA256 `59557aa55efecff2baa0250f239b4f9478a66fb00f43d3ee827731d53f06faa8`.
+Public bytes were downloaded again and exactly matched the passing ARTEMIS report.
+APKv2 signature verified; packageapp.bailacue.mobile, version0.2.4/code7,
+minimumAPI24/target36, ARM64+x86_64. Preview certificate SHA1:
+`5e8f16062ea3cd2c4a0d547876baa6f38cabf625`, unchanged from build5.
 
-Owner-approved Me+ APIv2 and all3 BailaCue-only migrations are deployed to
-`wbqnctrvxohxwiaignhg`. The client receives scoped opaque app sessions, not broad
-Me+ JWTs. No health tables/data, existing functions or auth settings were changed.
-Do not ask for deployment approval again. Real account acceptance is still pending.
+Run39111878471 built, passed all8 native ARTEMIS checks and published the APK.
+Checks39111879404 passed: 80 tests/9 suites,4 browser journeys, type/lint, Deno,
+Expo Doctor20/20 and web export. Native report/screenshots are committed under
+`docs/verification/android-build7`; original/output hashes and3.017075s duration
+were independently checked in the workspace. ARTEMIS uses its real controller,
+not autonomous Gemini. Build6 passed separate native acceptance but is superseded
+and remains a draft. Builds2–4 remain withdrawn. Build5 is historical.
 
-## Published and verified Android
+## New features and current Google blocker
 
-https://github.com/dn-lx/BailaCue/releases/tag/v0.2.3-preview.5
-APK `BailaCue-v0.2.3-build5-preview.apk`,68,508,221 bytes.
-SHA256 `7443b70330a8b6e0afdddfbab1711415b074f9c82a85df416fcf20008e42bb1f`.
-Public bytes were downloaded and verified: APKv2 signature, packageapp.bailacue.mobile,
-version0.2.3/code5, minimumAPI24/target36, ARM64+x86_64. Preview cert SHA1:
-`5e8f16062ea3cd2c4a0d547876baa6f38cabf625`.
+Searchable multi-label pickers in video import, details and cloud-folder defaults:
+select existing labels or create artist/video-type/custom labels, remove selected
+chips and save. Suggestions come from saved videos/folders in the current library;
+case/whitespace/Unicode variants deduplicate. Existing arrays/sync remain compatible.
+See docs/LABELS.md. Browser and native tests verify creation, reuse and persistence.
 
-68 tests across7 suites, TypeScript, lint,3 browser journeys, Deno check, Expo Doctor
-20/20 and web export passed. Build run39102137159 compiled the universal APK.
-Native ARTEMIS run39104109693 passed all7 checks against those exact bytes:
-launch, Settings/Library, real import, named1–4s section/loop control, separate native
-Media3 MP4 (ffprobe3.017075s), original checksum unchanged and Save to Photos.
-Recovery publication run39104394080 checked the successful report's APK hash before
-uploading. Committed report/screenshots are under docs/verification/android-build5.
-ARTEMIS used its real controller/helper1.2.0, not autonomous Gemini.
+The user's screenshot showed Google DEVELOPER_ERROR/code10. Official SDK docs
+identify it as an app/remote OAuth registration mismatch. Native code now maps it
+to GoogleDriveSetupError, with clear recovery and Files/setup-help actions.
+Nine SDK mock regressions pass. This is not a completed live sign-in fix.
+No Google Cloud credentials/project exist in the cloud runtime. Remote registration
+is awaiting the app owner's authenticated Google Cloud access. Do not request a
+password in chat. Once access is available, inspect the project and public Android
+OAuth client settings for this exact package/certificate; do not infer success.
+No private browser/session data belongs in the repository. See CLOUD-STORAGE.md.
 
-## Important history and limits
+## Existing app and infrastructure
 
-Native testing caught an R8-removed Room constructor (fixed by disabling preview
-shrinking) and unawaited SDK58 File.copy/File.move (fixed and regression-tested).
-Builds2–4 are withdrawn drafts. Native harness corrections concern picker Preview
-buttons, below-fold content and keyboard input/visibility; no app assertion was
-skipped. Do not recommend old builds or reuse their checksums.
+Original branding/themes, local import/recording, personal Drive/Dropbox folders,
+online/phone copies, recoverable uploads, practice player/loops/notes/collections,
+separate native trims with Photos/share/upload, comparison/reminders/device lock.
+Owner-approved Me+ APIv2 and all3 additive BailaCue migrations remain deployed to
+`wbqnctrvxohxwiaignhg`. The app receives scoped opaque sessions; existing health
+tables/auth settings were not changed. Do not request deployment approval again.
 
-Live OAuth still needs BailaCue's one-time Google/Dropbox app registrations; each
-user then selects their own account/folders. No IDs/secrets were invented. Files
-picker import works independently. No live cloud transfer or real two-user Me+
-acceptance is claimed. iOS native source is maintained but not compiled/signed.
-Remote source push, automatic merge/sync, server picks and WebDAV/S3 remain tracked
-implementation scope; physical camera/notifications/accessibility/large-file codec
-acceptance and release signing remain hardening work. APK is an internal preview.
-
-No store submission, main-branch merge, paid purchase or private-video sharing was
-performed. User authorization for GitHub upload and the scoped Me+ deployment is
-already explicit. Native root android/ios/artifacts are generated/ignored; use the
-Expo config plugin and modules, not manual generated-source edits. Read AGENTS.md
-and matching SDK58 docs before changing APIs. Do not spawn agents unless instructed.
+Live provider transfers, real two-user Me+ acceptance, physical camera/notifications/
+accessibility/large-file hardening and iOS compilation/signing remain unverified.
+Automatic merge/sync, remote new-video push, server picks and WebDAV/S3 remain pending.
+No main merge, store submission or paid purchase was performed. User authorization
+for GitHub source/APK upload and scoped Me+ deployment is explicit. Root native dirs
+are generated; read AGENTS.md and matching SDK58 docs before API changes. Do not
+spawn agents unless explicitly instructed.
