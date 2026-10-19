@@ -66,6 +66,9 @@ no BailaCue account. Ratings are user choices; labels start from folder defaults
 not automatic video-content analysis.
 
 See [actual verification](docs/VERIFICATION.md) and the [full scope ledger](docs/BACKLOG.md).
+Planned work: [YouTube playlists, single videos and optional beginner suggestions](docs/YOUTUBE-REQUIREMENTS.md)
+and a [UI/UX and icon design brief](docs/UI-UX-DIRECTION.md). These are requirements,
+not features in the current APK.
 Implemented source and mock tests do not imply live OAuth or physical-device validation.
 New-video server push, automatic sync/merge and WebDAV/S3 adapters remain pending.
 

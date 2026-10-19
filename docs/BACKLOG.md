@@ -100,3 +100,17 @@ server-generated picks and remote new-video push remain implementation work.
 - [x] Versioned Android preview APK published with matching successful native-test checksum/signature evidence.
 - [ ] Store release signing, AAB/IPA distribution and iOS evidence.
 - [ ] App store publication / production deployment only on separate instruction.
+
+## Planned YouTube and design work
+
+- [ ] Owner-curated optional beginner suggestions for Salsa/Bachata, supporting
+      playlists and single videos, plus manual link entry. Owner supplies links.
+- [ ] YouTube playlist sources, online player, metadata refresh/deduplication,
+      personal labels/ratings and explicit Daily Picks source participation.
+- [ ] YouTube availability, attribution, quota and capability-aware UI; no file
+      download, original renaming or native trim/export for linked YouTube content.
+- [ ] Focused UI/UX audit, screen/component designs and a more distinctive dance icon.
+
+Requirements and acceptance: [YOUTUBE-REQUIREMENTS.md](YOUTUBE-REQUIREMENTS.md).
+Proposed design process and starter evaluation: [UI-UX-DIRECTION.md](UI-UX-DIRECTION.md).
+These items are not implemented in the current preview; no new build is implied.
