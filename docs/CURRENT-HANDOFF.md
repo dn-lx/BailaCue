@@ -17,7 +17,9 @@ continuing and then completed in both sources. Private folder/file identifiers
 are deliberately absent from source and public evidence. User was told to close the
 old installed app if they wanted to stop its automatic pass before updating.
 
-153 unit/database tests, type/lint, web export and all six browser journeys passed. Native/public results pending.
+153 unit/database tests, type/lint, web export and all six browser journeys passed. Published v0.2.10-preview.15 after build/native/publication run39214131930 passed. All12 ARTEMIS checks passed with helper1.2.0. Public APK equals the tested artifact:70,240,141bytes, SHA2560c4901c01f83f277ab08a5dee9a911a6d484b40efde26e5f60d51e19a6cf52d5. Public APKv2 signature/version and unchanged signer verified. Evidence is in verification/android-build15/.
+App source fe73e07156a279e6b607911a8bd3aece4142814a; tagv0.2.10-preview.15.
+Build run39214131930; source checks39214128650 passed.
 Source pushes and Android prereleases remain authorized; no main merge, stores,
 paid services, TinyFish or unrelated Me+ access. See SOURCE-NUMBERING.md and VERIFICATION.md.
 
