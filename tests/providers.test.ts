@@ -184,16 +184,14 @@ it("renames Drive metadata by stable ID only after confirming the selected paren
     body: JSON.stringify({ name: "0001 — Turn.mp4" }),
   });
   expect(request.mock.calls[1][0]).not.toContain("uploadType");
-  const denied = vi
-    .fn()
-    .mockResolvedValue(
-      new Response(
-        JSON.stringify({
-          parents: ["elsewhere"],
-          capabilities: { canRename: true },
-        }),
-      ),
-    );
+  const denied = vi.fn().mockResolvedValue(
+    new Response(
+      JSON.stringify({
+        parents: ["elsewhere"],
+        capabilities: { canRename: true },
+      }),
+    ),
+  );
   await expect(
     new GoogleDriveProvider(async () => "token", denied).renameVideo(
       "file",
@@ -202,4 +200,19 @@ it("renames Drive metadata by stable ID only after confirming the selected paren
     ),
   ).rejects.toMatchObject({ code: "permission" });
   expect(denied).toHaveBeenCalledTimes(1);
+});
+
+it("reports the actual Drive rename HTTP status and reason", async () => {
+  const request = vi
+    .fn()
+    .mockResolvedValueOnce(
+      response({ parents: ["folder"], capabilities: { canRename: true } }),
+    )
+    .mockResolvedValueOnce(
+      response({ error: { message: "insufficientFilePermissions" } }, 403),
+    );
+  const adapter = new GoogleDriveProvider(async () => "token", request);
+  await expect(
+    adapter.renameVideo("file", "0001.mp4", "folder"),
+  ).rejects.toThrow("HTTP 403): insufficientFilePermissions");
 });

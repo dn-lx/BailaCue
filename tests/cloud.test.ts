@@ -165,7 +165,7 @@ describe("user-selected sources", () => {
     ]);
     expect(library.videos).toHaveLength(1);
     expect(library.videos[0]).toMatchObject({
-      title: "0001",
+      title: "Renamed",
       labels: ["Personal"],
       importance: 5,
       remote: { sourceIds: ["s", "s2"] },
@@ -208,11 +208,33 @@ describe("user-selected sources", () => {
       thumbnail: "file:///private/thumb.jpg",
       storagePreference: "offline",
     };
+    library.sources[0] = {
+      ...library.sources[0],
+      numberUploads: true,
+      renameResult: {
+        phase: "complete",
+        total: 1,
+        processed: 1,
+        renamed: 0,
+        alreadyNamed: 0,
+        pending: 0,
+        failures: [
+          {
+            fileId: "f",
+            fileName: "video.mp4",
+            message: "file:///private/phone-copy.mp4",
+          },
+        ],
+        updatedAt: "now",
+      },
+    };
     const snapshot = metadataSnapshot(library),
       serialised = JSON.stringify(snapshot);
     expect(serialised).not.toContain("file://");
     expect(serialised).not.toContain("dropboxAppKey");
     expect(snapshot.connections[0].connected).toBe(false);
+    expect(snapshot.sources[0].numberUploads).toBe(true);
+    expect(snapshot.sources[0]).not.toHaveProperty("renameResult");
     expect(
       restoreSnapshot(snapshot, emptyLibrary()).videos[0].offlineUri,
     ).toBeUndefined();
@@ -327,18 +349,16 @@ describe("upload initiation and safe recovery (mock HTTP)", () => {
   it.each(["missing", "different"])(
     "never reuploads a confirmed Dropbox job when its ID is %s",
     async (kind) => {
-      const request = vi
-        .fn()
-        .mockResolvedValue(
-          kind === "missing"
-            ? response({}, 409)
-            : response({
-                ".tag": "file",
-                id: "id:other",
-                name: "0001.mp4",
-                size: 10,
-              }),
-        );
+      const request = vi.fn().mockResolvedValue(
+        kind === "missing"
+          ? response({}, 409)
+          : response({
+              ".tag": "file",
+              id: "id:other",
+              name: "0001.mp4",
+              size: 10,
+            }),
+      );
       const read = vi.fn();
       await expect(
         uploadFile(

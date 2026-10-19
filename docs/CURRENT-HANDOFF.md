@@ -1,3 +1,30 @@
+# Current handoff · BailaCue 0.2.10 (build15)
+
+Owner changed the requirement: renaming must be an app option, never default.
+Connecting/refreshing/foreground discovery now only read metadata and never rename
+cloud or cached phone files. Source titles reflect actual filenames, including on
+partial failure. A manual Rename existing videos action previews approved file IDs,
+requires Apply, reports progress and per-file errors, supports pause after the
+current file and reviews remaining work on retry. New-upload numbering is a separate
+numberUploads source switch, off for missing/false flags in new and old libraries.
+Jobs capture numberedNames/originalName; legacy jobs without the choice default off.
+Stable numbering registries and old ID/session recovery are retained. Device-local
+renameResult is excluded from metadata snapshots, preventing phone paths in errors
+from syncing. No production database changes or connector rename writes.
+
+Owner-authorized Drive metadata reads confirmed an existing app rename pass was
+continuing and then completed in both sources. Private folder/file identifiers
+are deliberately absent from source and public evidence. User was told to close the
+old installed app if they wanted to stop its automatic pass before updating.
+
+153 unit/database tests, type/lint, web export and all six browser journeys passed. Native/public results pending.
+Source pushes and Android prereleases remain authorized; no main merge, stores,
+paid services, TinyFish or unrelated Me+ access. See SOURCE-NUMBERING.md and VERIFICATION.md.
+
+Historical build14 handoff follows.
+
+---
+
 # Current handoff · BailaCue 0.2.9 (build14)
 
 Owner corrected the filename requirement: every source video must have a number-only

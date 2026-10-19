@@ -1,4 +1,4 @@
-import { reserveUploadNumber } from "../../core/numbering";
+import { reserveUploadNumber, safeVideoName } from "../../core/numbering";
 import { provider } from "../../services/cloud/provider";
 import { scanSource } from "../../services/cloud/scan";
 import { prepareNamedCopy } from "../../services/phoneCopies";
@@ -7,6 +7,7 @@ import {
   assertUploadDestination,
   registerUpload,
   uploadDestination,
+  uploadNaming,
 } from "../../core/destination";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Switch } from "react-native";
@@ -109,7 +110,7 @@ export default function Transfer() {
         connectionId: connection.id,
         accountId: connection.accountId,
         provider: connection.provider,
-        name: `${video.title.replace(/[\\/]/g, "_")}.${extension}`,
+        ...uploadNaming(source, video.title, extension),
         mimeType: video.mimeType ?? mimeTypes[extension],
         size: video.size,
         fileId: "",
@@ -117,7 +118,7 @@ export default function Transfer() {
         status: "queued",
         keepCopy,
       };
-      if (!current.sequenceNumber) {
+      if (current.numberedNames === true && !current.sequenceNumber) {
         await commit((l) => {
           const latest = uploadDestination(l, sourceId).source;
           const reserved = reserveUploadNumber(
@@ -151,12 +152,14 @@ export default function Transfer() {
         },
         abort.current.signal,
       );
-      // Old saved jobs keep their original session/path across retry. Number
-      // their confirmed file by stable ID after completion, without reuploading.
-      let finalName = "";
+      // Saved jobs keep their session/path. Apply their captured naming choice
+      // only after confirmation, and recheck the destination for every upload.
+      let finalName =
+        current.originalName ?? safeVideoName(`${video.title}.${extension}`);
       await commit((l) => {
         const latest = uploadDestination(l, sourceId).source;
         assertUploadDestination(current, latest, connection);
+        if (current.numberedNames !== true && !current.sequenceNumber) return l;
         const reserved = reserveUploadNumber(
           latest,
           current.id,
@@ -164,7 +167,7 @@ export default function Transfer() {
           file.fileId,
         );
         current.sequenceNumber = reserved.number;
-        finalName = reserved.name;
+        if (current.numberedNames === true) finalName = reserved.name;
         return {
           ...l,
           sources: l.sources.map((s) =>
@@ -188,7 +191,7 @@ export default function Transfer() {
           file.name = finalName;
         } catch {
           setError(
-            "Upload confirmed. Cloud filename numbering needs another refresh in Storage.",
+            "Upload confirmed, but its filename could not be applied. Check write access in Storage. Use Rename existing videos if you want numbered names.",
           );
         }
       }
@@ -360,10 +363,10 @@ export default function Transfer() {
               />
             </Row>
             <Txt size={12} color={t.muted}>
-              BailaCue uses only the next number as the title and filename, such
-              as 0001.mp4. Each folder has its own increasing sequence. Upload
-              jobs resume after interruption using the same destination and
-              identity.
+              Uploads keep your chosen video title by default. Numbered names
+              are optional: enable Number new uploads for this folder in
+              Storage. Saved uploads keep their destination and file identity on
+              retry.
             </Txt>
           </Card>
           {job ? (

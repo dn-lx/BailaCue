@@ -1,6 +1,6 @@
 import { LabelPicker } from "../components/LabelPicker";
 import { libraryLabels } from "../core/labels";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { View, Switch } from "react-native";
 import { router } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
@@ -20,7 +20,7 @@ import { useTheme } from "../components/theme";
 import { useLibrary } from "../services/store";
 import { connectAccount, disconnectAccount } from "../services/cloud/accounts";
 import { provider } from "../services/cloud/provider";
-import { sourceStyle } from "../core/numbering";
+import { sourceRenamePreview, sourceStyle } from "../core/numbering";
 import { scanSource } from "../services/cloud/scan";
 import { parseFolder } from "../core/sources";
 import {
@@ -28,6 +28,7 @@ import {
   type CloudFolder,
   type Connection,
   type DanceStyle,
+  type SourceRenameProgress,
 } from "../core/types";
 import { deleteMedia } from "../services/media";
 export default function Storage() {
@@ -47,6 +48,15 @@ export default function Storage() {
   const [removeFolder, setRemoveFolder] = useState("");
   const [setup, setSetup] = useState(false);
   const [appKey, setAppKey] = useState(library.cloudSettings.dropboxAppKey);
+  const [renamePreview, setRenamePreview] =
+    useState<ReturnType<typeof sourceRenamePreview>>();
+  const [renameProgress, setRenameProgress] = useState<{
+    sourceId: string;
+    progress: SourceRenameProgress;
+  }>();
+  const [pausing, setPausing] = useState(false);
+  const renameController = useRef<AbortController | null>(null);
+  useEffect(() => () => renameController.current?.abort(), []);
   const selected = library.connections.find((c) => c.id === accountId);
   async function run(id: string, action: () => Promise<void>) {
     if (busy) return;
@@ -83,6 +93,45 @@ export default function Storage() {
   async function refresh(source: CloudFolder) {
     await scanSource({ commit, getLibrary }, source.id);
   }
+  async function previewNames(source: CloudFolder) {
+    await refresh(source);
+    setRenamePreview(sourceRenamePreview(getLibrary(), source.id));
+  }
+  async function applyNames() {
+    if (!renamePreview) return;
+    const reviewed = renamePreview;
+    setRenamePreview(undefined);
+    setPausing(false);
+    const controller = new AbortController();
+    renameController.current = controller;
+    setRenameProgress({
+      sourceId: reviewed.sourceId,
+      progress: {
+        phase: "scanning",
+        total: 0,
+        processed: 0,
+        renamed: 0,
+        alreadyNamed: 0,
+        pending: 0,
+        failures: [],
+      },
+    });
+    try {
+      await scanSource({ commit, getLibrary }, reviewed.sourceId, {
+        rename: true,
+        fileIds: reviewed.items.map((item) => item.fileId),
+        signal: controller.signal,
+        onProgress: (progress) =>
+          setRenameProgress({ sourceId: reviewed.sourceId, progress }),
+      });
+    } catch (error) {
+      setRenameProgress(undefined);
+      throw error;
+    } finally {
+      renameController.current = null;
+      setPausing(false);
+    }
+  }
   function edit(source: CloudFolder) {
     setAccountId(source.connectionId);
     setFolder(source.folderId);
@@ -118,6 +167,12 @@ export default function Storage() {
       writable: info.writable,
       numbering: editId
         ? library.sources.find((s) => s.id === editId)?.numbering
+        : undefined,
+      numberUploads: editId
+        ? library.sources.find((s) => s.id === editId)?.numberUploads === true
+        : false,
+      renameResult: editId
+        ? library.sources.find((s) => s.id === editId)?.renameResult
         : undefined,
     };
     if (editId) {
@@ -421,10 +476,10 @@ export default function Storage() {
             onChange={setLabels}
           />
           <Txt size={12} color={t.muted}>
-            New videos start unrated (counting as 5★) with these labels. Each
-            source gets number-only titles and filenames: 0001.mp4, 0002.mp4,
-            and up. Existing videos are renamed too. Labels, ratings and notes
-            stay with each video when a folder refreshes. Browse shows top-level
+            New videos start unrated (counting as 5★) with these labels.
+            Connecting and refreshing keep the filenames in your storage.
+            Numbered names are optional in the source controls below. Labels,
+            ratings and notes stay with each video. Browse shows top-level
             Dropbox folders; enter a path to choose a nested folder.
           </Txt>
           <Button
@@ -452,7 +507,7 @@ export default function Storage() {
         <Txt size={13} color={t.muted}>
           New files added outside BailaCue are discovered when you reopen the
           app, then every five minutes while it is active. Use Refresh videos to
-          check now. Numbering changes filenames, not video contents.
+          check now. Use Rename existing videos to choose numbered filenames.
         </Txt>
       ) : null}
       {library.sources.map((source) => (
@@ -514,6 +569,151 @@ export default function Storage() {
             >
               Refresh videos
             </Button>
+            <Row style={{ justifyContent: "space-between" }}>
+              <Txt weight="bold" style={{ flex: 1 }}>
+                Number new uploads
+              </Txt>
+              <Switch
+                accessibilityLabel={`Number new uploads to ${source.name}`}
+                value={source.numberUploads === true}
+                disabled={!!busy}
+                onValueChange={(value) =>
+                  run(`policy-${source.id}`, async () => {
+                    await commit((l) => ({
+                      ...l,
+                      sources: l.sources.map((s) =>
+                        s.id === source.id ? { ...s, numberUploads: value } : s,
+                      ),
+                    }));
+                  })
+                }
+              />
+            </Row>
+            <Txt size={12} color={t.muted}>
+              Off by default. Enable to give future uploads names like 0001.mp4.
+              Existing and externally added files change only with the rename
+              action.
+            </Txt>
+            <Button
+              variant="soft"
+              disabled={
+                !!busy ||
+                !source.writable ||
+                !library.connections.some(
+                  (c) =>
+                    c.id === source.connectionId && c.connected && c.writable,
+                )
+              }
+              loading={busy === `preview-${source.id}`}
+              onPress={() =>
+                run(`preview-${source.id}`, () => previewNames(source))
+              }
+            >
+              Rename existing videos…
+            </Button>
+            {renamePreview?.sourceId === source.id ? (
+              <Card>
+                <Txt weight="bold">Preview numbered filenames</Txt>
+                <Txt>
+                  {renamePreview.changes} of {renamePreview.items.length} cloud
+                  filenames will change in {source.name}.
+                </Txt>
+                <Txt size={12} color={t.muted}>
+                  The video extension is kept. Matching BailaCue phone copies
+                  will be renamed too. Labels, ratings and notes stay attached.
+                  Newly discovered files after this preview wait for your next
+                  rename action.
+                </Txt>
+                {renamePreview.items
+                  .filter((item) => item.from !== item.to)
+                  .slice(0, 3)
+                  .map((item) => (
+                    <Txt key={item.fileId} size={13}>
+                      {item.from} → {item.to}
+                    </Txt>
+                  ))}
+                <Button
+                  disabled={!!busy}
+                  onPress={() => run(`rename-${source.id}`, applyNames)}
+                >
+                  Apply numbered filenames
+                </Button>
+                <Button
+                  variant="ghost"
+                  disabled={!!busy}
+                  onPress={() => setRenamePreview(undefined)}
+                >
+                  Keep current filenames
+                </Button>
+              </Card>
+            ) : null}
+            {(() => {
+              const result =
+                renameProgress?.sourceId === source.id
+                  ? renameProgress.progress
+                  : source.renameResult;
+              if (!result) return null;
+              return (
+                <Card>
+                  <Txt weight="bold">
+                    {result.phase === "scanning"
+                      ? "Checking source…"
+                      : result.phase === "renaming"
+                        ? "Renaming videos…"
+                        : result.phase === "paused"
+                          ? "Renaming paused"
+                          : "Rename results"}
+                  </Txt>
+                  <Txt>
+                    {result.processed} / {result.total} checked ·{" "}
+                    {result.renamed} renamed · {result.alreadyNamed} already
+                    numbered
+                  </Txt>
+                  {result.pending ? (
+                    <Txt size={13}>
+                      {result.pending} unfinished uploads kept at their saved
+                      names. Resume them before retrying.
+                    </Txt>
+                  ) : null}
+                  {result.failures.map((failure, index) => (
+                    <Txt
+                      key={`${failure.fileId}-${index}`}
+                      size={13}
+                      color={t.primary}
+                    >
+                      {failure.fileName}: {failure.message}
+                    </Txt>
+                  ))}
+                  {busy === `rename-${source.id}` ? (
+                    <Button
+                      variant="soft"
+                      disabled={pausing}
+                      onPress={() => {
+                        setPausing(true);
+                        renameController.current?.abort();
+                      }}
+                    >
+                      {pausing
+                        ? "Pausing after current video…"
+                        : "Pause after current video"}
+                    </Button>
+                  ) : null}
+                  {result.phase === "paused" ||
+                  result.failures.length ||
+                  result.pending ? (
+                    <Button
+                      variant="soft"
+                      disabled={!!busy}
+                      onPress={() =>
+                        run(`preview-${source.id}`, () => previewNames(source))
+                      }
+                    >
+                      Review remaining renames
+                    </Button>
+                  ) : null}
+                </Card>
+              );
+            })()}
             <Row>
               <Button variant="ghost" onPress={() => edit(source)}>
                 Edit folder

@@ -1,4 +1,4 @@
-import { numberedTitle, planNumbering, sourceStyle } from "./numbering";
+import { planNumbering, sourceStyle } from "./numbering";
 import { v5 } from "uuid";
 import type { CloudFolder, Connection, Library, Video } from "./types";
 import type { RemoteVideo } from "../services/providers/types";
@@ -46,7 +46,7 @@ export function reconcileSource(
       const v = videos[existing];
       videos[existing] = {
         ...v,
-        title: numberedTitle(plan.numbering.files[file.fileId].number),
+        title: file.name.replace(/\.[^.]+$/, ""),
         style:
           v.styleSet !== true && v.style === source.defaultStyle
             ? sourceStyle(source)
@@ -58,7 +58,7 @@ export function reconcileSource(
         remote: {
           connectionId: connection.id,
           fileId: file.fileId,
-          fileName: plan.names.get(file.fileId),
+          fileName: file.name,
           sourceIds: [...new Set([...(v.remote?.sourceIds ?? []), source.id])],
           canDownload: file.canDownload,
         },
@@ -67,7 +67,7 @@ export function reconcileSource(
       indexes.set(id, videos.length);
       videos.push({
         id,
-        title: plan.names.get(file.fileId)!.replace(/\.[^.]+$/, ""),
+        title: file.name.replace(/\.[^.]+$/, ""),
         uri: "",
         mimeType: file.mimeType,
         duration: file.duration,
@@ -93,7 +93,7 @@ export function reconcileSource(
         remote: {
           connectionId: connection.id,
           fileId: file.fileId,
-          fileName: plan.names.get(file.fileId),
+          fileName: file.name,
           sourceIds: [source.id],
           canDownload: file.canDownload,
         },

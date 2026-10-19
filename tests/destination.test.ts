@@ -11,7 +11,9 @@ import {
   phoneDestination,
   registerUpload,
   uploadDestination,
+  uploadNaming,
 } from "../src/core/destination";
+import { reserveUploadNumber } from "../src/core/numbering";
 import type { PendingUpload } from "../src/services/cloud/uploadEngine";
 import {
   moveTrimHandle,
@@ -89,6 +91,42 @@ const job: PendingUpload = {
   status: "queued",
   keepCopy: false,
 };
+it.each([undefined, false, true])(
+  "numbers new uploads only after explicit opt-in (%s)",
+  (numberUploads) => {
+    const source = { ...salsa, numberUploads };
+    const naming = uploadNaming(source, "Class/turn", "mov");
+    const final = naming.numberedNames
+      ? reserveUploadNumber(source, "new", naming.originalName).name
+      : naming.name;
+    expect(final).toBe(numberUploads === true ? "0001.mov" : "Class_turn.mov");
+    expect(naming.originalName).toBe("Class_turn.mov");
+  },
+);
+it("registers the actual filename instead of claiming an unapplied numeric rename", () => {
+  const next = registerUpload(
+    library(),
+    video.id,
+    salsa,
+    connection,
+    {
+      fileId: "new",
+      name: "Original title.mp4",
+      size: 100,
+      mimeType: "video/mp4",
+      duration: 6,
+      modifiedAt: "now",
+      canDownload: true,
+    },
+    true,
+    7,
+    "0007.mp4",
+  );
+  expect(next.videos[0]).toMatchObject({
+    title: "Original title",
+    remote: { fileName: "Original title.mp4" },
+  });
+});
 it("uses the explicitly selected folder even when video style says Salsa", () => {
   expect(uploadDestination(library(), bachata.id).source.folderId).toBe(
     "drive-bachata",
@@ -180,7 +218,7 @@ it.each([true, false])(
       connection,
       {
         fileId: "uploaded",
-        name: "New clip.mp4",
+        name: "0007.mp4",
         size: 100,
         mimeType: "video/mp4",
         duration: 6,

@@ -818,7 +818,7 @@ function Player({ video, uri }: { video: Video; uri: VideoSource }) {
               The little details
             </Txt>
             {video.remote ? (
-              <Txt>Video number: {video.title}</Txt>
+              <Txt>Source title: {video.title}</Txt>
             ) : (
               <Field label="Title" value={title} onChangeText={setTitle} />
             )}

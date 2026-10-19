@@ -1,7 +1,7 @@
 import type { CloudFolder, Connection, Library, Video } from "./types";
 import type { PendingUpload } from "../services/cloud/uploadEngine";
 import type { RemoteVideo } from "../services/providers/types";
-import { numberedName, numberedTitle, sourceStyle } from "./numbering";
+import { safeVideoName, sourceStyle } from "./numbering";
 import { remoteId } from "./sources";
 
 export type SaveDestination = {
@@ -14,6 +14,18 @@ export const phoneDestination = (): SaveDestination => ({
   sourceId: "",
   keepCopy: true,
 });
+export function uploadNaming(
+  source: CloudFolder,
+  title: string,
+  extension: string,
+) {
+  const name = safeVideoName(`${title}.${extension}`);
+  return {
+    name,
+    originalName: name,
+    numberedNames: source.numberUploads === true,
+  };
+}
 export function clipDestination(video: Video): SaveDestination {
   if (video.remote && video.storagePreference !== "offline")
     return {
@@ -81,7 +93,7 @@ export function registerUpload(
       {
         ...video,
         id,
-        title: number ? numberedTitle(number) : video.title,
+        title: file.name.replace(/\.[^.]+$/, ""),
         style: sourceStyle(source),
         styleSet: false,
         source: connection.provider,
@@ -92,9 +104,7 @@ export function registerUpload(
         remote: {
           connectionId: connection.id,
           fileId: file.fileId,
-          fileName: number
-            ? numberedName(number, intendedName ?? file.name)
-            : file.name,
+          fileName: file.name,
           sourceIds: [source.id],
           canDownload: file.canDownload,
         },

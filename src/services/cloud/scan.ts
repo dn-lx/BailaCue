@@ -1,6 +1,10 @@
 import { reconcileSource } from "../../core/sources";
 import { planNumbering, stagedUploadNames } from "../../core/numbering";
-import type { CloudFolder, Library } from "../../core/types";
+import type {
+  CloudFolder,
+  Library,
+  SourceRenameProgress,
+} from "../../core/types";
 import { prepareNamedCopy } from "../phoneCopies";
 import { deleteMedia } from "../media";
 import { vault } from "./vault";
@@ -11,13 +15,51 @@ export type ScanStore = {
   getLibrary: () => Library;
   commit: (action: (l: Library) => Library) => Promise<Library>;
 };
-export function scanSource(store: ScanStore, sourceId: string) {
-  if (active.has(sourceId)) return active.get(sourceId)!;
-  const task = scan(store, sourceId).finally(() => active.delete(sourceId));
+export type ScanOptions = {
+  // Only the explicit, reviewed rename action may set this. Discovery never does.
+  rename?: boolean;
+  fileIds?: readonly string[];
+  signal?: AbortSignal;
+  onProgress?: (progress: SourceRenameProgress) => void;
+};
+export function scanSource(
+  store: ScanStore,
+  sourceId: string,
+  options: ScanOptions = {},
+): Promise<void> {
+  const previous = active.get(sourceId);
+  if (previous) {
+    // An explicit rename must not be swallowed by an in-flight discovery scan.
+    return options.rename
+      ? previous
+          .catch(() => {})
+          .then(() => scanSource(store, sourceId, options))
+      : previous;
+  }
+  const task = scan(store, sourceId, options).finally(() =>
+    active.delete(sourceId),
+  );
   active.set(sourceId, task);
   return task;
 }
-async function scan(store: ScanStore, sourceId: string) {
+async function scan(store: ScanStore, sourceId: string, options: ScanOptions) {
+  const progress: SourceRenameProgress = {
+    phase: "scanning",
+    total: 0,
+    processed: 0,
+    renamed: 0,
+    alreadyNamed: 0,
+    pending: 0,
+    failures: [],
+  };
+  const emit = () =>
+    options.onProgress?.({ ...progress, failures: [...progress.failures] });
+  if (options.rename) emit();
+  if (options.rename && options.signal?.aborted) {
+    progress.phase = "paused";
+    emit();
+    return;
+  }
   const before = store.getLibrary();
   const source = before.sources.find((s) => s.id === sourceId);
   const connection = before.connections.find(
@@ -27,9 +69,8 @@ async function scan(store: ScanStore, sourceId: string) {
     throw new Error("Reconnect this source first.");
   const adapter = provider(connection);
   const info = await adapter.inspectFolder(source.folderId);
-  const { videos } = await adapter.listVideos(source);
-  // Reserve all identities before any remote rename. A failed scan or rename does
-  // not reuse a number, lose notes or falsely remove unseen files.
+  const { videos: listing } = await adapter.listVideos(source);
+  const videos = listing.map((file) => ({ ...file }));
   let planned: CloudFolder = source;
   await store.commit((l) => {
     const current = l.sources.find((s) => s.id === source.id);
@@ -42,16 +83,19 @@ async function scan(store: ScanStore, sourceId: string) {
     planned = {
       ...current,
       writable: info.writable,
+      error: undefined,
       numbering: planNumbering(current, videos).numbering,
     };
     return reconcileSource(l, planned, videos);
   });
+  // Connecting, polling and Refresh videos stop here. No provider writes, upload-job vault
+  // access, phone-copy renames or title changes to an unapplied number.
+  if (options.rename !== true) return;
   const names = planNumbering(planned, videos).names;
   const pendingNames = new Set(stagedUploadNames(planned).keys());
   const pendingIds = new Set<string>();
-  // A completed-but-unregistered job must still be found at its saved path after
-  // a lost acknowledgement. Do not let discovery rename it ahead of resume.
   for (const video of store.getLibrary().videos.filter((v) => !v.remote)) {
+    if (options.signal?.aborted) break;
     const jobId = await vault.get(`upload-for-${video.id}`);
     if (!jobId) continue;
     const raw = await vault.get(`upload-${jobId}`);
@@ -61,26 +105,95 @@ async function scan(store: ScanStore, sourceId: string) {
     if (pending.fileId) pendingIds.add(pending.fileId);
     if (pending.path) pendingNames.add(pending.path.split("/").pop()!);
   }
-
-  let failures = 0;
-  for (const file of videos) {
+  const selected = options.fileIds ? new Set(options.fileIds) : undefined;
+  const targets = selected
+    ? videos.filter((v) => selected.has(v.fileId))
+    : videos;
+  progress.total = targets.length;
+  progress.phase = "renaming";
+  emit();
+  for (const file of targets) {
+    if (options.signal?.aborted) break;
     const name = names.get(file.fileId)!;
-    if (
-      file.name === name ||
-      pendingNames.has(file.name) ||
-      pendingIds.has(file.fileId)
-    )
-      continue;
-    if (!connection.writable || !info.writable) {
-      failures++;
-      continue;
+    if (pendingNames.has(file.name) || pendingIds.has(file.fileId)) {
+      progress.pending++;
+    } else {
+      let applied = file.name === name;
+      if (applied) progress.alreadyNamed++;
+      else {
+        try {
+          if (!connection.writable || !info.writable)
+            throw new Error(
+              "Allow write access for this account and folder, then retry.",
+            );
+          await adapter.renameVideo(file.fileId, name, planned.folderId);
+          file.name = name;
+          applied = true;
+          progress.renamed++;
+          // Save actual success immediately; later failures never claim it was
+          // renamed or roll it back. Ratings/notes remain on the same identity.
+          await store.commit((l) => ({
+            ...l,
+            videos: l.videos.map((v) =>
+              v.remote?.connectionId === connection.id &&
+              v.remote.fileId === file.fileId
+                ? {
+                    ...v,
+                    title: name.replace(/\.[^.]+$/, ""),
+                    remote: { ...v.remote, fileName: name },
+                  }
+                : v,
+            ),
+          }));
+        } catch (error) {
+          progress.failures.push({
+            fileId: file.fileId,
+            fileName: file.name,
+            message: (error as Error).message,
+          });
+        }
+      }
+      if (applied) {
+        const cached = store
+          .getLibrary()
+          .videos.find(
+            (v) =>
+              v.remote?.connectionId === connection.id &&
+              v.remote.fileId === file.fileId &&
+              v.offlineUri,
+          );
+        if (cached?.offlineUri) {
+          const oldUri = cached.offlineUri;
+          try {
+            const uri = await prepareNamedCopy(oldUri, name, cached.id);
+            if (uri !== oldUri) {
+              await store.commit((l) => ({
+                ...l,
+                videos: l.videos.map((v) =>
+                  v.id === cached.id && v.offlineUri === oldUri
+                    ? { ...v, offlineUri: uri }
+                    : v,
+                ),
+              }));
+              await deleteMedia(oldUri);
+            }
+          } catch (error) {
+            progress.failures.push({
+              fileId: file.fileId,
+              fileName: name,
+              message: `Phone copy: ${(error as Error).message}. The existing copy was kept.`,
+            });
+          }
+        }
+      }
     }
-    try {
-      await adapter.renameVideo(file.fileId, name, planned.folderId);
-    } catch {
-      failures++;
-    }
+    progress.processed++;
+    emit();
   }
+  progress.phase =
+    options.signal?.aborted && progress.processed < progress.total
+      ? "paused"
+      : "complete";
   await store.commit((l) => {
     const current = l.sources.find((s) => s.id === source.id);
     if (!current) return l;
@@ -88,49 +201,14 @@ async function scan(store: ScanStore, sourceId: string) {
       l,
       {
         ...current,
-        writable: info.writable,
-        error: failures
-          ? `${failures} cloud filename(s) could not be numbered. BailaCue numbers are saved; allow uploads/write access and refresh to retry.`
-          : undefined,
+        renameResult: {
+          ...progress,
+          failures: [...progress.failures],
+          updatedAt: new Date().toISOString(),
+        },
       },
       videos,
     );
   });
-  // Rename cached phone copies only after the source identities/numbers are saved.
-  for (const video of store
-    .getLibrary()
-    .videos.filter(
-      (v) => v.remote?.sourceIds.includes(source.id) && v.offlineUri,
-    )) {
-    const oldUri = video.offlineUri!;
-    const name = names.get(video.remote!.fileId);
-    if (!name) continue;
-    try {
-      const uri = await prepareNamedCopy(oldUri, name, video.id);
-      if (uri !== oldUri) {
-        await store.commit((l) => ({
-          ...l,
-          videos: l.videos.map((v) =>
-            v.id === video.id && v.offlineUri === oldUri
-              ? { ...v, offlineUri: uri }
-              : v,
-          ),
-        }));
-        await deleteMedia(oldUri);
-      }
-    } catch {
-      await store.commit((l) => ({
-        ...l,
-        sources: l.sources.map((s) =>
-          s.id === source.id
-            ? {
-                ...s,
-                error:
-                  `${s.error ?? ""} A phone copy could not be renamed; the original copy was kept. Refresh to retry.`.trim(),
-              }
-            : s,
-        ),
-      }));
-    }
-  }
+  emit();
 }

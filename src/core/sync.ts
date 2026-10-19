@@ -40,7 +40,9 @@ export function metadataSnapshot(library: Library) {
       writable: c.writable,
       connected: false,
     })),
-    sources: library.sources.map(({ error: _error, ...s }) => s),
+    sources: library.sources.map(
+      ({ error: _error, renameResult: _renameResult, ...s }) => s,
+    ),
     sessions: library.sessions,
     playlists: library.playlists,
     picks: library.picks,

@@ -26,6 +26,30 @@ export function numberedName(number: number, original: string) {
   const extension = /\.[a-z0-9]{1,8}$/i.exec(original)?.[0] ?? ".mp4";
   return `${numberedTitle(number)}${extension}`;
 }
+export function sourceRenamePreview(library: Library, sourceId: string) {
+  const source = library.sources.find((s) => s.id === sourceId);
+  if (!source) throw new Error("This source is no longer connected.");
+  const items = library.videos
+    .filter((v) => v.available && v.remote?.sourceIds.includes(sourceId))
+    .map((v) => {
+      const entry = source.numbering?.files[v.remote!.fileId];
+      if (!entry) throw new Error("Refresh videos before previewing names.");
+      return {
+        fileId: v.remote!.fileId,
+        from: v.remote!.fileName ?? v.title,
+        to: numberedName(entry.number, entry.originalName),
+        number: entry.number,
+        phoneCopy: !!v.offlineUri,
+      };
+    })
+    .sort((a, b) => a.number - b.number);
+  return {
+    sourceId,
+    sourceName: source.name,
+    items,
+    changes: items.filter((item) => item.from !== item.to).length,
+  };
+}
 // Retain recognition of pre-build12 upload sessions without changing their path.
 function legacyNumberedName(number: number, original: string) {
   return safeVideoName(
@@ -108,25 +132,14 @@ export function planNumbering(source: CloudFolder, files: RemoteVideo[]) {
   }
   return { numbering: state, names };
 }
-// Normalize saved/restored titles even offline, using already allocated numbers.
-// No new allocation or file mutation occurs until a complete source scan.
+// Display the last observed filename, never an unapplied allocation. No file I/O.
 export function normalizeSourceTitles(library: Library): Library {
   return {
     ...library,
     videos: library.videos.map((video) => {
       if (!video.remote) return video;
-      const remote = video.remote;
-      const entry = library.sources
-        .filter(
-          (s) =>
-            s.connectionId === remote.connectionId &&
-            remote.sourceIds.includes(s.id),
-        )
-        .map((s) => s.numbering?.files[remote.fileId])
-        .find(Boolean);
-      const number = entry?.number ?? Number(prefix.exec(video.title)?.[1]);
-      return Number.isSafeInteger(number) && number > 0
-        ? { ...video, title: numberedTitle(number) }
+      return video.remote.fileName
+        ? { ...video, title: video.remote.fileName.replace(/\.[^.]+$/, "") }
         : video;
     }),
   };

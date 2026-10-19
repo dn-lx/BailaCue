@@ -4,6 +4,7 @@ import {
   planNumbering,
   reserveUploadNumber,
   stagedUploadNames,
+  sourceRenamePreview,
 } from "../src/core/numbering";
 import { createLibraryWriter } from "../src/services/libraryWriter";
 import { emptyLibrary, type CloudFolder } from "../src/core/types";
@@ -91,8 +92,13 @@ it("retains numbers, notes and explicit ratings on refresh and metadata restore"
     },
   ];
   let next = reconcileSource(l, source, [file("a")]);
+  expect(sourceRenamePreview(next, source.id)).toMatchObject({
+    changes: 1,
+    items: [{ from: "a.mp4", to: "0001.mp4" }],
+  });
+  expect(next.videos[0].remote?.fileName).toBe("a.mp4");
   expect(next.videos[0]).toMatchObject({
-    title: "0001",
+    title: "a",
     style: "Salsa",
     importance: 5,
     ratingSet: false,
@@ -248,7 +254,7 @@ it("repairs a legacy reserved-number conflict once, then keeps the confirmed all
   ).toMatchObject({ number: 3, name: "0003.mp4", numbering: { next: 4 } });
 });
 
-it("normalizes stored titles offline and keeps numeric source titles on subsequent edits", async () => {
+it("uses the last observed filename offline rather than an unapplied number", async () => {
   const l = emptyLibrary();
   l.connections = [
     {
@@ -270,7 +276,7 @@ it("normalizes stored titles offline and keeps numeric source titles on subseque
     () => {},
   );
   writer.hydrate(old);
-  expect(writer.get().videos[0].title).toBe("0001");
+  expect(writer.get().videos[0].title).toBe("a");
   await writer.commit((library) => ({
     ...library,
     videos: library.videos.map((v) => ({
@@ -280,7 +286,7 @@ it("normalizes stored titles offline and keeps numeric source titles on subseque
     })),
   }));
   expect(writer.get().videos[0]).toMatchObject({
-    title: "0001",
+    title: "a",
     labels: ["Artist A"],
   });
 });

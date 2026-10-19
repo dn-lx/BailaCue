@@ -136,11 +136,25 @@ export class GoogleDriveProvider implements VideoProvider {
         body: JSON.stringify({ name }),
       },
     );
-    if (!response.ok)
+    if (!response.ok) {
+      let detail = "";
+      try {
+        const body = (await response.json()) as {
+          error?: { message?: string; errors?: { reason?: string }[] };
+        };
+        detail = body.error?.message ?? body.error?.errors?.[0]?.reason ?? "";
+      } catch {
+        /* A response without JSON still has a useful HTTP status. */
+      }
       throw new ProviderError(
-        "Drive could not rename this video. Refresh to retry.",
-        response.status === 401 ? "reauth" : "permission",
+        `Drive rename failed (HTTP ${response.status})${detail ? `: ${detail.slice(0, 500)}` : ". Review remaining renames to retry."}`,
+        response.status === 401
+          ? "reauth"
+          : response.status === 403
+            ? "permission"
+            : "network",
       );
+    }
   }
   async playback(fileId: string) {
     const metadata = (await this.get(

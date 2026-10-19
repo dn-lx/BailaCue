@@ -26,6 +26,7 @@ test("user connects Salsa and Bachata folders → streams → edits → refresh 
   context,
 }) => {
   let outsideAdded = false;
+  let failExternalOnce = true;
   const renamed = new Map<string, string>();
   const renames: { from_path: string; to_path: string }[] = [];
   const errors: string[] = [];
@@ -93,6 +94,13 @@ test("user connects Salsa and Bachata folders → streams → edits → refresh 
     const args = r.request().postDataJSON();
     expect(args.autorename).toBe(false);
     renames.push(args);
+    if (args.from_path === "id:external" && failExternalOnce) {
+      failExternalOnce = false;
+      return r.fulfill({
+        status: 403,
+        json: { error_summary: "no_write_permission" },
+      });
+    }
     renamed.set(args.from_path, args.to_path.split("/").pop());
     return r.fulfill({
       json: {
@@ -257,18 +265,42 @@ test("user connects Salsa and Bachata folders → streams → edits → refresh 
       exact: true,
     }),
   ).toBeEnabled();
+  await expect(
+    page.getByRole("switch", {
+      name: "Number new uploads to Tuesday class",
+      exact: true,
+    }),
+  ).not.toBeChecked();
+  await expect(
+    page.getByRole("switch", {
+      name: "Number new uploads to Bachata class",
+      exact: true,
+    }),
+  ).not.toBeChecked();
+  await page
+    .getByRole("button", { name: "Refresh videos", exact: true })
+    .first()
+    .click();
+  expect(renames).toHaveLength(0);
   await page.goto("/library");
-  // Credentials are intentionally memory-only on web; SPA navigation retains this test connection.
-  // Reloading the browser requires reconnecting. Return through in-app navigation below.
+  await expect(
+    page.getByRole("button", { name: "Play Cloud turn", exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Play Bachata basics", exact: true }),
+  ).toBeVisible();
   await expect(
     page.getByRole("button", { name: "Play 0001", exact: true }),
-  ).toHaveCount(2);
+  ).toHaveCount(0);
   await page
     .getByRole("button", { name: "Bachata class", exact: true })
     .click();
   await expect(
-    page.getByRole("button", { name: "Play 0001", exact: true }),
-  ).toHaveCount(1);
+    page.getByRole("button", { name: "Play Bachata basics", exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Play Cloud turn", exact: true }),
+  ).toHaveCount(0);
   await page
     .getByRole("button", { name: "Tuesday class", exact: true })
     .click();
@@ -285,6 +317,61 @@ test("user connects Salsa and Bachata folders → streams → edits → refresh 
   await expect(
     page.getByRole("button", { name: "Browse my folders", exact: true }),
   ).toBeVisible();
+  const salsaCard = page
+    .getByText("Tuesday class", { exact: true })
+    .filter({ visible: true })
+    .first()
+    .locator("..");
+  const bachataCard = page
+    .getByText("Bachata class", { exact: true })
+    .filter({ visible: true })
+    .first()
+    .locator("..");
+  await salsaCard
+    .getByRole("button", { name: "Rename existing videos…", exact: true })
+    .click();
+  await expect(
+    salsaCard.getByText("Preview numbered filenames", { exact: true }),
+  ).toBeVisible();
+  expect(renames).toHaveLength(0);
+  await salsaCard
+    .getByRole("button", { name: "Keep current filenames", exact: true })
+    .click();
+  expect(renames).toHaveLength(0);
+  await salsaCard
+    .getByRole("button", { name: "Rename existing videos…", exact: true })
+    .click();
+  await salsaCard
+    .getByText("Preview numbered filenames", { exact: true })
+    .scrollIntoViewIfNeeded();
+  await page.screenshot({
+    path: "artifacts/screenshots/rename-preview.png",
+    fullPage: true,
+  });
+  await salsaCard
+    .getByRole("button", { name: "Apply numbered filenames", exact: true })
+    .click();
+  await expect(
+    salsaCard.getByText("Rename results", { exact: true }),
+  ).toBeVisible();
+  expect(renames).toHaveLength(1);
+  await page
+    .getByRole("switch", {
+      name: "Number new uploads to Bachata class",
+      exact: true,
+    })
+    .check();
+  expect(renames).toHaveLength(1);
+  await bachataCard
+    .getByRole("button", { name: "Rename existing videos…", exact: true })
+    .click();
+  await bachataCard
+    .getByRole("button", { name: "Apply numbered filenames", exact: true })
+    .click();
+  await expect(
+    bachataCard.getByText("Rename results", { exact: true }),
+  ).toBeVisible();
+  expect(renames).toHaveLength(2);
   await page.getByRole("button", { name: "Done", exact: true }).click();
   await page.getByRole("button", { name: "Play 0001", exact: true }).click();
   await expect(page.getByText("ONLINE VIDEO", { exact: true })).toBeVisible();
@@ -304,7 +391,7 @@ test("user connects Salsa and Bachata folders → streams → edits → refresh 
     page.getByRole("textbox", { name: "Title", exact: true }),
   ).toHaveCount(0);
   await expect(
-    page.getByText("Video number: 0001", { exact: true }),
+    page.getByText("Source title: 0001", { exact: true }),
   ).toBeVisible();
   await page
     .getByRole("button", { name: "Choose labels", exact: true })
@@ -331,6 +418,40 @@ test("user connects Salsa and Bachata folders → streams → edits → refresh 
     .getByRole("button", { name: "Refresh videos", exact: true })
     .first()
     .click();
+  expect(renames).toHaveLength(2);
+  expect(renamed.has("id:external")).toBe(false);
+  await salsaCard
+    .getByRole("button", { name: "Rename existing videos…", exact: true })
+    .click();
+  await expect(
+    salsaCard.getByText("9999.mp4 → 0002.mp4", { exact: true }),
+  ).toBeVisible();
+  expect(renames).toHaveLength(2);
+  await salsaCard
+    .getByRole("button", { name: "Apply numbered filenames", exact: true })
+    .click();
+  await expect(salsaCard.getByText(/9999.mp4: Dropbox access/)).toBeVisible();
+  expect(renamed.has("id:external")).toBe(false);
+  await salsaCard
+    .getByText(/9999.mp4: Dropbox access/)
+    .scrollIntoViewIfNeeded();
+  await page.screenshot({
+    path: "artifacts/screenshots/rename-failure.png",
+    fullPage: true,
+  });
+  await salsaCard
+    .getByRole("button", { name: "Review remaining renames", exact: true })
+    .click();
+  await salsaCard
+    .getByRole("button", { name: "Apply numbered filenames", exact: true })
+    .click();
+  await expect(salsaCard.getByText(/9999.mp4: Dropbox access/)).toHaveCount(0);
+  await expect.poll(() => renamed.get("id:external")).toBe("0002.mp4");
+  await expect(
+    salsaCard.getByText("2 / 2 checked · 1 renamed · 1 already numbered", {
+      exact: true,
+    }),
+  ).toBeVisible();
   await page.getByRole("button", { name: "Done", exact: true }).click();
   await page.getByRole("button", { name: "All storage", exact: true }).click();
   await expect(

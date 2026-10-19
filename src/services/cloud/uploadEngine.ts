@@ -17,6 +17,8 @@ export type PendingUpload = {
   provider: "google-drive" | "dropbox";
   name: string;
   sequenceNumber?: number;
+  numberedNames?: boolean;
+  originalName?: string;
   mimeType: string;
   size: number;
   fileId: string;

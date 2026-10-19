@@ -91,8 +91,20 @@ export type CloudFolder = {
   defaultLabels: string[];
   writable: boolean;
   numbering?: SourceNumbering;
+  // Missing on older libraries: always opt out until explicitly enabled.
+  numberUploads?: boolean;
+  renameResult?: SourceRenameProgress & { updatedAt: string };
   lastSyncedAt?: string;
   error?: string;
+};
+export type SourceRenameProgress = {
+  phase: "scanning" | "renaming" | "paused" | "complete";
+  total: number;
+  processed: number;
+  renamed: number;
+  alreadyNamed: number;
+  pending: number;
+  failures: { fileId: string; fileName: string; message: string }[];
 };
 export type Library = {
   version: 1;
