@@ -30,26 +30,44 @@ generic and wants a more distinctive identity connected to dancing.
 
 ## Can agent-project-starter help?
 
-If the owner means [Meir Labs' agent-project-starter](https://meirlabs.com/agents/project-starter),
-its published description includes a planner, scaffolder, design-applier,
-analytics-wirer, test-wirer and docs-writer. The design-applier handles themes,
-typography and layout, so parts of that workflow could help organize a redesign.
+The owner confirmed their repository is
+[dn-lx/agent-project-starter](https://github.com/dn-lx/agent-project-starter), whose
+default branch was `prod` when inspected. Yes: its design workflow can help improve
+this app. The following evaluation is based on its README and actual design docs,
+not the unrelated Meir Labs project with a similar name.
 
-The [GitHub README](https://github.com/meirlabs/library/tree/main/agents/project-starter)
-describes a new-project workflow. Its
-[design-applier instructions](https://github.com/meirlabs/library/blob/main/agents/project-starter/files/design-applier.md)
-specifically use HTML theme attributes, a CSS-based web UI kit, React web icons and
-environment-specific favicons. These are not directly applicable to native React
-Native screens or Android/iOS launcher artwork. It can inform a plan and consistency
-rules, but needs adaptation; it does not establish a dedicated app-icon design
-capability. Do not run its scaffolder over the existing repository or add analytics
-merely to improve appearance. It has not been installed or executed here.
+Its [Design Stack](https://github.com/dn-lx/agent-project-starter/blob/prod/docs/DESIGN-STACK.md)
+assigns clear responsibilities:
 
-A more direct approach for BailaCue is a focused UX audit, Figma screen/component
-mockups, custom icon concepts using image generation, then a clean vector master
-and implementation in the existing React Native components. Figma helps review
-layout and visual consistency; image generation helps explore icon ideas; device
-testing verifies the resulting implementation. None replaces product design judgment.
+| Need in BailaCue | Relevant workflow from the starter |
+| --- | --- |
+| Distinctive dance identity, hierarchy and visual direction | Taste Skill |
+| Consistent palette, typography, spacing and UX patterns | UI/UX Pro Max |
+| Critique, alignment, clarity and polish | Impeccable |
+| Verify real rendered flows and accessibility | Frontend Verification + Accessibility/Visual Regression |
+
+Its [Premium Redesign](https://github.com/dn-lx/agent-project-starter/blob/prod/.agents/skills/premium-redesign/SKILL.md)
+workflow starts from product requirements and current UI, defines visual acceptance
+criteria and reusable design tokens, optionally uses Figma, then implements, polishes
+and verifies. This is a useful structure for the proposed work above.
+
+Adapt that structure to this existing Expo/React Native app. Web-only HTML/CSS,
+browser interaction assumptions and `motion/react` are not native implementation
+instructions. Native accessibility, safe areas, touch targets, player gestures and
+Android/iOS artwork requirements still need explicit device evidence. Keep the
+existing branch/release setup and project rules; adopting design guidance is not a
+request to bootstrap a new app, migrate branches or enable analytics.
+
+For the icon, use the creative-direction stage to define three concepts, image
+generation or vector exploration to develop them, and a clean editable vector master
+for the selected artwork. The starter organizes the process; it does not itself
+establish that a distinctive, production-ready app icon has been generated.
+
+Recommended combination: the starter's focused design workflow, Figma screen/component
+mockups where useful, custom icon exploration and implementation in the existing
+React Native components. None replaces product design judgment or device testing.
+The upstream files were inspected as references only. No starter scripts, external
+design packs, hooks or dependencies have been installed or executed in BailaCue.
 
 The next design deliverable should be a few representative screen mockups and three
 icon candidates, with a clear reason for each direction. These are proposed next
