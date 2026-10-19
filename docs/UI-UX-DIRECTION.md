@@ -1,10 +1,33 @@
-# Proposed UI/UX and icon follow-up
+# UI/UX and icon improvement requirements
 
-Status: design brief and tool recommendation, 2026-10-19. No redesign or icon change
-has been applied. App name remains **BailaCue**. The owner finds the current icon too
+Status: owner-requested requirements, 2026-10-19; implementation pending. No redesign
+or icon change has been applied. App name remains **BailaCue**. The owner finds the current icon too
 generic and wants a more distinctive identity connected to dancing.
 
-## Proposed work
+## Required use of Agent Project Starter
+
+**UX-01:** Use the owner's
+[dn-lx/agent-project-starter](https://github.com/dn-lx/agent-project-starter) design
+workflow to improve BailaCue's UI/UX and app icon. Apply its Premium Redesign and
+Design Stack guidance to the existing app: Taste for creative direction, UI/UX Pro
+Max for design-system guidance, and Impeccable for critique and polish, followed by
+rendered UI, accessibility and visual-regression verification. Adapt relevant guidance
+to Expo/React Native and preserve BailaCue's product behavior and project rules.
+
+Acceptance:
+
+- [ ] Record the reviewed starter revision and the design guidance used.
+- [ ] Capture current screens, define visual acceptance criteria and document the
+      improved shared tokens/components and key user journeys.
+- [ ] Develop three distinctive dance-icon concepts and deliver the selected icon's
+      editable master and platform assets.
+- [ ] Implement the UI improvements and verify alignment, large text, accessibility
+      and important native video workflows with before/after evidence.
+
+This is a requirement for the future design work, not an instruction to run the
+starter's full bootstrap or replace this application's architecture.
+
+## Required work
 
 1. Audit the main journeys: add/preview/classify a video, choose its source, play and
    practise, trim/save a new file, find Daily Picks, and manage connected sources.
@@ -49,7 +72,7 @@ assigns clear responsibilities:
 Its [Premium Redesign](https://github.com/dn-lx/agent-project-starter/blob/prod/.agents/skills/premium-redesign/SKILL.md)
 workflow starts from product requirements and current UI, defines visual acceptance
 criteria and reusable design tokens, optionally uses Figma, then implements, polishes
-and verifies. This is a useful structure for the proposed work above.
+and verifies. This is the required structure for the design work above.
 
 Adapt that structure to this existing Expo/React Native app. Web-only HTML/CSS,
 browser interaction assumptions and `motion/react` are not native implementation
@@ -69,6 +92,6 @@ React Native components. None replaces product design judgment or device testing
 The upstream files were inspected as references only. No starter scripts, external
 design packs, hooks or dependencies have been installed or executed in BailaCue.
 
-The next design deliverable should be a few representative screen mockups and three
-icon candidates, with a clear reason for each direction. These are proposed next
-steps, not completed assets or a request to replace the app's existing architecture.
+The next design deliverable is a few representative screen mockups and three icon
+candidates, with a clear reason for each direction. These are pending deliverables,
+not completed assets or a request to replace the app's existing architecture.

@@ -109,8 +109,10 @@ server-generated picks and remote new-video push remain implementation work.
       personal labels/ratings and explicit Daily Picks source participation.
 - [ ] YouTube availability, attribution, quota and capability-aware UI; no file
       download, original renaming or native trim/export for linked YouTube content.
-- [ ] Focused UI/UX audit, screen/component designs and a more distinctive dance icon.
+- [ ] **UX-01:** Use the owner's [Agent Project Starter](https://github.com/dn-lx/agent-project-starter)
+      design workflow for a focused UI/UX audit, improved screens/components and a
+      more distinctive dance icon, adapted to the existing Expo/React Native app.
 
 Requirements and acceptance: [YOUTUBE-REQUIREMENTS.md](YOUTUBE-REQUIREMENTS.md).
-Proposed design process and starter evaluation: [UI-UX-DIRECTION.md](UI-UX-DIRECTION.md).
+Required design process and acceptance: [UI-UX-DIRECTION.md](UI-UX-DIRECTION.md).
 These items are not implemented in the current preview; no new build is implied.

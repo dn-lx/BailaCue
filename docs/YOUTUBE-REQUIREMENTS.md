@@ -94,5 +94,12 @@ playlist or single-video links instead, or use both approaches.
 - Confirm the default Daily Picks participation UX when multiple sources share a
   dance style. Current behavior is documented in [DAILY-PICKS.md](DAILY-PICKS.md).
 
+## Related UI/UX requirement
+
+- [ ] **UX-01:** Use the owner's [Agent Project Starter](https://github.com/dn-lx/agent-project-starter)
+      design workflow to improve the existing app's UI/UX and create a more distinctive
+      dance app icon. Adapt it to Expo/React Native, including the new YouTube flows.
+      Full scope and acceptance are in [UI-UX-DIRECTION.md](UI-UX-DIRECTION.md).
+
 No app build, provider configuration or production database change is included in
-this documentation task. Design follow-up is recorded in [UI-UX-DIRECTION.md](UI-UX-DIRECTION.md).
+this documentation task.
