@@ -1,4 +1,23 @@
-# Current acceptance · BailaCue 0.2.17 / build22
+# Current acceptance · BailaCue 0.2.21 / build26
+
+[Acceptance39508298270](https://github.com/dn-lx/BailaCue/actions/runs/39508298270)
+passed all **14 native checks** through Google's pinned real ARTEMIS controller
+and helper 1.2.0 on API 35. No autonomous model, private media or real account was used.
+
+Native import/resize/pixel Mirror/trim/export/original-preservation/Photos/labels/
+rated Daily Picks/Practice timing and pause assertions pass. Export duration:
+3.017075s. Public bytes equal the accepted APK, SHA256
+`3101235f761f09afdf43b77c462a7cc88ae32dbd35ca546c0558cf8f41e7e07c`; APKv2 signature/content/version and unchanged signer were independently checked.
+
+The live public playlist attempt timed out without exposing addable contents. The app displayed its timeout and API-key setup guidance. Live import remains unverified and is not counted as a passed check. Playlist regression tests use controlled official-endpoint responses.
+
+[Report](verification/android-build26/report.json) · [APK proof](verification/android-build26/apk-proof.json) · [Media proof](verification/android-build26/media-proof.json) · [Full scope](VERIFICATION.md).
+The iOS simulator compile passes separately and does not establish iPhone runtime
+acceptance. Historical acceptance records follow.
+
+---
+
+# Historical acceptance · BailaCue 0.2.17 / build22
 
 [Acceptance39448344894](https://github.com/dn-lx/BailaCue/actions/runs/39448344894)
 passed all **14 native checks** through Google's real pinned ARTEMIS controller and

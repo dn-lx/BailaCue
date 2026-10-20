@@ -1,5 +1,7 @@
 # Full-document implementation · preview22
 
+The later [round-2 requirements and implementation](REQUIREMENTS-ROUND-2.md) are a separate list, delivered in build26. [Current verification](VERIFICATION.md) records that APK; the table below remains the historical first-round record.
+
 The owner authorized all 22 issues on20 October2026. The organized specification
 is mirrored in [PRODUCT-REQUIREMENTS.md](PRODUCT-REQUIREMENTS.md). Earlier review-only
 wording is superseded. All original screenshots remain in the Google Doc.

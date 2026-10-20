@@ -1,23 +1,22 @@
-# Current handoff · round 2 · 0.2.21/build26 in progress
+# Current handoff · published 0.2.21/build26
 
-The owner authorized all six issues in REQUIREMENTS-ROUND-2.md after approving
-the concept05 b/play preview. Source implements playlist cueing without playback,
-durable Add/Open Library and retry, compact YouTube titles, resize/full screen with
-a stable player instance, and clean transparent in-app/platform icon exports.
-App name and UI palette remain unchanged. Native publication is pending; see
-VERIFICATION.md. Build22 remains the previous public preview until build26 passes.
+All six owner-approved round-2 issues are implemented in source `9bc627d1c6aff5918938d506e1cbdf8a03ab2914`.
+[Direct Android download](https://github.com/dn-lx/BailaCue/releases/download/v0.2.21-preview.26/BailaCue-v0.2.21-build26-preview.apk) · [Verification](VERIFICATION.md) · [Requirements](REQUIREMENTS-ROUND-2.md).
 
-190 unit/database tests and the browser journeys pass; Doctor20/20 and iOS Hermes
-export pass. No new native dependency or production table is required. The selected
-icon SVG is a geometric refinement of the approved image, with 70 exports; old BC
-sources are historical. Full YouTube pagination needs a device API key; keyless
-player enumeration can be limited and the UI discloses setup/retry. A live Android
-attempt is separate from mocked regression evidence.
+190 tests/19 suites,14 browser journeys, type/lint/export/Doctor 20/20 pass.
+All 14 native ARTEMIS checks pass on the exact public APK; signature, digest,
+version and unchanged signer were independently verified. Fresh iOS simulator
+compilation passes; a signed iPhone build/runtime review remains separate.
 
-Source pushes and Android prerelease publication are authorized. Do not merge main,
-submit stores, run paid services, use TinyFish or modify unrelated Me+ data. No
-subagents without explicit delegation authorization. Earlier handoffs remain in Git.
+The live public playlist attempt timed out without exposing addable contents. The app displayed its timeout and API-key setup guidance. Live import remains unverified and is not counted as a passed check. Playlist regression tests use controlled official-endpoint responses.
+Full YouTube pagination needs a device API key; the official player's keyless list
+can be limited and the UI explains setup/retry. No video downloads apply to YouTube.
 
-Build23/tag v0.2.18-preview.23 was withheld before publication for the final transparent lock-screen mark and landscape full-screen-action placement corrections.
+Concept05 b/play uses a clean geometric SVG and 70 exports. In-app artwork is
+transparent; Android layers include safe-zone padding. OS launcher/iOS backgrounds
+are separate. Whole chip groups, including shorter wrapped rows, are centered;
+text alignment inside chips remains unchanged. App name/theme remain unchanged.
 
-Build24 was withheld before publication after the launcher-mask check found clipping in the adaptive foreground. Build25 pads only the adaptive layers to preserve the complete symbol under Android masks.
+PR#1 stays draft and main stays unmerged. No new production table or deployment
+was required. Do not use TinyFish, paid services, unrelated Me+ data or store
+submission. No subagents without explicit delegation. Earlier handoffs remain in Git.

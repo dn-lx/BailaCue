@@ -251,8 +251,8 @@ async def main():
         elements = await observe("loop-enabled")
         if not any("Loop on" in label(e) for e in elements): raise AssertionError("Loop did not enable")
         report["checks"].append({"check":"Native named section and loop control", "result":"passed"})
-        # Centered destination chips change the card's wrapped height. Bring the
-        # export action clear of Android's gesture edge before tapping; a clipped
+        # Card interactions can leave the export action clipped at the bottom.
+        # Bring it clear of Android's gesture edge before tapping; a clipped
         # bottom-edge hit can launch Recents instead of completing this journey.
         screen = await controller.get_screen_data()
         await controller.swipe_coords(screen.width-24,int(screen.height*.78),screen.width-24,int(screen.height*.48),350)

@@ -1,6 +1,6 @@
 # BailaCue · new requirements · round 2
 
-Status: the owner authorized all six round-2 issues. Implemented in 0.2.21/build26 source; native acceptance and publication are pending.
+Status: all six owner-approved issues are implemented in published 0.2.21/build26. All 14 recorded native checks pass. Live-provider and iOS runtime limits are recorded in VERIFICATION.md.
 
 This is a new list of feedback on Android preview 0.2.17/build22. It is separate
 from the earlier 22-issue requirements and uses a new `R2` numbering sequence.
@@ -86,8 +86,8 @@ strokes and central play triangle remain part of the symbol itself.
 **Confirmed reference:** The owner supplied `1000072660.jpg`. The unchanged board
 is saved at [round-2-selected-concept-05-board.jpg](brand/round-2-selected-concept-05-board.jpg).
 Use the panel numbered **05**, not the adjacent designs or the previous BC mark.
-This board is reference artwork; an editable master of the revised icon is still
-part of future implementation.
+The board is reference artwork. The revised editable master and 70 exports are
+committed under assets/brand and listed in its manifest.
 
 ![Owner-supplied concept board; selected concept05 is bottom-middle](brand/round-2-selected-concept-05-board.jpg)
 
@@ -181,3 +181,18 @@ Implementation scope is this round-2 list. Existing libraries, originals, source
 Build23/tag v0.2.18-preview.23 was withheld before publication for the final transparent lock-screen mark and landscape full-screen-action placement corrections.
 
 Build24 was withheld before publication after the launcher-mask check found clipping in the adaptive foreground. Build25 pads only the adaptive layers to preserve the complete symbol under Android masks.
+
+Current evidence:190 unit/database tests,14 browser journeys, centered-row geometry, Android native acceptance, verified public APK identity and fresh iOS simulator compilation. See [verification](VERIFICATION.md) for actual scope and remaining manual acceptance.
+
+## Implementation and remaining acceptance · build26
+
+| Issue         | Delivered / evidence                                                                                                                                     | Remaining acceptance                                                                                          |
+| ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| R2-01         | Compact two-line title, expand action and complete accessible title; browser widths320/360/412                                                           | Full native large-font/screen-reader review                                                                   |
+| R2-02 / R2-03 | Resize grip, accessible adjustments, full screen and Android Back; controlled browser checks preserve player identity, position, speed and playing state | Live embedded playback on Android and iPhone; the live Android playlist timed out before a playable import    |
+| R2-04         | Approved b/play SVG and 70 exports; transparent in-app artwork; all 10 compiled Android adaptive/themed layers fit the 66dp safe zone                    | Broader physical launcher/device review                                                                       |
+| R2-05         | Visible Add, cue-before-play, durable save/retry/Open Library, API pagination and partial-refresh preservation; domain and browser regressions pass      | Live public playlist import timed out without an API key; second playlist and iPhone import remain unverified |
+| R2-06         | Whole chip groups and shorter wrapped rows center; 34 groups measured at 320/412px with 0px maximum error; light/dark screenshots                        | Full native font-scale/accessibility review                                                                   |
+
+All 14 native editing/Practice regression checks pass. They do not claim successful
+live YouTube import; see [the report and exact limits](VERIFICATION.md).

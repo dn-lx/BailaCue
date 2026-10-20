@@ -3,15 +3,15 @@
 **Watch. Practise. Repeat.** A private dance video library with Salsa, Bachata and custom dance types for Android
 and iOS, built with React Native, TypeScript and Expo SDK 58.
 
-<img src="assets/icon.png" alt="BailaCue blue BC monogram with embedded play button" width="160" />
+<img src="assets/brand/symbol-color-transparent.png" alt="BailaCue transparent blue b symbol with centered play button" width="160" />
 
 ## Install Android
 
-Download [BailaCue 0.2.17 for Android](https://github.com/dn-lx/BailaCue/releases/download/v0.2.17-preview.22/BailaCue-v0.2.17-build22-preview.apk)
-or open [release notes](https://github.com/dn-lx/BailaCue/releases/tag/v0.2.17-preview.22).
+Download [BailaCue 0.2.21 for Android](https://github.com/dn-lx/BailaCue/releases/download/v0.2.21-preview.26/BailaCue-v0.2.21-build26-preview.apk)
+or open [release notes](https://github.com/dn-lx/BailaCue/releases/tag/v0.2.21-preview.26).
 Open it on an Android phone and allow installation from your browser/files app when
 Android asks. This is an internal preview signed with a test certificate, not a
-Play Store release. Version **0.2.17 (22)**; minimum Android 7/API 24.
+Play Store release. Version **0.2.21 (26)**; minimum Android 7/API 24.
 
 No Metro server or Expo Go is needed for the APK. iOS needs a separate signed build
 with an Apple Developer account; an Android APK cannot be installed on an iPhone.
@@ -19,7 +19,7 @@ with an Apple Developer account; an Android APK cannot be installed on an iPhone
 Preview publication is gated on Google ARTEMIS native checks, including actual
 resize/trim-handle gestures, real import, new-file trimming, original-byte preservation,
 saving to Photos, artist-label creation/reuse and rated Salsa/Bachata Daily Picks.
-All 14 build22 native checks passed; public APK identity is recorded in the verification report below.
+Native checks, the separate live YouTube attempt and public APK identity are recorded in the verification report below.
 [Verification and screenshots](docs/VERIFICATION.md) record exact scope and remaining
 live-provider/iOS setup. The release verification records the final native and public-download evidence.
 
@@ -27,14 +27,14 @@ live-provider/iOS setup. The release verification records the final native and p
 
 - [Optional numbered filenames](docs/SOURCE-NUMBERING.md): preview, explicitly apply, pause and retry per-file failures. Connecting/refreshing keeps actual filenames. New-upload numbering is off by default.
 - Preview an imported video before choosing its dance style and destination.
-- Owner-selected blue BC/play icon, black alternate, wordmarks, adaptive icon, splash,
+- Owner-selected concept05 b/play icon, black alternate, wordmarks, adaptive icon, splash,
   coordinated badges and blue/black light/dark themes. [Brand asset inventory](docs/brand/README.md)
-  lists 66 exports, traced SVG and outlined-wordmark masters, transparent/monochrome families and platform assets.
+  lists 70 exports, geometric SVG and outlined-wordmark masters, transparent/monochrome families and platform assets.
 - [Rating-led Daily Picks](docs/DAILY-PICKS.md): one video per selected dance by default, advanced source selection, unrated counted as 5★,
   independent cooldowns, minimum stars and an explicit update-today action.
 - [Continuous Practice](docs/PRACTICE.md): filtered, rating-weighted balanced queues, Previous/Next,
   named loops, actual active-time timing, breaks, safe restore and idempotent history.
-- [YouTube videos/playlists](docs/YOUTUBE.md): optional owner-supplied Bachata Tutorials,
+- [YouTube videos/playlists](docs/YOUTUBE.md): explicit cue discovery without starting playback, visible Add, durable save/retry and Open Library; optional owner-supplied Bachata Tutorials,
   manual links, previews, selection, pagination/refresh and deduplicated personal metadata.
   Opt in for online Daily Picks/Practice; YouTube has no file-download or editing actions.
 - [Product/reliability audit PDF](docs/audits/BailaCue-Audit-2026-10-18.pdf) with prioritized improvements
@@ -73,7 +73,8 @@ not automatic video-content analysis.
 
 See [actual verification](docs/VERIFICATION.md) and the [full scope ledger](docs/BACKLOG.md).
 The [approved requirements](docs/PRODUCT-REQUIREMENTS.md), [implementation tracker](docs/IMPLEMENTATION-TRACKER.md)
-and [UI/UX direction](docs/UI-UX-DIRECTION.md) describe the full-document delivery.
+and [UI/UX direction](docs/UI-UX-DIRECTION.md) describe the first delivery.
+The [round-2 requirements](docs/REQUIREMENTS-ROUND-2.md) add reliable playlist imports, compact YouTube titles, resize/full screen the transparent b/play identity and centered chip groups.
 Implemented source and mock tests do not imply live OAuth or physical-device validation.
 New-video server push, automatic sync/merge and WebDAV/S3 adapters remain pending.
 
@@ -108,7 +109,7 @@ npm run build:android
 ```
 
 The script generates Android from Expo config and builds a bundled release-mode APK
-at `artifacts/BailaCue-v0.2.17-build22-preview.apk` with SHA-256. Native media code is
+at `artifacts/BailaCue-v0.2.21-build26-preview.apk` with SHA-256. Native media code is
 committed under `modules/baila-media`; generated root `android/` and `ios/` are ignored.
 The generated internal debug certificate is used for previews; configure your own
 release signing before store publication. Never commit signing keys.
