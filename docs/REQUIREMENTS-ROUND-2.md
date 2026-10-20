@@ -66,11 +66,47 @@ player; opening the external YouTube app is a separate fallback.
   restricts full-screen playback, explain that state and offer Open in YouTube;
   do not present an ineffective full-screen button as working.
 
+## R2-04 · Replace the app icon using the newly selected concept
+
+**Owner feedback:** The current icon does not look good. Use the **fifth icon/photo
+in the second icon-concept screenshot**, now identified by the supplied board as
+**concept05: the lowercase “b” mark in the bottom-middle panel**, and add a
+**triangular play button in the middle**.
+
+**Requirement:** Use concept05's blue loop and upright with its black diagonal
+stroke as the base of the next app icon. Add a clearly visible, right-facing play
+triangle centered inside the loop of the “b”. This is the updated icon selection
+for round 2; the earlier concept03 selection remains historical.
+
+**Confirmed reference:** The owner supplied `1000072660.jpg`. The unchanged board
+is saved at [round-2-selected-concept-05-board.jpg](brand/round-2-selected-concept-05-board.jpg).
+Use the panel numbered **05**, not the adjacent designs or the previous BC mark.
+This board is reference artwork; an editable master of the revised icon is still
+part of future implementation.
+
+![Owner-supplied concept board; selected concept05 is bottom-middle](brand/round-2-selected-concept-05-board.jpg)
+
+**Acceptance:**
+
+- The base design matches concept05 on the confirmed board, with a comparison preview
+  showing the reference and the revised icon.
+- The play triangle sits in the middle, has clear contrast, and preserves the
+  distinguishing features of the selected base design.
+- The symbol and triangle remain recognizable at small launcher sizes and under
+  Android/iOS icon masks; check light, dark and supported themed presentation.
+- During implementation, update affected launcher/adaptive/monochrome/iOS and
+  in-app icon exports consistently. Keep the reference, editable master, exports
+  and updated asset manifest in Git, following the existing brand asset contract.
+- This request changes the icon design; it does not request another app rename
+  or a change to the app's blue/black colour theme.
+
 ## Implementation order and evidence
 
 1. R2-01: compact title and header layout.
 2. R2-02: resize behavior and accessible controls.
 3. R2-03: full-screen lifecycle and device verification.
+4. R2-04: match the selected artwork, add the centered play triangle, and update
+   affected icon assets. This design task can proceed independently of the player work.
 
 The user's screenshot `1000072658.png` in the conversation is the visual reference;
 the personal screenshot is not published in Git. Capture before/after evidence
