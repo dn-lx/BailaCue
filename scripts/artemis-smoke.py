@@ -98,6 +98,8 @@ async def main():
     report["checks"].append({"check":"Native tab navigation to Library", "result":"passed"})
     if os.environ.get("BAILACUE_ARTEMIS_VIDEO") == "1":
         fixture = Path(os.environ["BAILACUE_ARTEMIS_FIXTURE"])
+        # Navigate through the outer page margin so the native preview seek bar
+        # cannot consume a scroll gesture. Resize/trim gestures below still target controls.
         async def locate(text, scrolls=0, attempts=12, exact=False):
             for attempt in range(attempts):
                 elements = await observe("video-step")
@@ -109,7 +111,7 @@ async def main():
                         pass
                 if attempt < scrolls:
                     screen = await controller.get_screen_data()
-                    await controller.swipe_coords(screen.width//2,int(screen.height*.78),screen.width//2,int(screen.height*.28),400)
+                    await controller.swipe_coords(screen.width-24,int(screen.height*.78),screen.width-24,int(screen.height*.28),400)
                 await asyncio.sleep(1)
             raise AssertionError(f"Native journey could not locate {text}")
         async def field(text,value):
@@ -130,7 +132,7 @@ async def main():
                         raise AssertionError(f"Native text entry did not replace {text} with {value}")
                     return
                 screen = await controller.get_screen_data()
-                await controller.swipe_coords(screen.width//2,int(screen.height*.78),screen.width//2,int(screen.height*.48),350)
+                await controller.swipe_coords(screen.width-24,int(screen.height*.78),screen.width-24,int(screen.height*.48),350)
             raise AssertionError(f"Could not verify the entered value for {text}")
         await locate("Add video")
         await locate("Choose a video")
@@ -194,7 +196,7 @@ async def main():
         async def top():
             for _ in range(5):
                 screen=await controller.get_screen_data()
-                await controller.swipe_coords(screen.width//2,int(screen.height*.28),screen.width//2,int(screen.height*.75),200)
+                await controller.swipe_coords(screen.width-24,int(screen.height*.28),screen.width-24,int(screen.height*.75),200)
         await locate("Play",scrolls=3,exact=True)
         await asyncio.sleep(1)
         await locate("Pause",scrolls=2,exact=True)
@@ -286,7 +288,7 @@ async def main():
         # Return above editing tools to the primary details card.
         for _ in range(8):
             screen=await controller.get_screen_data()
-            await controller.swipe_coords(screen.width//2,int(screen.height*.30),screen.width//2,int(screen.height*.80),250)
+            await controller.swipe_coords(screen.width-24,int(screen.height*.30),screen.width-24,int(screen.height*.80),250)
         await locate("Remove label ARTEMIS Artist",scrolls=6)
         await observe("label-removed")
         # Removing a chip can adjust the nested scroll offset. Start from a known
@@ -334,7 +336,7 @@ async def main():
                     if text in label(element) and b.get("bottom", 0) > b.get("top", 0) >= 0 and b["bottom"] <= controller.ctx.device.device_height:
                         return
                 screen = await controller.get_screen_data()
-                await controller.swipe_coords(screen.width//2,int(screen.height*.78),screen.width//2,int(screen.height*.28),400)
+                await controller.swipe_coords(screen.width-24,int(screen.height*.78),screen.width-24,int(screen.height*.28),400)
                 await asyncio.sleep(0.8)
             raise AssertionError(f"Native Daily Picks did not show {text}")
         await see("Play ARTEMIS Bachata pick","daily-bachata")
