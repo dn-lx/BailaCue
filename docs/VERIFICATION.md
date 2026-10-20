@@ -17,7 +17,7 @@ unchanged original bytes, Photos save, labels, Daily Picks and Practice backgrou
 pause. Public APK identity and signature will be recorded after publication.
 
 YouTube/Dropbox browser tests use mocked official endpoints, not live accounts.
-iOS compilation/signing, real creator-specific YouTube/autoplay, live cloud transfers
+An unsigned iOS simulator compile check is being run separately. Physical iOS signing/playback, real creator-specific YouTube/autoplay, live cloud transfers
 and physical phone-call interruptions remain unverified. YouTube's full pagination
 requires a device API key; its keyless visible-player list may be limited. No new
 production database changes or app-store submission are included.
