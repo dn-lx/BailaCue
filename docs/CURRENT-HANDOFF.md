@@ -1,4 +1,4 @@
-# Current handoff · full requirements ·0.2.15/build20
+# Current handoff · full requirements ·0.2.16/build21
 
 The owner authorized all22 issues, superseding the earlier review-only gate.
 See PRODUCT-REQUIREMENTS.md, IMPLEMENTATION-TRACKER.md, YOUTUBE.md and VERIFICATION.md.
@@ -197,3 +197,5 @@ Automatic metadata merge/sync, new-video push and WebDAV/S3 adapters remain pend
 Unpublished build18/tag v0.2.13-preview.18/run39429970323 was cancelled before publication to fix unselected dances entering total-count Daily Picks. Immutable tag/source retained.
 
 Build19/tag v0.2.14-preview.19/run39431016837 was cancelled before publication for final YouTube import, full-screen contrast and revoked-copy UI corrections.
+
+Build20/tag v0.2.15-preview.20/run39432080504 built successfully but was blocked after5 native checks: the hidden full-screen VideoView stole the inline video surface. Source21 conditionally mounts it. Evidence is in verification/android-build20-initial/. No build20 release was published.

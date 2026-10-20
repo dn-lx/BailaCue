@@ -671,17 +671,19 @@ function Player({ video, uri }: { video: Video; uri: VideoSource }) {
             justifyContent: "center",
           }}
         >
-          <VideoView
-            player={player}
-            surfaceType="textureView"
-            style={{
-              width: "100%",
-              flex: 1,
-              transform: [{ scaleX: mirror ? -1 : 1 }],
-            }}
-            nativeControls={false}
-            contentFit="contain"
-          />
+          {fullscreen ? (
+            <VideoView
+              player={player}
+              surfaceType="textureView"
+              style={{
+                width: "100%",
+                flex: 1,
+                transform: [{ scaleX: mirror ? -1 : 1 }],
+              }}
+              nativeControls={false}
+              contentFit="contain"
+            />
+          ) : null}
           <View style={{ padding: 12, gap: 8, backgroundColor: t.surface }}>
             <Timeline
               duration={video.duration}
