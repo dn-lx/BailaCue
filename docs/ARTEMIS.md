@@ -1,4 +1,4 @@
-# Preview18 native acceptance in progress
+# Preview19 native acceptance in progress
 
 The updated harness removes preset assertions, tests the resize grip, opens Extra
 options before editing, and checks native Mirror by comparing asymmetric rendered

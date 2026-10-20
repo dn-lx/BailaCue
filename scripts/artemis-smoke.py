@@ -195,6 +195,9 @@ async def main():
             for _ in range(5):
                 screen=await controller.get_screen_data()
                 await controller.swipe_coords(screen.width//2,int(screen.height*.28),screen.width//2,int(screen.height*.75),200)
+        await locate("Play",scrolls=3,exact=True)
+        await asyncio.sleep(1)
+        await locate("Pause",scrolls=2,exact=True)
         await top()
         grip, b=await control("Resize video area","mirror-normal")
         from PIL import Image, ImageChops, ImageStat

@@ -1,6 +1,6 @@
 {
   "name": "bailacue",
-  "version": "0.2.13",
+  "version": "0.2.14",
   "main": "expo-router/entry",
   "dependencies": {
     "@expo-google-fonts/dm-sans": "^0.4.2",

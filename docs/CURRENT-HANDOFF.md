@@ -1,10 +1,10 @@
-# Current handoff · full requirements ·0.2.13/build18
+# Current handoff · full requirements ·0.2.14/build19
 
 The owner authorized all22 issues, superseding the earlier review-only gate.
 See PRODUCT-REQUIREMENTS.md, IMPLEMENTATION-TRACKER.md, YOUTUBE.md and VERIFICATION.md.
 The source includes the simplified player, dynamic dances/labels/filters/sorts,
 rating-led Daily Picks, continuous timed Practice and optional YouTube sources.
-177 unit/database tests and10 browser journeys pass; Doctor20/20. The Android
+178 unit/database tests and10 browser journeys pass; Doctor20/20. The Android
 build/native/publication gate is in progress. Do not claim native acceptance yet.
 Name stays BailaCue; concept03 BC/play in blue/black.66 vector/PNG exports are in Git.
 No automatic renaming, production deployment or main merge. iOS/live-provider and
@@ -193,3 +193,5 @@ No paid actions. No subagents unless explicitly requested.
 Live provider transfers, real two-user Me+ acceptance, camera/notification/physical
 accessibility/large-file hardening and iOS compilation/signing remain unverified.
 Automatic metadata merge/sync, new-video push and WebDAV/S3 adapters remain pending.
+
+Unpublished build18/tag v0.2.13-preview.18/run39429970323 was cancelled before publication to fix unselected dances entering total-count Daily Picks. Immutable tag/source retained.

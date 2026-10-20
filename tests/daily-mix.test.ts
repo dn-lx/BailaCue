@@ -207,3 +207,16 @@ it("chooses one video from each dance source even when all legacy video styles s
   l.videos[0].ratingSet = true;
   expect(choosePicks(l, now)).toEqual(["bachata"]);
 });
+
+it("keeps unselected dance types out of total-count mode as an eligibility gate", () => {
+  const l = emptyLibrary();
+  l.preferences.styles = ["Salsa"];
+  l.preferences.onePerStyle = false;
+  l.preferences.count = 2;
+  l.videos = [
+    video("selected", "Salsa", 3),
+    video("unselected", "Bachata", 5),
+    video("other", "Tango", 5),
+  ];
+  expect(choosePicks(l, now)).toEqual(["selected"]);
+});

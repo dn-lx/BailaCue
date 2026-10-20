@@ -8,6 +8,7 @@ export const minimumPickRating = (library: Library) =>
   Math.max(1, Math.min(5, library.preferences.minPickRating ?? 1));
 const eligible = (library: Library, video: Video) =>
   video.available &&
+  library.preferences.styles.includes(video.style) &&
   (!video.youtube ||
     (library.preferences.includeYouTube && video.youtube.embedAllowed)) &&
   effectiveRating(video) >= minimumPickRating(library) &&

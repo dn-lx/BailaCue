@@ -1,7 +1,7 @@
-# Verification · BailaCue0.2.13/build18
+# Verification · BailaCue0.2.14/build19
 
 Full approved requirements are implemented in the preview source. Acceptance must
-remain separate from implementation:177 unit/database tests in17 suites, TypeScript,
+remain separate from implementation:178 unit/database tests in17 suites, TypeScript,
 ESLint, web export,10 browser journeys and Expo Doctor20/20 pass locally.
 
 Browser evidence covers a real synthetic-file import, seek/trim handles, resize,
@@ -27,3 +27,5 @@ manifest includes dimensions, alpha and checksums. See brand/README.md and the
 implementation matrix in IMPLEMENTATION-TRACKER.md. Optional renaming stays off.
 
 Prior brand-only preview: [build17](VERIFICATION-0.2.12.md).
+
+Unpublished build18/tag v0.2.13-preview.18/run39429970323 was cancelled before publication to fix unselected dances entering total-count Daily Picks. Immutable tag/source retained.
