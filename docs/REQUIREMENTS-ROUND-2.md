@@ -112,12 +112,48 @@ part of future implementation.
 - This request changes the icon design; it does not request another app rename
   or a change to the app's blue/black colour theme.
 
+## R2-05 · Make YouTube playlists addable to the Library
+
+**Owner report:** YouTube playlists currently appear impossible to add. The owner
+requests a working playlist-add flow. This issue is recorded only; implementation
+has not been authorized in this round.
+
+**Requirement:** Let users paste a supported public YouTube playlist link, review
+its contents, choose all or selected available videos, and explicitly add the
+playlist and selected videos to their Library. The optional beginner suggestion
+must use the same working flow.
+
+**Acceptance:**
+
+- **Add selected videos** is discoverable after playlist details load, with the
+  selected count and a clear explanation when adding is not yet available.
+- Loading playlist contents and saving selections must not require the preview
+  video to start playing. Playback errors must not block an otherwise valid import.
+- Clearly explain any required API configuration, invalid/restricted key, quota
+  limit, unavailable playlist, network failure or empty result, with a useful
+  setup/retry action. Do not leave users indefinitely waiting for hidden controls.
+- The keyless path must state what it can actually import. Do not describe setup
+  as optional while silently making it necessary to complete that same journey.
+- After Add, show confirmed completion and an obvious **Open Library** action.
+  The named playlist and selected videos appear in the Library and remain after
+  reopening the app. A preview or an empty placeholder is not a successful import.
+- Preserve playlist order, personal ratings/labels/notes and existing memberships.
+  Repeated imports and overlapping playlists must not duplicate videos.
+- Refresh discovers additions without erasing existing personal metadata when
+  requests fail or the returned list is incomplete.
+- Verify the owner's Bachata Tutorials playlist and another public playlist on
+  an actual Android build; record iOS verification separately. Include missing/
+  invalid configuration, preview playback failure, retry, duplicate import and
+  persistence cases. Distinguish mocked checks from live import evidence.
+- YouTube entries remain online links; adding them does not download video files.
+
 ## Implementation order and evidence
 
-1. R2-01: compact title and header layout.
-2. R2-02: resize behavior and accessible controls.
-3. R2-03: full-screen lifecycle and device verification.
-4. R2-04: match the selected artwork, add the centered play triangle, and update
+1. R2-05: unblock playlist import and prove that added videos reach the Library.
+2. R2-01: compact title and header layout.
+3. R2-02: resize behavior and accessible controls.
+4. R2-03: full-screen lifecycle and device verification.
+5. R2-04: match the selected artwork, add the centered play triangle, and update
    affected icon assets. This design task can proceed independently of the player work.
 
 The user's screenshot `1000072658.png` in the conversation is the visual reference;
