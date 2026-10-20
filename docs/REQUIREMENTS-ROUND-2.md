@@ -78,6 +78,11 @@ stroke as the base of the next app icon. Add a clearly visible, right-facing pla
 triangle centered inside the loop of the “b”. This is the updated icon selection
 for round 2; the earlier concept03 selection remains historical.
 
+**Background requirement:** The owner requests a **transparent background**.
+The revised symbol artwork and in-app icon must have genuine transparency, with
+no white, blue or black rectangular tile baked around the mark. The blue/black
+strokes and central play triangle remain part of the symbol itself.
+
 **Confirmed reference:** The owner supplied `1000072660.jpg`. The unchanged board
 is saved at [round-2-selected-concept-05-board.jpg](brand/round-2-selected-concept-05-board.jpg).
 Use the panel numbered **05**, not the adjacent designs or the previous BC mark.
@@ -92,6 +97,13 @@ part of future implementation.
   showing the reference and the revised icon.
 - The play triangle sits in the middle, has clear contrast, and preserves the
   distinguishing features of the selected base design.
+- Deliver transparent SVG and PNG artwork with clean alpha edges. In-app use
+  renders the symbol directly over the current screen background without an
+  added square tile; verify it on both light and dark surfaces.
+- Use transparency for the Android adaptive foreground. Keep any OS-required
+  launcher background or flattened iOS export separate from the transparent
+  master. Platform launchers may apply a background/mask; do not promise fully
+  transparent launcher tiles where the OS requires a background.
 - The symbol and triangle remain recognizable at small launcher sizes and under
   Android/iOS icon masks; check light, dark and supported themed presentation.
 - During implementation, update affected launcher/adaptive/monochrome/iOS and
