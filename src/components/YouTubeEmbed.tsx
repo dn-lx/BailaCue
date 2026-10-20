@@ -24,6 +24,10 @@ export default function YouTubeEmbed(props: YouTubeEmbedProps) {
       ),
     [token, props.videoId, props.playlistId, props.enforcePause],
   );
+  const source = useMemo(
+    () => ({ html, baseUrl: "https://app.bailacue.mobile/" }),
+    [html],
+  );
   const command = useCallback(() => {
     const p = latest.current;
     web.current?.injectJavaScript(
@@ -36,12 +40,17 @@ export default function YouTubeEmbed(props: YouTubeEmbedProps) {
   return (
     <WebView<object>
       ref={web}
-      source={{ html, baseUrl: "https://app.bailacue.mobile/" }}
-      style={{ height: 260, minHeight: 220, backgroundColor: "#080D18" }}
+      source={source}
+      containerStyle={props.fill ? { flex: 1 } : { flex: 0, height: 260 }}
+      style={
+        props.fill
+          ? { flex: 1, backgroundColor: "#080D18" }
+          : { height: 260, minHeight: 220, backgroundColor: "#080D18" }
+      }
       allowsInlineMediaPlayback
       allowsFullscreenVideo
       mediaPlaybackRequiresUserAction={false}
-      originWhitelist={["https://*"]}
+      originWhitelist={["*"]}
       onMessage={(event) => {
         try {
           const data = JSON.parse(event.nativeEvent.data);

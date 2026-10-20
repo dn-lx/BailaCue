@@ -369,6 +369,49 @@ async def main():
         await locate("Finish & save",exact=True)
         report["checks"].append({"check":"Native continuous Practice counts playback, excludes pause and returns from background paused", "result":"passed", "active_seconds_before_pause":first})
 
+        # Supplemental public-network attempt: never count a blocked provider as a pass.
+        # Once import succeeds, player/layout assertions below are normal release gates.
+        if os.environ.get("BAILACUE_ARTEMIS_YOUTUBE_LIVE") == "1":
+            imported = False
+            try:
+                await locate("Add video", exact=True)
+                await top()
+                await locate("Add from YouTube", scrolls=8, exact=True)
+                await locate("Preview beginner Bachata playlist", scrolls=8, exact=True)
+                await locate("Add selected videos", scrolls=12, exact=True)
+                for _ in range(20):
+                    elements=await observe("youtube-live-discovery")
+                    if any("Added " in label(e) and "videos to your Library" in label(e) for e in elements):
+                        imported=True
+                        break
+                    buttons=[e for e in elements if any(str(e.get(k," ")).strip()=="Add selected videos" for k in ["text","content-desc","label"]) and str(e.get("enabled","")).lower()=="true" and (str(e.get("clickable","")).lower()=="true" or str(e.get("focusable","")).lower()=="true")]
+                    if buttons:
+                        await tap("Add selected videos",exact=True)
+                        await top()
+                        await locate("Open Library",scrolls=8,exact=True)
+                        imported=True
+                        break
+                    await asyncio.sleep(2)
+                if not imported:
+                    raise AssertionError("The public player did not expose addable playlist contents within the bounded live attempt")
+                elements=await observe("youtube-live-library")
+                if any("Open Library" in label(e) for e in elements):
+                    await locate("Open Library",scrolls=8,exact=True)
+                report["live_youtube"]={"status":"imported", "playlist":"PL2E0b6twkkHkMemtovF3zHgo95pURUUmy", "configuration":"official cued player, no API key, no account or mocked responses"}
+            except Exception as live_error:
+                imported = False
+                report["live_youtube"]={"status":"blocked-or-unverified", "error":str(live_error), "configuration":"public playlist without an API key; no mocked responses"}
+                await observe("youtube-live-blocked")
+            if imported:
+                await locate("Play ",scrolls=10)
+                await locate("Full screen",scrolls=4,exact=True)
+                elements=await observe("youtube-live-fullscreen")
+                if not any("Exit full screen" in label(e) for e in elements):raise AssertionError("YouTube full-screen exit is not visible")
+                await controller.driver.execute_shell("input keyevent 4")
+                elements=await observe("youtube-live-returned")
+                if not any("Full screen" in label(e) for e in elements):raise AssertionError("Android Back did not return to the same YouTube detail page")
+                report["checks"].append({"check":"Live public YouTube playlist import reaches Library and full screen returns to the video", "result":"passed"})
+
     report["status"] = "passed"
 
 try:

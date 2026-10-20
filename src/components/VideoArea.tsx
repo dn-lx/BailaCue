@@ -7,14 +7,23 @@ import { videoAreaHeight } from "../core/editing";
 export function VideoArea({
   children,
   onDragging,
+  fullscreen = false,
+  minHeight = 150,
+  maxHeight,
 }: {
   children: ReactNode;
   onDragging: (active: boolean) => void;
+  fullscreen?: boolean;
+  minHeight?: number;
+  maxHeight?: number;
 }) {
   const t = useTheme();
   const { height: viewport } = useWindowDimensions();
   const [requested, setRequested] = useState(270);
-  const height = videoAreaHeight(requested, viewport);
+  const height = Math.max(
+    minHeight,
+    Math.min(videoAreaHeight(requested, viewport), maxHeight ?? Infinity),
+  );
   const live = useRef({ height, viewport, onDragging });
   useLayoutEffect(() => {
     live.current = { height, viewport, onDragging };
@@ -40,10 +49,15 @@ export function VideoArea({
     }),
   );
   return (
-    <View>
+    <View style={fullscreen ? { flex: 1 } : undefined}>
       <View
         testID="video-frame"
-        style={{ backgroundColor: "#080D18", height, overflow: "hidden" }}
+        style={{
+          backgroundColor: "#080D18",
+          height: fullscreen ? undefined : height,
+          flex: fullscreen ? 1 : undefined,
+          overflow: "hidden",
+        }}
       >
         {children}
       </View>
@@ -74,8 +88,11 @@ export function VideoArea({
         accessibilityRole="adjustable"
         accessibilityLabel="Resize video area"
         accessibilityValue={{
-          min: 150,
-          max: Math.max(150, Math.min(700, viewport * 0.75)),
+          min: minHeight,
+          max: Math.max(
+            minHeight,
+            Math.min(700, viewport * 0.75, maxHeight ?? Infinity),
+          ),
           now: Math.round(height),
           text: `${Math.round(height)} pixels tall`,
         }}
@@ -94,6 +111,7 @@ export function VideoArea({
         }
         style={{
           minHeight: 44,
+          display: fullscreen ? "none" : "flex",
           alignItems: "center",
           justifyContent: "center",
           gap: 4,

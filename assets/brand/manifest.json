@@ -1,9 +1,8 @@
 {
-  "concept": "03 — BC + play",
+  "concept": "05 — b + centered play",
   "sources": [
-    "assets/brand/bc-play-blue-source.png",
-    "assets/brand/bc-play-black-source.png",
-    "assets/brand/bc-play-monochrome-source.png"
+    "docs/brand/round-2-selected-concept-05-board.jpg",
+    "assets/brand/b-play-approved-preview.png"
   ],
   "masters": [
     "assets/brand/symbol-master.svg",
@@ -12,15 +11,15 @@
   "sourceChecksums": [
     {
       "path": "assets/brand/symbol-master.svg",
-      "sha256": "afd8a2238abd8848de63c5dbee4f966226433988f6f8f1a2c4592b8ac9e6380f"
+      "sha256": "da33095b90830722414555cfd0662fa853998b2dbc808c357b9a7b97e2a14d70"
     },
     {
       "path": "assets/brand/wordmark-master.svg",
       "sha256": "562062540e4dc0729daf44a3fc310eb8c71ce9689e95d0e9ee0f20c25ba331ec"
     },
     {
-      "path": "assets/brand/bc-play-monochrome-source.png",
-      "sha256": "805fc4e852892272e789e9cd538d5d6421755bce61a3cb116567061a4b217763"
+      "path": "assets/brand/b-play-approved-preview.png",
+      "sha256": "1c79a8e64dfacf743ea567a0abf1d96b2f5139b5ba73e77b43dd03fd922c353f"
     }
   ],
   "formatNote": "Symbols and logo lockups contain SVG paths, including outlined Outfit typography. PNG exports preserve alpha except opaque app/store tiles. Badge and social-tagline text is editable SVG text.",
@@ -31,7 +30,7 @@
       "width": 1024,
       "height": 1024,
       "alpha": true,
-      "sha256": "4cc9699ab64b53aa4406c5479c33efc55a21871db384b3a752ee601d754e99c5"
+      "sha256": "cd4501eff4c771fe4bde62de2c8399869f9c7e80baffba2b3e4e2986695476f8"
     },
     {
       "path": "assets/brand/symbol-white-transparent.png",
@@ -39,7 +38,7 @@
       "width": 1024,
       "height": 1024,
       "alpha": true,
-      "sha256": "0f62989be5b7c2675d1a92903633492f8f4c568f32f9d8323c58747ca3b3804c"
+      "sha256": "c0b21f064274ac6a9c7899e69a2d49a8ebde36808de288fc32029828894c2a01"
     },
     {
       "path": "assets/brand/symbol-black-transparent.svg",
@@ -47,7 +46,7 @@
       "width": 1024,
       "height": 1024,
       "alpha": true,
-      "sha256": "dec6c5d7d9c8259f0d709d5c5ca6dcaaa1ee26582c5cd7e9bd6e91a4c89cc714"
+      "sha256": "b363e4e427b8983b0c4678f157500fb8a7cf022184b6959ff06dd02bd994214c"
     },
     {
       "path": "assets/brand/symbol-black-transparent.png",
@@ -55,7 +54,7 @@
       "width": 1024,
       "height": 1024,
       "alpha": true,
-      "sha256": "a19d250d6524c9a26f0cb21d713119311e01f57ab726f9bf308ab66b6089cd76"
+      "sha256": "684568b1f647625020a78fd8c6fa894f88520c8169d953416fc0b10fc13b8f1b"
     },
     {
       "path": "assets/brand/symbol-blue-transparent.svg",
@@ -63,7 +62,7 @@
       "width": 1024,
       "height": 1024,
       "alpha": true,
-      "sha256": "11387919dcb95fe2fb42f5b1f4da9139e68674f3d8fcd26b12b98c3ccba848e3"
+      "sha256": "a00302f2535018f25b5973e45a6d26bb787ef4a0d69022bc2c57227de3c23762"
     },
     {
       "path": "assets/brand/symbol-blue-transparent.png",
@@ -71,7 +70,39 @@
       "width": 1024,
       "height": 1024,
       "alpha": true,
-      "sha256": "b494ac3f27ed38ee05f92593db1cc3d9c8b4bf8325a31d6a806dd46b1fea6311"
+      "sha256": "5b1e38f8af7285c17a79d28bba5cec54bd3f71159c6bb3e8d3ee12f547afd659"
+    },
+    {
+      "path": "assets/brand/symbol-color-transparent.svg",
+      "format": "svg",
+      "width": 1024,
+      "height": 1024,
+      "alpha": true,
+      "sha256": "17e3dd1f954b429a97101e30da7384cd0e66b20ef12acc7a8dd9cf9906ec7073"
+    },
+    {
+      "path": "assets/brand/symbol-color-transparent.png",
+      "format": "png",
+      "width": 1024,
+      "height": 1024,
+      "alpha": true,
+      "sha256": "916e0f7cc8615d907b46b3a90bc377f9f8b3dfb6ff38a7dda187b0aab4ffd727"
+    },
+    {
+      "path": "assets/brand/symbol-color-dark-transparent.svg",
+      "format": "svg",
+      "width": 1024,
+      "height": 1024,
+      "alpha": true,
+      "sha256": "7cb707c4377413f95ad53eaf3fe7db9d2bb2876df1156ce90b6968995125ce65"
+    },
+    {
+      "path": "assets/brand/symbol-color-dark-transparent.png",
+      "format": "png",
+      "width": 1024,
+      "height": 1024,
+      "alpha": true,
+      "sha256": "b5e60f255c6fe22daf27f85a59276dc1e692e97d4d3c6390958089674b193dc2"
     },
     {
       "path": "assets/icon.svg",
@@ -79,7 +110,7 @@
       "width": 1024,
       "height": 1024,
       "alpha": true,
-      "sha256": "71694f793cd9849907850035e9af785360936c30431a125d72de93f484f902b9"
+      "sha256": "82ba9327ebc0b5579acafae8dbe7633108db4ad49a2e02615f1a18e307e312ce"
     },
     {
       "path": "assets/icon.png",
@@ -87,7 +118,7 @@
       "width": 1024,
       "height": 1024,
       "alpha": true,
-      "sha256": "3f89c61c8a0939a658a6cc5cabafff1763962778136be1cec35fd65d1cee95c2"
+      "sha256": "ed14423de7293195113207756bcfbde388ba2d52792049314bb8aeed5ec3e848"
     },
     {
       "path": "assets/adaptive-icon.png",
@@ -95,7 +126,7 @@
       "width": 1024,
       "height": 1024,
       "alpha": true,
-      "sha256": "0f62989be5b7c2675d1a92903633492f8f4c568f32f9d8323c58747ca3b3804c"
+      "sha256": "916e0f7cc8615d907b46b3a90bc377f9f8b3dfb6ff38a7dda187b0aab4ffd727"
     },
     {
       "path": "assets/adaptive-monochrome.png",
@@ -103,7 +134,7 @@
       "width": 1024,
       "height": 1024,
       "alpha": true,
-      "sha256": "bcacc037e6fe9c11a8a62175d4264b5a2290cb6425513d4c5d0af209a689aab8"
+      "sha256": "9919ad303c5ee0a925f6922983ec60213b3631257948c6e8a9f0f3c77e8c970d"
     },
     {
       "path": "assets/splash-icon.png",
@@ -111,7 +142,7 @@
       "width": 512,
       "height": 512,
       "alpha": true,
-      "sha256": "767c1df10df1df80cc72e408e9d7f21ec17fb8eb95a923725f8aef430e7df979"
+      "sha256": "47ad33e2b824de561d671283071bd2540f65b35469f2ff34b78be465ad317f25"
     },
     {
       "path": "assets/brand/icon-black.svg",
@@ -119,7 +150,7 @@
       "width": 1024,
       "height": 1024,
       "alpha": true,
-      "sha256": "1cc958d2df0335d18cdadc9ad5a69722e23e2e65ecc050776da75802f83f4661"
+      "sha256": "abfe3307506c181dbf7caf28dd0ceb85dae62678fac4645b37d0aa8cfffd7fd4"
     },
     {
       "path": "assets/brand/icon-black.png",
@@ -127,7 +158,7 @@
       "width": 1024,
       "height": 1024,
       "alpha": true,
-      "sha256": "db54d8bb06f203c163e0e0be7e03c121d0df5a7d441f0c4fa63aa54d18eb9b24"
+      "sha256": "c76cd54866e3b6ae354ec200a0dde2823db57e9280aa129ab97cd8428d9ce7a8"
     },
     {
       "path": "assets/favicon.png",
@@ -135,7 +166,7 @@
       "width": 64,
       "height": 64,
       "alpha": false,
-      "sha256": "5ebbba3fc5822a5c3a326088135a5a4dc3bdf70cb10752163fef2517ccb1cbf1"
+      "sha256": "ad5be61c0b497b4a4b79fac3ef3c4b0bc5d65e0219b10664587d1852dc19b67e"
     },
     {
       "path": "assets/brand/favicon-16.png",
@@ -143,7 +174,7 @@
       "width": 16,
       "height": 16,
       "alpha": false,
-      "sha256": "077f81c3699d9368ca285020ccc90bc8efb53045bfe3ed47744e95d6c686411f"
+      "sha256": "3925ecfc54943da8ef2e33149ab81899810be91416677f628a03996591d9b743"
     },
     {
       "path": "assets/brand/favicon-32.png",
@@ -151,7 +182,7 @@
       "width": 32,
       "height": 32,
       "alpha": false,
-      "sha256": "0698c1212d853dd2acfb7e9e6e69256a312bbb7e055c7a7cafffffc25bab5de4"
+      "sha256": "9c018ca18ed238e23040b3295429f06ccb5582f0b867c5910fbf266afdff06c6"
     },
     {
       "path": "assets/brand/apple-touch-icon.png",
@@ -159,7 +190,7 @@
       "width": 180,
       "height": 180,
       "alpha": false,
-      "sha256": "8c0c7055d241a78b107da2f643dfc42bb08760a2d82ba98276c21e86b165d6c8"
+      "sha256": "c7e260be3e0eb34a881de7c97169c448f67ec122821946e5ed828f84e20688ee"
     },
     {
       "path": "assets/brand/android-icon-192.png",
@@ -167,7 +198,7 @@
       "width": 192,
       "height": 192,
       "alpha": false,
-      "sha256": "5ba9ce1bd01f7ca88165e3cbb62af955fef155e92728c3eac8c370ab08d4b748"
+      "sha256": "2f1a64ca6542465e6c793584d08ac55ea9fdf4c544a9cdc41417f55ace4a8ccb"
     },
     {
       "path": "assets/brand/android-icon-512.png",
@@ -175,7 +206,7 @@
       "width": 512,
       "height": 512,
       "alpha": false,
-      "sha256": "5ed71c6118fdcd2de847cd94deb2425969aadb268d3fa11f2a7e7c56396ffae6"
+      "sha256": "662af960db8f2020d3ab82ad3f80068c0d79428359308158c36c4f5bdca77e46"
     },
     {
       "path": "assets/brand/ios-app-store.png",
@@ -183,7 +214,7 @@
       "width": 1024,
       "height": 1024,
       "alpha": false,
-      "sha256": "d9860ad3123710a0c4b1715624d0e658c1c189dd55f5d33d98d897efd09839b1"
+      "sha256": "fb55b720138cbc1b20a255c829670f5ab7473b2a567317d4f437d5514e9b8b38"
     },
     {
       "path": "assets/brand/logo-horizontal-light.svg",
@@ -191,7 +222,7 @@
       "width": 1024,
       "height": 256,
       "alpha": true,
-      "sha256": "e51db4706e9e26d38209c187077423c271580afba59890c38b1f6383f71715de"
+      "sha256": "863423bbf25c7409f6dbf0b569b0c251a6ffe166d2147189cef43d8f441afc84"
     },
     {
       "path": "assets/brand/logo-horizontal-light.png",
@@ -199,7 +230,7 @@
       "width": 1024,
       "height": 256,
       "alpha": true,
-      "sha256": "f28b3a42ef55bf84605654333e66317394103902fbbb2d67d312966058afd79b"
+      "sha256": "405a4f4e39514b55cb8a0a44854b6c2871fbd8cce6676d58203b7b65bc02e8c4"
     },
     {
       "path": "assets/brand/logo-stacked-light.svg",
@@ -207,7 +238,7 @@
       "width": 640,
       "height": 640,
       "alpha": true,
-      "sha256": "e94a0f3af21a66f65025fd34f5a297ce8eb47aec69563c673f7b73efc3bb52d4"
+      "sha256": "302f95dd0643a6315216830009906ee8a7de5d7e30e9ff4d91d5d132ca3574a2"
     },
     {
       "path": "assets/brand/logo-stacked-light.png",
@@ -215,7 +246,7 @@
       "width": 640,
       "height": 640,
       "alpha": true,
-      "sha256": "042136ce17377e57018d5687750723451d9ab8e9366fa12531be05416ad33ddb"
+      "sha256": "58a725422d87fbf501cf5f9c03cf466fe9c04d86c9575dcc8bb7b0f930c3079a"
     },
     {
       "path": "assets/brand/logo-horizontal-light-transparent.svg",
@@ -223,7 +254,7 @@
       "width": 1024,
       "height": 256,
       "alpha": true,
-      "sha256": "3fb57494a0c9c352394fc43457c30f7965ec7db0255ecf429e44ba9da2aa8d8f"
+      "sha256": "39cb700f001778886dedfbd8870d30472cfa64aac7bf2f293b843a08a6110702"
     },
     {
       "path": "assets/brand/logo-horizontal-light-transparent.png",
@@ -231,7 +262,7 @@
       "width": 1024,
       "height": 256,
       "alpha": true,
-      "sha256": "176bda664adfa37d1152531069a616a3ac1a7d4d5243ca3e5aa16103fd948a5e"
+      "sha256": "62f4c503b842af985d029595f3ad53559c788c56990ae09af159cba34eac4fca"
     },
     {
       "path": "assets/brand/logo-stacked-light-transparent.svg",
@@ -239,7 +270,7 @@
       "width": 640,
       "height": 640,
       "alpha": true,
-      "sha256": "d73c762d1d5b62dffd6b5e7835e24777d7cdd4d369535b9b932342ee3363f0cb"
+      "sha256": "b723e95eeb542f792d57a473564e4da461b48066ccae411bb6d4ab5dbe62bab1"
     },
     {
       "path": "assets/brand/logo-stacked-light-transparent.png",
@@ -247,7 +278,7 @@
       "width": 640,
       "height": 640,
       "alpha": true,
-      "sha256": "884bfc68c510e139fc600711af20b703b7f187a4330adaf40bd5c21949c6ee58"
+      "sha256": "598f738dd41ae98cd86f9106abf67418f4631e25cfd319092c479f3ee2c2b3e2"
     },
     {
       "path": "assets/brand/logo-horizontal-dark.svg",
@@ -255,7 +286,7 @@
       "width": 1024,
       "height": 256,
       "alpha": true,
-      "sha256": "e81296ac80dccd4de38269dca51474d882286326899db2894e3ba3d5d3d65e9c"
+      "sha256": "916671f1d605bbaf9b119bd3cd38cb797bfa6bc96392749cff183ece782aa629"
     },
     {
       "path": "assets/brand/logo-horizontal-dark.png",
@@ -263,7 +294,7 @@
       "width": 1024,
       "height": 256,
       "alpha": true,
-      "sha256": "548fb3cb3b7b5935a4301a260255cf890802fdb82051ecec610ea6b55381c88d"
+      "sha256": "b446c52cbc668ec1d7d6487912724cd2a5ed7b864c19b58423fb6b0d44841bd7"
     },
     {
       "path": "assets/brand/logo-stacked-dark.svg",
@@ -271,7 +302,7 @@
       "width": 640,
       "height": 640,
       "alpha": true,
-      "sha256": "82ab7e1fd34804758fcfeeb02376427ddcb2788b4abb80ab3c3b68b9b701b944"
+      "sha256": "8d889010303ea25b83abe3fcc12f28de0dad91c5fbb9ee3727bf6a16c51d284b"
     },
     {
       "path": "assets/brand/logo-stacked-dark.png",
@@ -279,7 +310,7 @@
       "width": 640,
       "height": 640,
       "alpha": true,
-      "sha256": "bb758810ce55e799da69e2a0d931f6b64d4d15bde7be46c23b5b0ccac2084c79"
+      "sha256": "389862960d19a41630f022f6b41a70e5c4fb4543a08369affab3d8bd30586524"
     },
     {
       "path": "assets/brand/logo-horizontal-dark-transparent.svg",
@@ -287,7 +318,7 @@
       "width": 1024,
       "height": 256,
       "alpha": true,
-      "sha256": "72cb7a9fcd03ebefb5f62c12e745f52f353ac07e2c0875aaafa87b731b0ea81f"
+      "sha256": "2130d7412f8f55162e49f0c0f2d80df56dfc2ad849ec8c994e6e809f5a88af80"
     },
     {
       "path": "assets/brand/logo-horizontal-dark-transparent.png",
@@ -295,7 +326,7 @@
       "width": 1024,
       "height": 256,
       "alpha": true,
-      "sha256": "b0f08670ae324de5c9300729eb3d885aa7714dcf9d105e8aadc7b90a29f5a77b"
+      "sha256": "95711fecfa02658ae9a8f5c78cf52c279e11f51daf39d7a7c2f12068fbee004e"
     },
     {
       "path": "assets/brand/logo-stacked-dark-transparent.svg",
@@ -303,7 +334,7 @@
       "width": 640,
       "height": 640,
       "alpha": true,
-      "sha256": "d6bc8f3dd5394cfdb19107f06bd019d30b7f86e76e54fc749e283a182c717edd"
+      "sha256": "791b4107d90f5e6a5e8f3961625780834619c4146e037ada24af4a42dcfe0a3c"
     },
     {
       "path": "assets/brand/logo-stacked-dark-transparent.png",
@@ -311,7 +342,7 @@
       "width": 640,
       "height": 640,
       "alpha": true,
-      "sha256": "e7fb275e179a4b527766d6086d898cfb02c461f4147c37d1ea67c10068e5d780"
+      "sha256": "2ea74bd9ab9a0c45a9278f09170381690f7a5ec5daa8d4a52e0c694ce5e5d8b6"
     },
     {
       "path": "assets/brand/logo-horizontal-mono-white.svg",
@@ -319,7 +350,7 @@
       "width": 1024,
       "height": 256,
       "alpha": true,
-      "sha256": "f4e106a9f7e0b2415126375e04ec2fa721459576927fdaf3ba417ac2178b1fec"
+      "sha256": "72fac9d439e58543fede5b7f76e99828ff732589edfece3331665fc1fd6797bb"
     },
     {
       "path": "assets/brand/logo-horizontal-mono-white.png",
@@ -327,7 +358,7 @@
       "width": 1024,
       "height": 256,
       "alpha": true,
-      "sha256": "f2caaf8199c323d1d00908a34d63f1ba0d67a687c47b23d861194e2effb43053"
+      "sha256": "877e7962ab38ca2f0daefbf5cc4998526cfa5a415c5afb0e10672a9318216b1e"
     },
     {
       "path": "assets/brand/logo-stacked-mono-white.svg",
@@ -335,7 +366,7 @@
       "width": 640,
       "height": 640,
       "alpha": true,
-      "sha256": "587b7493edd2faf57f6a3f6c80baa525e315d19c3b18d594450d28148afb8957"
+      "sha256": "b9bc24fe56c3c91e16664f419f07ea0220a5dc1f4952c61c8d3f914dfec6666d"
     },
     {
       "path": "assets/brand/logo-stacked-mono-white.png",
@@ -343,7 +374,7 @@
       "width": 640,
       "height": 640,
       "alpha": true,
-      "sha256": "90a344e69fa46c27c7f33e71d2cbb677fd2b8f803b34c1f895e11dd2907ec0b8"
+      "sha256": "8274bce366513cdbe1a0b537d0319fa53ce82125f4a4ef57bc4cc2be1229ba2f"
     },
     {
       "path": "assets/brand/logo-horizontal-mono-white-transparent.svg",
@@ -351,7 +382,7 @@
       "width": 1024,
       "height": 256,
       "alpha": true,
-      "sha256": "aa43a38d6c858e790d6c69e6eb5a886e9ec4c58cdd6efe4fe9e1289ca73a7dcf"
+      "sha256": "6e9b910eef1dd46a89b99cd7176cac6de7ad4b6e823ad9c4814ca4d701e4d611"
     },
     {
       "path": "assets/brand/logo-horizontal-mono-white-transparent.png",
@@ -359,7 +390,7 @@
       "width": 1024,
       "height": 256,
       "alpha": true,
-      "sha256": "32bcb0913df628148e3d9f714ad8029c974e2949ede7a82062be9919e8572011"
+      "sha256": "3f1a3e7bd5cd1489f610a2c55de442ab704fb7a77396cd37b037ef6695952a3a"
     },
     {
       "path": "assets/brand/logo-stacked-mono-white-transparent.svg",
@@ -367,7 +398,7 @@
       "width": 640,
       "height": 640,
       "alpha": true,
-      "sha256": "3b97214b4041c8c177bdd63f4e664d9b49a0de68cfabde2c48252f87b1d7e490"
+      "sha256": "3d661d92ed08886fb72ed94afa50b00a8e1fe8e849fbeb0b12d3c35604d7189e"
     },
     {
       "path": "assets/brand/logo-stacked-mono-white-transparent.png",
@@ -375,7 +406,7 @@
       "width": 640,
       "height": 640,
       "alpha": true,
-      "sha256": "4ad434a3bdf5396c79861567cbf837dc1045b60150acc0f58287a916366655b4"
+      "sha256": "ca47b6915a65ad3d119a5679e718e180f6bffb559e3aa9c342de7ec9ce5cb1a9"
     },
     {
       "path": "assets/brand/logo-horizontal-mono-black.svg",
@@ -383,7 +414,7 @@
       "width": 1024,
       "height": 256,
       "alpha": true,
-      "sha256": "f238fdcc1a79f54535968ddff851e1f159e4d7b192c29ac4eb33637762197968"
+      "sha256": "5e6d9b88f2b5e5d7ddb2181790f62663a34ef335112acd64cc8cec1f33e7cf56"
     },
     {
       "path": "assets/brand/logo-horizontal-mono-black.png",
@@ -391,7 +422,7 @@
       "width": 1024,
       "height": 256,
       "alpha": true,
-      "sha256": "516e9b276ad787c66fcf84937fd341db525a726ec6e9b851c8201ef16edf6646"
+      "sha256": "bab22801371872903a68b3352673200f8637a723450adfc7ff66bf3e02fe073c"
     },
     {
       "path": "assets/brand/logo-stacked-mono-black.svg",
@@ -399,7 +430,7 @@
       "width": 640,
       "height": 640,
       "alpha": true,
-      "sha256": "f5b5050bf2ff7a317244d573b8acbec670b62a92dbfc5817c0e24558ff177616"
+      "sha256": "aeef0f4afd16ac8e0bdcb24343814435d399181aa2f19797ba0a4e8f28e74c9d"
     },
     {
       "path": "assets/brand/logo-stacked-mono-black.png",
@@ -407,7 +438,7 @@
       "width": 640,
       "height": 640,
       "alpha": true,
-      "sha256": "14a6fe0b1ae7a4f1cc12b98b6bd1807bc4019892c0a3ab92cb45037f3e6466f6"
+      "sha256": "71b74f9ce48cc4de40b1841a20959da2e7a12a739b71fbff306c6844df8752ae"
     },
     {
       "path": "assets/brand/logo-horizontal-mono-black-transparent.svg",
@@ -415,7 +446,7 @@
       "width": 1024,
       "height": 256,
       "alpha": true,
-      "sha256": "3bfdb60dca6423cc807997d3922e46b5b5053a49ad86ca504b3e37879f688fdd"
+      "sha256": "adb6137f0522f9137e1c0f1128ece28dbf6002a4cc5aaa11275406299df283d6"
     },
     {
       "path": "assets/brand/logo-horizontal-mono-black-transparent.png",
@@ -423,7 +454,7 @@
       "width": 1024,
       "height": 256,
       "alpha": true,
-      "sha256": "feb1b2ac6bf35ff974fe978b1b8c24ee28070ae371d642273632acbf276984dd"
+      "sha256": "3b3f00348393adac5728978b23e92f05ddf316d8bf20fd88b8514244981bfa60"
     },
     {
       "path": "assets/brand/logo-stacked-mono-black-transparent.svg",
@@ -431,7 +462,7 @@
       "width": 640,
       "height": 640,
       "alpha": true,
-      "sha256": "b18ff798f38eab442efd9305bcf9bc87493c43e575c2bc2fdf540e31a2184ac2"
+      "sha256": "87bdf092ecef7aca03b8b2817a0be864817fca9f09d96b3185ed0cccee11a356"
     },
     {
       "path": "assets/brand/logo-stacked-mono-black-transparent.png",
@@ -439,7 +470,7 @@
       "width": 640,
       "height": 640,
       "alpha": true,
-      "sha256": "f2670a8129ace2d19c4e63f38527faa08896060dae43ec90254d3e2bdc193d4a"
+      "sha256": "07a99df306960d8e51a6598b90907216691becd4398418fb3203a9995c2d6717"
     },
     {
       "path": "docs/brand/badge-salsa.svg",
@@ -511,7 +542,7 @@
       "width": 1200,
       "height": 720,
       "alpha": true,
-      "sha256": "100c482896bcfa6c69a042cfad263e18983b097de8aa898cfea6803e51694876"
+      "sha256": "1db3fb09885b95557eb1ada363b1eeeecd9db689f01cb4bc8497db6c43c41da2"
     },
     {
       "path": "docs/brand/identity.png",
@@ -519,7 +550,7 @@
       "width": 1200,
       "height": 720,
       "alpha": true,
-      "sha256": "50ef96b2bc1cebcc2d61ef554e7ed4a31535f17ddbc105074bcde6aae1ff14bc"
+      "sha256": "cdf623abc3b0533692903f5eaeea9bdd8fe96d13188a6e4aacfa2b0046716f1f"
     },
     {
       "path": "assets/brand/social-1200x630.svg",
@@ -527,7 +558,7 @@
       "width": 1200,
       "height": 630,
       "alpha": true,
-      "sha256": "4b3d9ae6b5da1cb4e208125b52491940cd4300e7ac213503c710d1f338fda5c8"
+      "sha256": "616bad7dfa64f48919e483f561a34b2763cc5c5b543c621cf3782fbc0f6b9a1b"
     },
     {
       "path": "assets/brand/social-1200x630.png",
@@ -535,7 +566,7 @@
       "width": 1200,
       "height": 630,
       "alpha": true,
-      "sha256": "6288c245d5c1cb2791ec963146d1031955f64e1de984398e866438668525bddc"
+      "sha256": "a834374352593f3065279b96cf326c8786d46ce423321fae29828e9444a18bc4"
     },
     {
       "path": "assets/brand/play-feature-1024x500.svg",
@@ -543,7 +574,7 @@
       "width": 1024,
       "height": 500,
       "alpha": true,
-      "sha256": "4b1f441b1ee482e1f2f102ed566434c952caaf5a02693e23042df8d5ca7a0ad3"
+      "sha256": "976771c88c2d415ecc3cc3f01cd5d66b37bc1e700b301cbc0ef363b9b886aa04"
     },
     {
       "path": "assets/brand/play-feature-1024x500.png",
@@ -551,7 +582,7 @@
       "width": 1024,
       "height": 500,
       "alpha": true,
-      "sha256": "5cf3232fc5aec3622c788d814a0919cd8e9823683776a0c80f77a31f4bb57cce"
+      "sha256": "12b0342ddba9c8839caa9c0e959b1ebca05563dec296b514b2bbc0d1dc5de2bf"
     }
   ],
   "pending": []

@@ -127,12 +127,13 @@ function playerBridge(enforcePause: boolean) {
   const messages: Record<string, unknown>[] = [],
     counts = { pause: 0, play: 0 };
   let events: Events | undefined;
+  let nativeState = 2;
   const player = {
     getCurrentTime: () => 0,
     getDuration: () => 10,
     getPlaylist: () => [],
     getAvailablePlaybackRates: () => [1],
-    getPlayerState: () => 2,
+    getPlayerState: () => nativeState,
     pauseVideo: () => {
       counts.pause++;
     },
@@ -175,7 +176,10 @@ function playerBridge(enforcePause: boolean) {
   return {
     counts,
     messages,
-    state: (data: number) => events!.onStateChange({ data }),
+    state: (data: number) => {
+      nativeState = data;
+      events!.onStateChange({ data });
+    },
     command: window.bailacueCommand as (command: { playing: boolean }) => void,
   };
 }
@@ -197,7 +201,9 @@ describe("official iframe pause policy", () => {
     p.command({ playing: false });
     p.messages.length = 0;
     p.state(1);
-    expect(p.counts.pause).toBe(1);
+    expect(p.counts.pause).toBe(0);
     expect(p.messages.some((m) => m.phase === "playing")).toBe(true);
+    p.command({ playing: false });
+    expect(p.counts.pause).toBe(1);
   });
 });

@@ -14,12 +14,23 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import Svg, { Path } from "react-native-svg";
 import { useTheme } from "./theme";
-export function Mark({ size = 44 }: { size?: number }) {
+export function Mark({
+  size = 44,
+  onDark = false,
+}: {
+  size?: number;
+  onDark?: boolean;
+}) {
+  const t = useTheme();
   return (
     <Image
-      source={require("../../assets/icon.png")}
+      source={
+        t.dark || onDark
+          ? require("../../assets/brand/symbol-color-dark-transparent.png")
+          : require("../../assets/brand/symbol-color-transparent.png")
+      }
       accessible={false}
-      style={{ width: size, height: size, borderRadius: size * 0.22 }}
+      style={{ width: size, height: size }}
     />
   );
 }

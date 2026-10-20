@@ -2,7 +2,7 @@
   "expo": {
     "name": "BailaCue",
     "slug": "bailacue",
-    "version": "0.2.17",
+    "version": "0.2.18",
     "scheme": "bailacue",
     "orientation": "default",
     "userInterfaceStyle": "automatic",
@@ -10,18 +10,18 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "app.bailacue.mobile",
-      "buildNumber": "22",
+      "buildNumber": "23",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
       "package": "app.bailacue.mobile",
-      "versionCode": 22,
+      "versionCode": 23,
       "permissions": [],
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#1465FF",
+        "backgroundColor": "#F4F7FC",
         "monochromeImage": "./assets/adaptive-monochrome.png"
       },
       "allowBackup": false

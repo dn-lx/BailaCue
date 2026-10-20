@@ -100,7 +100,7 @@ jobs:
             adb install -r artifacts/*.apk
             adb push /tmp/BailaCue-ARTEMIS.mp4 /sdcard/Download/BailaCue-ARTEMIS.mp4
             adb shell am broadcast -a android.intent.action.MEDIA_SCANNER_SCAN_FILE -d file:///sdcard/Download/BailaCue-ARTEMIS.mp4
-            BAILACUE_ARTEMIS_VIDEO=1 BAILACUE_ARTEMIS_FIXTURE=/tmp/BailaCue-ARTEMIS.mp4 BAILACUE_ARTEMIS_OUT="$GITHUB_WORKSPACE/artifacts/artemis" uv run --project /tmp/artemis python scripts/artemis-smoke.py
+            BAILACUE_ARTEMIS_YOUTUBE_LIVE=1 BAILACUE_ARTEMIS_VIDEO=1 BAILACUE_ARTEMIS_FIXTURE=/tmp/BailaCue-ARTEMIS.mp4 BAILACUE_ARTEMIS_OUT="$GITHUB_WORKSPACE/artifacts/artemis" uv run --project /tmp/artemis python scripts/artemis-smoke.py
       - uses: actions/upload-artifact@v4
         if: always()
         with:

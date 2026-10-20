@@ -154,6 +154,7 @@ export type YouTubeSource = {
   defaultLabels: string[];
   videoIds: string[];
   lastSyncedAt?: string;
+  limited?: boolean;
   error?: string;
 };
 export const emptyLibrary = (): Library => ({

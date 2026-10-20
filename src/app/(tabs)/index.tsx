@@ -54,8 +54,6 @@ export default function Today() {
         <View
           style={{
             padding: 6,
-            backgroundColor: t.brandBlack,
-            borderRadius: 18,
           }}
         >
           <Mark />
@@ -75,7 +73,7 @@ export default function Today() {
             transform: [{ rotate: "-18deg" }],
           }}
         >
-          <Mark size={240} />
+          <Mark size={240} onDark />
         </View>
         <Badge tone="accent">A LITTLE EVERY DAY</Badge>
         <Txt

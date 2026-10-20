@@ -46,7 +46,13 @@ export default function LibraryScreen() {
   const videos = sortVideos(filterVideos(library.videos, view), view.sort);
   const active = [
     view.style,
-    view.sourceId,
+    view.sourceId
+      ? ([...library.sources, ...(library.youtubeSources ?? [])].find(
+          (s) => s.id === view.sourceId,
+        )?.name ??
+        { phone: "On phone", online: "Online" }[view.sourceId] ??
+        "Selected source")
+      : undefined,
     ...(view.labels ?? []),
     ...(view.ratings ?? []).map((n) => `${n}★`),
     view.includeUnrated ? "Unrated" : "",

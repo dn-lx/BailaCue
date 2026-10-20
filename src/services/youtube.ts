@@ -1,8 +1,25 @@
 import type { YouTubeMetadata } from "../core/youtube";
 const ROOT = "https://www.googleapis.com/youtube/v3/";
 async function json(url: string, signal?: AbortSignal) {
-  const response = await fetch(url, { signal });
-  const body = await response.json().catch(() => null);
+  const controller = new AbortController();
+  const abort = () => controller.abort();
+  if (signal?.aborted) controller.abort();
+  signal?.addEventListener("abort", abort, { once: true });
+  const timeout = setTimeout(abort, 15000);
+  let response: Response, body;
+  try {
+    response = await fetch(url, { signal: controller.signal });
+    body = await response.json().catch(() => null);
+  } catch {
+    if (signal?.aborted)
+      throw new Error("Import cancelled. Your library has not changed.");
+    throw new Error(
+      "YouTube could not be reached within 15 seconds. Check your connection and retry.",
+    );
+  } finally {
+    clearTimeout(timeout);
+    signal?.removeEventListener("abort", abort);
+  }
   if (!response.ok)
     throw new Error(
       body?.error?.message ??
@@ -64,6 +81,10 @@ export async function playlistItems(
       ...(page ? { pageToken: page } : {}),
     });
     const data = await json(`${ROOT}playlistItems?${query}`, signal);
+    if (!Array.isArray(data.items))
+      throw new Error(
+        "YouTube did not return playlist contents. Check YouTube Data API v3 setup and retry.",
+      );
     for (const row of data.items ?? []) {
       const s = row.snippet,
         videoId = row.contentDetails?.videoId ?? s?.resourceId?.videoId;
@@ -92,6 +113,28 @@ export async function playlistItems(
       );
   } while (page);
   return result;
+}
+
+/** Contents are the essential operation; an unavailable playlist title must not block adding videos. */
+export async function readPlaylist(
+  id: string,
+  key: string,
+  signal: AbortSignal,
+  onProgress?: (count: number) => void,
+) {
+  const items = await playlistItems(id, key, signal, onProgress);
+  if (!items.length)
+    throw new Error(
+      "This playlist contains no readable videos. Check that it is public and not empty.",
+    );
+  let title: string | undefined;
+  try {
+    title = (await playlistMetadata(id, key, signal)).title;
+  } catch {
+    if (signal.aborted)
+      throw new Error("Import cancelled. Your library has not changed.");
+  }
+  return { items, title, complete: true as const };
 }
 export async function embeddedPlaylistMetadata(
   ids: string[],

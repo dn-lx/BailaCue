@@ -1,6 +1,6 @@
 # BailaCue · new requirements · round 2
 
-Status: recorded for review; not implemented by this documentation update.
+Status: the owner authorized all five round-2 issues. Implemented in 0.2.18/build23 source; native acceptance and publication are pending.
 
 This is a new list of feedback on Android preview 0.2.17/build22. It is separate
 from the earlier 22-issue requirements and uses a new `R2` numbering sequence.
@@ -115,8 +115,7 @@ part of future implementation.
 ## R2-05 · Make YouTube playlists addable to the Library
 
 **Owner report:** YouTube playlists currently appear impossible to add. The owner
-requests a working playlist-add flow. This issue is recorded only; implementation
-has not been authorized in this round.
+requests a working playlist-add flow and subsequently authorized implementation of this round.
 
 **Requirement:** Let users paste a supported public YouTube playlist link, review
 its contents, choose all or selected available videos, and explicitly add the
@@ -161,5 +160,4 @@ the personal screenshot is not published in Git. Capture before/after evidence
 using a public lesson or synthetic test content. Browser layout checks complement
 actual Android/iOS player checks; record untested platforms explicitly.
 
-This update records requirements only. It does not modify the app, publish a new
-APK, or reopen implementation of the previous requirements list.
+Implementation scope is this round-2 list. Existing libraries, originals, source choices and optional numbering are preserved. See VERIFICATION.md for the current build and the distinction between automated, native and live-provider evidence.

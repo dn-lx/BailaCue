@@ -17,13 +17,12 @@ import {
 import { uid } from "../core/types";
 import {
   embeddedPlaylistMetadata,
-  playlistItems,
-  playlistMetadata,
+  readPlaylist,
   videoMetadata,
 } from "../services/youtube";
 
 export default function YouTubeSources() {
-  const { library, update } = useLibrary();
+  const { library, update, commit } = useLibrary();
   const [previewPlaying, setPreviewPlaying] = useState(false);
   const [url, setUrl] = useState(""),
     [choiceUrl, setChoiceUrl] = useState(""),
@@ -31,6 +30,11 @@ export default function YouTubeSources() {
     [items, setItems] = useState<YouTubeMetadata[]>([]),
     [selected, setSelected] = useState<string[]>([]);
   const [previewLimit, setPreviewLimit] = useState(50);
+  const [attempt, setAttempt] = useState(0);
+  const [complete, setComplete] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [playbackError, setPlaybackError] = useState("");
+  const [saved, setSaved] = useState<{ count: number; sourceId?: string }>();
   const [title, setTitle] = useState(""),
     [style, setStyle] = useState("Bachata"),
     [labels, setLabels] = useState<string[]>([]);
@@ -45,7 +49,20 @@ export default function YouTubeSources() {
       "",
   );
   const request = useRef<AbortController | undefined>(undefined),
-    loadedPlaylist = useRef("");
+    loadedPlaylist = useRef(""),
+    discoveryVersion = useRef(0),
+    discoveredRows = useRef<YouTubeMetadata[]>([]),
+    discoveryMode = useRef<"none" | "api" | "player">("none");
+  useEffect(() => {
+    if (!waiting) return;
+    const timeout = setTimeout(() => {
+      setWaiting(false);
+      setError(
+        "The player did not return playlist contents. Retry discovery or use a YouTube Data API v3 key for a complete import. Playing the preview is not required.",
+      );
+    }, 25000);
+    return () => clearTimeout(timeout);
+  }, [waiting]);
   useEffect(() => () => request.current?.abort(), []);
   useFocusEffect(
     useCallback(
@@ -68,6 +85,12 @@ export default function YouTubeSources() {
     const controller = new AbortController();
     request.current = controller;
     setError("");
+    setPlaybackError("");
+    setSaved(undefined);
+    setComplete(false);
+    discoveryVersion.current++;
+    discoveryMode.current = "none";
+    setAttempt((n) => n + 1);
     setLink(undefined);
     setPreviewPlaying(false);
     setChoiceUrl("");
@@ -77,9 +100,12 @@ export default function YouTubeSources() {
     setSelected([]);
     setWaiting(false);
     loadedPlaylist.current = "";
+    discoveredRows.current = [];
     try {
       const parsed = parseYouTubeLink(input, choice);
       setUrl(input);
+      discoveryMode.current =
+        parsed.kind === "playlist" ? (key.trim() ? "api" : "player") : "none";
       setLink(parsed);
       setBusy(true);
       const existing =
@@ -97,22 +123,41 @@ export default function YouTubeSources() {
         setSelected([item.id]);
         setTitle(item.title);
       } else if (key.trim()) {
-        const info = await playlistMetadata(
-          parsed.id,
-          key.trim(),
-          controller.signal,
-        );
-        const rows = await playlistItems(
-          parsed.id,
-          key.trim(),
-          controller.signal,
-          (n) => setMessage(`Reading playlist · ${n} videos`),
-        );
-        if (controller.signal.aborted) return;
-        setTitle(info.title);
-        setItems(rows);
-        setSelected(rows.filter((x) => x.available).map((x) => x.id));
-        setMessage(`${rows.length} videos read in playlist order.`);
+        try {
+          const result = await readPlaylist(
+            parsed.id,
+            key.trim(),
+            controller.signal,
+            (n) => {
+              if (!controller.signal.aborted)
+                setMessage(`Reading playlist · ${n} videos`);
+            },
+          );
+          if (controller.signal.aborted) return;
+          setTitle(
+            result.title ??
+              existing?.name ??
+              beginnerYouTube.find((s) => s.playlistId === parsed.id)?.title ??
+              "YouTube playlist",
+          );
+          setItems(result.items);
+          setSelected(result.items.filter((x) => x.available).map((x) => x.id));
+          setComplete(true);
+          setMessage(`${result.items.length} videos read in playlist order.`);
+        } catch (e) {
+          if (controller.signal.aborted) return;
+          setTitle(
+            existing?.name ??
+              beginnerYouTube.find((s) => s.playlistId === parsed.id)?.title ??
+              "YouTube playlist",
+          );
+          discoveryMode.current = "player";
+          setAttempt((n) => n + 1);
+          setWaiting(true);
+          setError(
+            `${(e as Error).message.replaceAll(key.trim(), "[API key]")} Check that the key allows YouTube Data API v3. We will also try the player's visible list below.`,
+          );
+        }
       } else {
         setTitle(
           existing?.name ??
@@ -121,7 +166,7 @@ export default function YouTubeSources() {
         );
         setWaiting(true);
         setMessage(
-          "Play or cue the playlist below to read its visible video list. For complete paginated imports, configure a YouTube Data API key in Advanced setup.",
+          "Reading the playlist from the official player without starting playback. Its visible list may be limited. A YouTube Data API v3 key enables complete paginated imports.",
         );
       }
     } catch (e) {
@@ -136,14 +181,16 @@ export default function YouTubeSources() {
   }
   async function fromPlayer(ids: string[]) {
     if (
-      !waiting ||
+      discoveryMode.current !== "player" ||
+      complete ||
       !link ||
       link.kind !== "playlist" ||
-      loadedPlaylist.current === link.id ||
+      loadedPlaylist.current === `${link.id}:${ids.join(",")}` ||
       !ids.length
     )
       return;
-    loadedPlaylist.current = link.id;
+    loadedPlaylist.current = `${link.id}:${ids.join(",")}`;
+    const version = ++discoveryVersion.current;
     const controller = request.current;
     if (!controller || controller.signal.aborted) return;
     setBusy(true);
@@ -152,63 +199,113 @@ export default function YouTubeSources() {
       const rows = await embeddedPlaylistMetadata(
         ids,
         controller.signal,
-        (done, total) =>
-          setMessage(`Reading video details · ${done} / ${total}`),
+        (done, total) => {
+          if (
+            !controller.signal.aborted &&
+            version === discoveryVersion.current
+          )
+            setMessage(`Reading video details · ${done} / ${total}`);
+        },
       );
-      if (controller.signal.aborted) return;
-      setItems(rows);
-      setSelected(rows.filter((x) => x.available).map((x) => x.id));
+      if (controller.signal.aborted || version !== discoveryVersion.current)
+        return;
+      const previous = discoveredRows.current;
+      const previousIds = new Set(previous.map((x) => x.id));
+      const merged = [
+        ...rows,
+        ...previous.filter((old) => !rows.some((x) => x.id === old.id)),
+      ];
+      discoveredRows.current = merged;
+      setItems(merged);
+      setSelected((old) => [
+        ...new Set([
+          ...old,
+          ...rows
+            .filter((x) => x.available && !previousIds.has(x.id))
+            .map((x) => x.id),
+        ]),
+      ]);
+      setError("");
       setMessage(
-        `The embedded player returned ${rows.length} videos. YouTube may limit this list; an API-key refresh reads all pages.`,
+        `The embedded player returned ${merged.length} videos. YouTube may limit this list; an API-key refresh reads all pages.`,
       );
     } catch (e) {
-      if (!controller.signal.aborted) setError((e as Error).message);
+      if (!controller.signal.aborted && version === discoveryVersion.current)
+        setError((e as Error).message);
     } finally {
-      if (!controller.signal.aborted) setBusy(false);
+      if (!controller.signal.aborted && version === discoveryVersion.current)
+        setBusy(false);
     }
   }
-  function save() {
-    if (!link || !selected.length) return;
-    const rows = items.filter((item) => selected.includes(item.id));
-    const unavailable = items.filter((item) => !item.available);
-    update((l) => {
-      const previous =
-        link.kind === "playlist"
-          ? l.youtubeSources?.find((s) => s.playlistId === link.id)
-          : undefined;
-      const source =
-        link.kind === "playlist"
-          ? {
-              id: previous?.id ?? uid(),
-              playlistId: link.id,
-              name: title.trim() || "YouTube playlist",
-              defaultStyle: style,
-              defaultDanceId: l.danceTypes?.find((d) => d.name === style)?.id,
-              defaultLabels: labels,
-              videoIds: rows.map((x) => x.id),
-              lastSyncedAt: new Date().toISOString(),
-            }
-          : undefined;
-      return importYouTube(
-        l,
-        [
-          ...rows,
-          ...unavailable.filter((item) =>
-            l.videos.some((v) => v.youtube?.id === item.id),
-          ),
-        ],
-        style,
-        labels,
-        source,
-        true,
-      );
-    });
-    setItems([]);
-    setLink(undefined);
-    setWaiting(false);
-    setMessage(
-      `Added ${rows.length} videos. Existing ratings, notes and labels were kept.`,
+  async function save() {
+    if (!link || !selected.length || busy) return;
+    setSaving(true);
+    discoveryMode.current = "none";
+    discoveryVersion.current++;
+    request.current?.abort();
+    const rows = items.filter(
+      (item) => item.available && selected.includes(item.id),
     );
+    const unavailable = items.filter((item) => !item.available);
+    setBusy(true);
+    setError("");
+    let savedSourceId: string | undefined;
+    try {
+      await commit((l) => {
+        const previous =
+          link.kind === "playlist"
+            ? l.youtubeSources?.find((s) => s.playlistId === link.id)
+            : undefined;
+        const source =
+          link.kind === "playlist"
+            ? {
+                id: previous?.id ?? uid(),
+                playlistId: link.id,
+                name: title.trim() || "YouTube playlist",
+                defaultStyle: style,
+                defaultDanceId: l.danceTypes?.find((d) => d.name === style)?.id,
+                defaultLabels: labels,
+                videoIds: [
+                  ...new Set([
+                    ...rows.map((x) => x.id),
+                    ...(!complete ? (previous?.videoIds ?? []) : []),
+                  ]),
+                ],
+                limited: !complete,
+                lastSyncedAt: new Date().toISOString(),
+              }
+            : undefined;
+        savedSourceId = source?.id;
+        return importYouTube(
+          l,
+          [
+            ...rows,
+            ...unavailable.filter((item) =>
+              l.videos.some((v) => v.youtube?.id === item.id),
+            ),
+          ],
+          style,
+          labels,
+          source,
+          complete,
+        );
+      });
+      request.current?.abort();
+      discoveryMode.current = "none";
+      discoveryVersion.current++;
+      setItems([]);
+      setLink(undefined);
+      setWaiting(false);
+      setSaved({ count: rows.length, sourceId: savedSourceId });
+      setMessage("Existing ratings, notes and labels were kept.");
+    } catch {
+      setError(
+        "The videos could not be saved on this phone. Free some storage and try Add again. Your selection is kept.",
+      );
+    } finally {
+      setBusy(false);
+      setSaving(false);
+    }
   }
   return (
     <Screen
@@ -270,6 +367,42 @@ export default function YouTubeSources() {
         <Button disabled={busy} onPress={() => void preview()}>
           Preview link
         </Button>
+        {link ? (
+          <>
+            <DancePicker value={style} onChange={setStyle} />
+            <LabelPicker
+              value={labels}
+              options={libraryLabels(library)}
+              onChange={setLabels}
+            />
+            <Txt size={12}>
+              {busy
+                ? "Reading video details…"
+                : waiting
+                  ? "Waiting for playlist contents…"
+                  : !items.length
+                    ? "No videos ready to add. Retry discovery or configure the Data API key below."
+                    : complete
+                      ? "Complete playlist read. Choose the lessons to add."
+                      : "Limited player list: existing playlist memberships will be kept. Use a Data API key to read all pages."}
+            </Txt>
+            {playbackError ? (
+              <Txt size={12}>
+                Preview: {playbackError} You can still add any loaded videos.
+              </Txt>
+            ) : null}
+            <Button
+              disabled={!selected.length || busy}
+              onPress={() => void save()}
+            >
+              {saving
+                ? "Saving to Library…"
+                : busy
+                  ? "Reading video details…"
+                  : "Add selected videos"}
+            </Button>
+          </>
+        ) : null}
         <Txt size={12}>
           YouTube videos stay online. Downloads, trimming, exporting, cloud
           uploads and source renaming apply to your own files only.
@@ -289,13 +422,29 @@ export default function YouTubeSources() {
           </Button>
         </Card>
       ) : null}
+      {saved ? (
+        <Card>
+          <Txt weight="bold">Added {saved.count} videos to your Library</Txt>
+          <Button
+            onPress={() => {
+              update((l) => ({
+                ...l,
+                libraryView: { sourceId: saved.sourceId, sort: "added-new" },
+              }));
+              router.push("/library");
+            }}
+          >
+            Open Library
+          </Button>
+        </Card>
+      ) : null}
       {link ? (
         <Card>
           <Txt size={23} weight="display">
             Preview before adding
           </Txt>
           <YouTubeEmbed
-            key={`${link.kind}:${link.id}`}
+            key={`${link.kind}:${link.id}:${attempt}`}
             videoId={link.kind === "video" ? link.id : undefined}
             playlistId={link.kind === "playlist" ? link.id : undefined}
             playing={previewPlaying}
@@ -305,7 +454,9 @@ export default function YouTubeSources() {
               if (state.phase === "paused" || state.phase === "ended")
                 setPreviewPlaying(false);
               if (state.phase === "error")
-                setError(state.error ?? "YouTube playback is unavailable.");
+                setPlaybackError(
+                  state.error ?? "YouTube playback is unavailable.",
+                );
             }}
           />
           <Button
@@ -325,12 +476,14 @@ export default function YouTubeSources() {
           ) : (
             <Txt weight="bold">{title}</Txt>
           )}
-          <DancePicker value={style} onChange={setStyle} />
-          <LabelPicker
-            value={labels}
-            options={libraryLabels(library)}
-            onChange={setLabels}
-          />
+          {link.kind === "playlist" && !busy ? (
+            <Button
+              variant="soft"
+              onPress={() => void preview(url, "playlist")}
+            >
+              Retry playlist discovery
+            </Button>
+          ) : null}
           {items.length ? (
             <>
               <Row>
@@ -351,6 +504,7 @@ export default function YouTubeSources() {
                   <Chip
                     selected={selected.includes(item.id)}
                     onPress={() =>
+                      item.available &&
                       setSelected((ids) =>
                         ids.includes(item.id)
                           ? ids.filter((id) => id !== item.id)
@@ -371,20 +525,24 @@ export default function YouTubeSources() {
                   Show next {Math.min(50, items.length - previewLimit)} lessons
                 </Button>
               ) : null}
-              <Button disabled={!selected.length || busy} onPress={save}>
-                Add selected videos
+              <Button
+                disabled={!selected.length || busy}
+                onPress={() => void save()}
+              >
+                Add these videos
               </Button>
             </>
           ) : null}
         </Card>
       ) : null}
-      {busy ? (
+      {busy && !saving ? (
         <Button
           variant="soft"
           onPress={() => {
             request.current?.abort();
             setBusy(false);
             setWaiting(false);
+            discoveryVersion.current++;
             setMessage("Cancelled. Your library has not changed.");
           }}
         >
@@ -400,8 +558,9 @@ export default function YouTubeSources() {
         <Card>
           <Txt accessibilityRole="alert">{error}</Txt>
           <Txt size={12}>
-            Your saved library is unchanged. Check the connection, playlist
-            visibility or API setup, then preview again.
+            Your saved library is unchanged. Check the connection, public
+            playlist visibility and YouTube Data API v3 setup, then retry. An
+            invalid/restricted key or an unloaded player can prevent discovery.
           </Txt>
         </Card>
       ) : null}
@@ -413,7 +572,8 @@ export default function YouTubeSources() {
           <View key={s.id} style={{ gap: 8 }}>
             <Txt weight="bold">{s.name}</Txt>
             <Txt>
-              {s.defaultStyle} · {s.videoIds.length} videos ·{" "}
+              {s.defaultStyle} · {s.videoIds.length} videos
+              {s.limited ? " · limited player list" : ""} ·{" "}
               {s.lastSyncedAt
                 ? new Date(s.lastSyncedAt).toLocaleDateString()
                 : "Not refreshed"}

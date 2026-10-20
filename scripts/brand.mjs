@@ -1,4 +1,4 @@
-// Package the approved, image-generated monochrome drawing as traced SVG geometry.
+// Export the approved concept05 b/play identity from its refined geometric SVG master.
 // SVG masters and outlined typography are committed; normal exports need only sharp.
 import sharp from "sharp";
 import { createHash } from "node:crypto";
@@ -12,8 +12,15 @@ const wordBox = wordmark.match(/viewBox="([^"]+)"/)[1],
   wordPaths = wordmark.match(/<path[\s\S]*<\/svg>/)[0].replace("</svg>", "");
 const svg = (w, h, content) =>
   `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">${content}</svg>`;
-const symbol = (color, x = 0, y = 0, w = 1024, h = w) =>
-  `<svg x="${x}" y="${y}" width="${w}" height="${h}" viewBox="0 0 1254 1254">${mark.replace('fill="#000000"', `fill="${color}"`)}</svg>`;
+const symbol = (color, x = 0, y = 0, w = 1024, h = w) => {
+  const paths =
+    color === "brand"
+      ? mark
+      : color === "brand-dark"
+        ? mark.replaceAll("#080D18", "#FFFFFF")
+        : mark.replaceAll(/fill="#[0-9A-Fa-f]{6}"/g, `fill="${color}"`);
+  return `<svg x="${x}" y="${y}" width="${w}" height="${h}" viewBox="0 0 1254 1254">${paths}</svg>`;
+};
 const type = (mode, x, y, w, h) =>
   `<svg x="${x}" y="${y}" width="${w}" height="${h}" viewBox="${wordBox}">${wordPaths.replaceAll("#080D18", mode === "dark" ? "#FFFFFF" : mode === "mono-white" ? "#FFFFFF" : "#080D18").replaceAll("#1465FF", mode === "mono-white" ? "#FFFFFF" : mode === "mono-black" ? "#080D18" : "#1465FF")}</svg>`;
 const generated = [];
@@ -34,17 +41,25 @@ for (const [name, color] of [
     `assets/brand/symbol-${name}-transparent`,
     svg(1024, 1024, symbol(color)),
   );
+for (const [name, color] of [
+  ["color", "brand"],
+  ["color-dark", "brand-dark"],
+])
+  await exportSvg(
+    `assets/brand/symbol-${name}-transparent`,
+    svg(1024, 1024, symbol(color)),
+  );
 await exportSvg(
   "assets/icon",
   svg(
     1024,
     1024,
-    '<rect width="1024" height="1024" fill="#1465FF"/>' + symbol("#FFFFFF"),
+    '<rect width="1024" height="1024" fill="#F4F7FC"/>' + symbol("brand"),
   ),
 );
 await save(
   "assets/adaptive-icon.png",
-  await sharp(Buffer.from(svg(1024, 1024, symbol("#FFFFFF"))))
+  await sharp(Buffer.from(svg(1024, 1024, symbol("brand"))))
     .png()
     .toBuffer(),
 );
@@ -56,7 +71,7 @@ await save(
 );
 await save(
   "assets/splash-icon.png",
-  await sharp(Buffer.from(svg(512, 512, symbol("#FFFFFF", 0, 0, 512))))
+  await sharp(Buffer.from(svg(512, 512, symbol("brand-dark", 0, 0, 512))))
     .png()
     .toBuffer(),
 );
@@ -65,7 +80,7 @@ await exportSvg(
   svg(
     1024,
     1024,
-    '<rect width="1024" height="1024" fill="#080D18"/>' + symbol("#FFFFFF"),
+    '<rect width="1024" height="1024" fill="#080D18"/>' + symbol("brand-dark"),
   ),
 );
 for (const [name, size] of [
@@ -97,7 +112,12 @@ for (const mode of ["light", "dark", "mono-white", "mono-black"]) {
         1024,
         256,
         bg +
-          symbol(mode === "light" ? "#1465FF" : fg, 0, 0, 256) +
+          symbol(
+            mode === "light" ? "brand" : mode === "dark" ? "brand-dark" : fg,
+            0,
+            0,
+            256,
+          ) +
           type(mode, 270, 70, 710, 116),
       ),
     );
@@ -110,7 +130,12 @@ for (const mode of ["light", "dark", "mono-white", "mono-black"]) {
         640,
         640,
         stackbg +
-          symbol(mode === "light" ? "#1465FF" : fg, 80, 0, 480) +
+          symbol(
+            mode === "light" ? "brand" : mode === "dark" ? "brand-dark" : fg,
+            80,
+            0,
+            480,
+          ) +
           type(mode, 90, 490, 460, 82),
       ),
     );
@@ -136,8 +161,9 @@ await exportSvg(
     1200,
     720,
     '<rect width="1200" height="720" fill="#F4F7FC"/>' +
-      symbol("#1465FF", 0, 0, 400) +
-      symbol("#080D18", 400, 0, 400) +
+      symbol("brand", 0, 0, 400) +
+      '<rect x="400" y="0" width="400" height="400" fill="#080D18"/>' +
+      symbol("brand-dark", 400, 0, 400) +
       type("light", 800, 140, 340, 70) +
       ["#1465FF", "#080D18", "#FFFFFF", "#C7DCFF"]
         .map(
@@ -145,7 +171,7 @@ await exportSvg(
             `<rect x="${48 + i * 288}" y="420" width="264" height="144" rx="18" fill="${c}" stroke="#C4D0E0"/><text x="${48 + i * 288}" y="605" font-family="sans-serif" font-size="24" fill="#080D18">${c}</text>`,
         )
         .join("") +
-      '<text x="48" y="670" font-family="sans-serif" font-size="22" fill="#54647B">BC + play · Vector masters · Outfit + DM Sans · Blue / black / white</text>',
+      '<text x="48" y="670" font-family="sans-serif" font-size="22" fill="#54647B">b + play · Vector masters · Outfit + DM Sans · Blue / black / white</text>',
   ),
 );
 await exportSvg(
@@ -154,7 +180,7 @@ await exportSvg(
     1200,
     630,
     '<rect width="1200" height="630" fill="#080D18"/>' +
-      symbol("#FFFFFF", 30, 30, 570) +
+      symbol("brand-dark", 30, 30, 570) +
       type("dark", 600, 220, 520, 98) +
       '<text x="610" y="370" font-family="sans-serif" font-size="28" fill="#B5C3D9">Watch. Practise. Repeat.</text>',
   ),
@@ -165,7 +191,7 @@ await exportSvg(
     1024,
     500,
     '<rect width="1024" height="500" fill="#080D18"/>' +
-      symbol("#FFFFFF", 0, 0, 500) +
+      symbol("brand-dark", 0, 0, 500) +
       type("dark", 500, 180, 480, 90),
   ),
 );
@@ -173,11 +199,10 @@ await writeFile(
   "assets/brand/manifest.json",
   JSON.stringify(
     {
-      concept: "03 — BC + play",
+      concept: "05 — b + centered play",
       sources: [
-        "assets/brand/bc-play-blue-source.png",
-        "assets/brand/bc-play-black-source.png",
-        "assets/brand/bc-play-monochrome-source.png",
+        "docs/brand/round-2-selected-concept-05-board.jpg",
+        "assets/brand/b-play-approved-preview.png",
       ],
       masters: [
         "assets/brand/symbol-master.svg",
@@ -187,7 +212,7 @@ await writeFile(
         [
           "assets/brand/symbol-master.svg",
           "assets/brand/wordmark-master.svg",
-          "assets/brand/bc-play-monochrome-source.png",
+          "assets/brand/b-play-approved-preview.png",
         ].map(async (path) => ({
           path,
           sha256: createHash("sha256")

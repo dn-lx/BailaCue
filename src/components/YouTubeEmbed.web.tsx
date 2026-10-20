@@ -62,8 +62,8 @@ export default function YouTubeEmbed(props: YouTubeEmbedProps) {
       style={{
         border: 0,
         width: "100%",
-        height: 280,
-        minHeight: 220,
+        height: props.fill ? "100%" : 280,
+        minHeight: 200,
         background: "#080D18",
       }}
     />
