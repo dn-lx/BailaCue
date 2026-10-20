@@ -73,7 +73,7 @@ export function YouTubeDetail({ video }: { video: Video }) {
         <ScrollView
           style={{
             flexGrow: 0,
-            maxHeight: Math.max(120, height * 0.25),
+            maxHeight: height < 500 ? 64 : Math.max(120, height * 0.25),
             display: fullscreen ? "none" : "flex",
           }}
           contentContainerStyle={{
@@ -108,6 +108,11 @@ export function YouTubeDetail({ video }: { video: Video }) {
             </Button>
           </Row>
         </ScrollView>
+        <Row style={{ justifyContent: "center", paddingVertical: 6 }}>
+          <Button variant="soft" onPress={() => setFullscreen(!fullscreen)}>
+            {fullscreen ? "Exit full screen" : "Full screen"}
+          </Button>
+        </Row>
         <VideoArea
           fullscreen={fullscreen}
           minHeight={200}
@@ -152,11 +157,6 @@ export function YouTubeDetail({ video }: { video: Video }) {
             onEnd={() => setPlaying(false)}
           />
         </VideoArea>
-        <Row style={{ justifyContent: "center", paddingVertical: 6 }}>
-          <Button variant="soft" onPress={() => setFullscreen(!fullscreen)}>
-            {fullscreen ? "Exit full screen" : "Full screen"}
-          </Button>
-        </Row>
         <ScrollView
           style={{ display: fullscreen ? "none" : "flex", flex: 1 }}
           keyboardShouldPersistTaps="handled"
@@ -232,7 +232,7 @@ export function YouTubeDetail({ video }: { video: Video }) {
               onSeek={(seconds) => setSeek({ seconds, key: Date.now() })}
             />
             <Txt>
-              Use Full screen below the picture to enlarge the player. Playback
+              Use Full screen above the picture to enlarge the player. Playback
               speed depends on this video’s supported rates. YouTube videos
               cannot be mirrored, downloaded or edited in BailaCue.
             </Txt>

@@ -40,7 +40,7 @@ export function PrivacyGate({ children }: React.PropsWithChildren) {
         backgroundColor: t.background,
       }}
     >
-      <View style={{ backgroundColor: t.brandBlack, borderRadius: 24, padding: 12 }}>
+      <View style={{ padding: 12 }}>
         <Mark size={64} />
       </View>
       <Txt size={30} weight="display">

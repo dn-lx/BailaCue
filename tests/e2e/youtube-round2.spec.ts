@@ -142,9 +142,17 @@ test("YouTube title is compact; resize and full screen retain the same player an
   await expect(
     page.getByRole("button", { name: "Exit full screen", exact: true }),
   ).toBeVisible();
+  await page.setViewportSize({ width: 915, height: 412 });
+  await expect(
+    page.getByRole("button", { name: "Exit full screen", exact: true }),
+  ).toBeInViewport();
   await page
     .getByRole("button", { name: "Exit full screen", exact: true })
     .click();
+  await expect(
+    page.getByRole("button", { name: "Full screen", exact: true }),
+  ).toBeInViewport();
+  await page.setViewportSize({ width: 412, height: 915 });
   expect(
     await page
       .locator('iframe[title="YouTube lesson player"]')
@@ -156,15 +164,13 @@ test("YouTube title is compact; resize and full screen retain the same player an
     page.getByRole("button", { name: "Pause video", exact: true }),
   ).toBeVisible();
   expect(
-    await page
-      .locator('iframe[title="YouTube lesson player"]')
-      .evaluate((el) =>
-        (
-          (el as HTMLIFrameElement).contentWindow as unknown as {
-            testPlayer: { getPlaybackRate: () => number };
-          }
-        ).testPlayer.getPlaybackRate(),
-      ),
+    await page.locator('iframe[title="YouTube lesson player"]').evaluate((el) =>
+      (
+        (el as HTMLIFrameElement).contentWindow as unknown as {
+          testPlayer: { getPlaybackRate: () => number };
+        }
+      ).testPlayer.getPlaybackRate(),
+    ),
   ).toBe(1.5);
   for (const width of [320, 360, 412]) {
     await page.setViewportSize({ width, height: 915 });
