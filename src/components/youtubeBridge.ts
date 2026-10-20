@@ -9,6 +9,7 @@ export type YouTubeEmbedProps = {
   videoId?: string;
   playlistId?: string;
   playing?: boolean;
+  enforcePause?: boolean;
   rate?: number;
   seekRequest?: { seconds: number; key: number };
   onState?: (state: YouTubeObservation) => void;
@@ -22,12 +23,19 @@ export function youtubeHtml(
   videoId?: string,
   playlistId?: string,
   origin = "https://app.bailacue.mobile",
+  enforcePause = false,
 ) {
   if (videoId && !/^[\w-]{11}$/.test(videoId))
     throw new Error("Invalid YouTube video ID");
   if (playlistId && !/^[\w-]{10,120}$/.test(playlistId))
     throw new Error("Invalid YouTube playlist ID");
-  const config = JSON.stringify({ token, videoId, playlistId, origin });
+  const config = JSON.stringify({
+    token,
+    videoId,
+    playlistId,
+    origin,
+    enforcePause,
+  });
   return `<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="referrer" content="strict-origin-when-cross-origin"><style>html,body,#player{margin:0;width:100%;height:100%;min-height:220px;background:#080D18;overflow:hidden}</style></head><body><div id="player"></div><script>
   const config=${config};let player,ready=false,latest={},lastPlaylist='',lastSeek;
   function send(data){const msg={...data,token:config.token};if(window.ReactNativeWebView)window.ReactNativeWebView.postMessage(JSON.stringify(msg));else parent.postMessage(msg,'*')}
@@ -35,7 +43,7 @@ export function youtubeHtml(
   function playlist(){if(!ready||!player.getPlaylist)return;const ids=player.getPlaylist()||[];const key=ids.join(',');if(ids.length&&key!==lastPlaylist){lastPlaylist=key;send({kind:'playlist',ids})}}
   window.bailacueCommand=function(command){latest=command;if(!ready)return;try{if(typeof command.playing==='boolean'){if(command.playing)player.playVideo();else player.pauseVideo()}if(command.rate&&(player.getAvailablePlaybackRates()||[]).includes(command.rate))player.setPlaybackRate(command.rate);if(command.seek&&command.seek.key!==lastSeek){lastSeek=command.seek.key;player.seekTo(Math.max(0,command.seek.seconds),true)}}catch(e){observe('error','Playback controls could not be applied. Use the YouTube player controls.')}};
   window.addEventListener('message',event=>{if(event.source===parent&&event.data&&event.data.token===config.token&&event.data.kind==='command')window.bailacueCommand(event.data.command)});
-  window.onYouTubeIframeAPIReady=function(){player=new YT.Player('player',{host:'https://www.youtube-nocookie.com',videoId:config.videoId,playerVars:{playsinline:1,controls:1,rel:0,origin:config.origin,...(config.playlistId?{listType:'playlist',list:config.playlistId}:{})},events:{onReady:function(){ready=true;observe('ready');send({kind:'rates',rates:player.getAvailablePlaybackRates()});playlist();window.bailacueCommand(latest)},onStateChange:function(event){const phase=({0:'ended',1:'playing',2:'paused',3:'buffering',5:'ready'})[event.data];if(phase)observe(phase);playlist();if(event.data===0)send({kind:'end'})},onPlaybackRateChange:function(event){send({kind:'rate',rate:event.data})},onError:function(event){const errors={2:'Invalid video link.',5:'The embedded player cannot play this video.',100:'This video is private or no longer available.',101:'The creator disabled embedded playback.',150:'The creator disabled embedded playback.',153:'YouTube could not verify this embedded player. Open the video in YouTube.'};observe('error',errors[event.data]||'YouTube playback is unavailable. Open in YouTube.',event.data)}}})};
+  window.onYouTubeIframeAPIReady=function(){player=new YT.Player('player',{host:'https://www.youtube-nocookie.com',videoId:config.videoId,playerVars:{playsinline:1,controls:1,rel:0,origin:config.origin,...(config.playlistId?{listType:'playlist',list:config.playlistId}:{})},events:{onReady:function(){ready=true;observe('ready');send({kind:'rates',rates:player.getAvailablePlaybackRates()});playlist();window.bailacueCommand(latest)},onStateChange:function(event){if(event.data===1&&config.enforcePause&&latest.playing===false){player.pauseVideo();return}const phase=({0:'ended',1:'playing',2:'paused',3:'buffering',5:'ready'})[event.data];if(phase)observe(phase);playlist();if(event.data===0)send({kind:'end'})},onPlaybackRateChange:function(event){send({kind:'rate',rate:event.data})},onError:function(event){const errors={2:'Invalid video link.',5:'The embedded player cannot play this video.',100:'This video is private or no longer available.',101:'The creator disabled embedded playback.',150:'The creator disabled embedded playback.',153:'YouTube could not verify this embedded player. Open the video in YouTube.'};observe('error',errors[event.data]||'YouTube playback is unavailable. Open in YouTube.',event.data)}}})};
   const script=document.createElement('script');script.src='https://www.youtube.com/iframe_api';script.referrerPolicy='strict-origin-when-cross-origin';script.onerror=()=>observe('error','YouTube is unreachable. Check your connection.');document.head.appendChild(script);
   const timeout=setTimeout(()=>{if(!ready)observe('error','YouTube is taking too long to load. Retry online or open in YouTube.')},20000);
   const timer=setInterval(()=>{if(ready){const s=player.getPlayerState();if(s===1)observe('playing');playlist()}},500);window.addEventListener('pagehide',()=>{clearInterval(timer);clearTimeout(timeout);if(player&&player.destroy)player.destroy()});

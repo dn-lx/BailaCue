@@ -62,6 +62,9 @@ test("Practice plays a continuous queue, preserves Previous, pauses time and res
   await page
     .getByRole("button", { name: "Pause practice", exact: true })
     .click();
+  await expect(
+    page.getByRole("button", { name: "Resume practice", exact: true }),
+  ).toBeVisible();
   const timer = page.getByText(/^\d+ active seconds/);
   const before = await timer.innerText();
   await page.waitForTimeout(1100);

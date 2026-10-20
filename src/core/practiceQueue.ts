@@ -27,6 +27,7 @@ export type ActivePractice = {
   running: boolean;
   cycle: number;
   position: number;
+  playbackEpoch?: number;
 };
 export function practiceDefaults(l: Library): PracticePreferences {
   return {
@@ -153,5 +154,81 @@ export function savePractice(l: Library, state: ActivePractice): Library {
             ...l.sessions.filter((s) => s.id !== state.id),
           ]
         : l.sessions,
+  };
+}
+
+export type PlaybackContext = {
+  sessionId: string;
+  epoch: number;
+  index: number;
+  videoId: string;
+};
+export function playbackContext(state: ActivePractice): PlaybackContext {
+  return {
+    sessionId: state.id,
+    epoch: state.playbackEpoch ?? 0,
+    index: state.index,
+    videoId: state.queue[state.index] ?? "",
+  };
+}
+export function matchesPlayback(
+  state: ActivePractice | undefined,
+  context: PlaybackContext,
+): state is ActivePractice {
+  return (
+    !!state &&
+    state.id === context.sessionId &&
+    (state.playbackEpoch ?? 0) === context.epoch &&
+    state.index === context.index &&
+    state.queue[state.index] === context.videoId
+  );
+}
+export function movePractice(
+  state: ActivePractice,
+  delta: number,
+): { state: ActivePractice; exhausted: boolean } {
+  const index = state.index + delta;
+  if (index < 0) return { state, exhausted: false };
+  if (index >= state.queue.length)
+    return { state: { ...state, running: false }, exhausted: true };
+  return {
+    state: {
+      ...state,
+      index,
+      position: 0,
+      playbackEpoch: (state.playbackEpoch ?? 0) + 1,
+    },
+    exhausted: false,
+  };
+}
+export function recordPlayback(
+  state: ActivePractice,
+  context: PlaybackContext,
+  position: number,
+  isPlaying: boolean,
+): ActivePractice {
+  if (!matchesPlayback(state, context)) return state;
+  const id = state.queue[state.index];
+  return {
+    ...state,
+    position: Number.isFinite(position)
+      ? Math.max(0, position)
+      : state.position,
+    visited:
+      isPlaying &&
+      state.running &&
+      state.stage === "focus" &&
+      !state.visited.includes(id)
+        ? [...state.visited, id]
+        : state.visited,
+  };
+}
+
+/** A fresh generator per preview calculation keeps metadata-only rerenders stable. */
+export function practiceRandom(seed: number): () => number {
+  let state = seed >>> 0;
+  return () => {
+    state = (Math.imul(1664525, state) + 1013904223) >>> 0;
+    return state / 4294967296;
   };
 }

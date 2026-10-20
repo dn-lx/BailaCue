@@ -1,7 +1,7 @@
-# Verification · BailaCue0.2.16/build21
+# Verification · BailaCue0.2.17/build22
 
 Full approved requirements are implemented in the preview source. Acceptance must
-remain separate from implementation:178 unit/database tests in17 suites, TypeScript,
+remain separate from implementation:185 unit/database tests in18 suites, TypeScript,
 ESLint, web export,10 browser journeys and Expo Doctor20/20 pass locally.
 
 Browser evidence covers a real synthetic-file import, seek/trim handles, resize,
@@ -33,3 +33,5 @@ Unpublished build18/tag v0.2.13-preview.18/run39429970323 was cancelled before p
 Build19/tag v0.2.14-preview.19/run39431016837 was cancelled before publication for final YouTube import, full-screen contrast and revoked-copy UI corrections.
 
 Build20/tag v0.2.15-preview.20/run39432080504 built successfully but was blocked after5 native checks: the hidden full-screen VideoView stole the inline video surface. Source21 conditionally mounts it. Evidence is in verification/android-build20-initial/. No build20 release was published.
+
+Build21 passed13 native checks, including real pixel Mirror reversal, export/original integrity, labels and Daily Picks, but was withheld for the final Practice pause check. Build22 rejects stale session/mount events and preserves explicit pause intent. Its native release gate is pending.

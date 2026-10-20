@@ -1,10 +1,10 @@
-# Current handoff · full requirements ·0.2.16/build21
+# Current handoff · full requirements ·0.2.17/build22
 
 The owner authorized all22 issues, superseding the earlier review-only gate.
 See PRODUCT-REQUIREMENTS.md, IMPLEMENTATION-TRACKER.md, YOUTUBE.md and VERIFICATION.md.
 The source includes the simplified player, dynamic dances/labels/filters/sorts,
 rating-led Daily Picks, continuous timed Practice and optional YouTube sources.
-178 unit/database tests and10 browser journeys pass; Doctor20/20. The Android
+185 unit/database tests and10 browser journeys pass; Doctor20/20. The Android
 build/native/publication gate is in progress. Do not claim native acceptance yet.
 Name stays BailaCue; concept03 BC/play in blue/black.66 vector/PNG exports are in Git.
 No automatic renaming, production deployment or main merge. iOS/live-provider and
@@ -199,3 +199,5 @@ Unpublished build18/tag v0.2.13-preview.18/run39429970323 was cancelled before p
 Build19/tag v0.2.14-preview.19/run39431016837 was cancelled before publication for final YouTube import, full-screen contrast and revoked-copy UI corrections.
 
 Build20/tag v0.2.15-preview.20/run39432080504 built successfully but was blocked after5 native checks: the hidden full-screen VideoView stole the inline video surface. Source21 conditionally mounts it. Evidence is in verification/android-build20-initial/. No build20 release was published.
+
+Build21 passed13 native checks, including real pixel Mirror reversal, export/original integrity, labels and Daily Picks, but was withheld for the final Practice pause check. Build22 rejects stale session/mount events and preserves explicit pause intent. Its native release gate is pending.

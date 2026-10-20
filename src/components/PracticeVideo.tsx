@@ -83,12 +83,11 @@ export function PracticeVideo(props: PracticeVideoProps) {
       <View style={{ gap: 12 }}>
         <YouTubeEmbed
           videoId={video.youtube.id}
+          enforcePause
           playing={props.playing}
           seekRequest={seekRequest}
           onState={(state) => {
             props.onState(state);
-            if (state.phase === "playing" && !props.playing)
-              props.onPlayingRequest(true);
             if (state.phase === "paused" && props.playing)
               props.onPlayingRequest(false);
           }}
@@ -159,6 +158,7 @@ function NativePracticeVideo(props: PracticeVideoProps & { uri: VideoSource }) {
         observe("error", e.error?.message ?? "This video could not play.");
     });
     const playing = player.addListener("playingChange", (e) => {
+      if (e.isPlaying !== player.playing) return;
       if (e.isPlaying) {
         started.current = true;
         observe("playing");

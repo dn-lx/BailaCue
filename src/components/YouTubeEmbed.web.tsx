@@ -21,8 +21,9 @@ export default function YouTubeEmbed(props: YouTubeEmbedProps) {
         typeof window === "undefined"
           ? "https://app.bailacue.mobile"
           : window.location.origin,
+        props.enforcePause,
       ),
-    [token, props.videoId, props.playlistId],
+    [token, props.videoId, props.playlistId, props.enforcePause],
   );
   const command = useCallback(() => {
     const p = latest.current;

@@ -14,8 +14,15 @@ export default function YouTubeEmbed(props: YouTubeEmbedProps) {
     latest.current = props;
   });
   const html = useMemo(
-    () => youtubeHtml(token, props.videoId, props.playlistId),
-    [token, props.videoId, props.playlistId],
+    () =>
+      youtubeHtml(
+        token,
+        props.videoId,
+        props.playlistId,
+        undefined,
+        props.enforcePause,
+      ),
+    [token, props.videoId, props.playlistId, props.enforcePause],
   );
   const command = useCallback(() => {
     const p = latest.current;

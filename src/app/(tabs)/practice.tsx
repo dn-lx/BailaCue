@@ -1,11 +1,4 @@
-import {
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AppState, Switch, View } from "react-native";
 import { router, useFocusEffect } from "expo-router";
 import {
@@ -28,8 +21,14 @@ import {
   beginPractice,
   practiceDefaults,
   practiceQueue,
+  practiceRandom,
   savePractice,
   tickPractice,
+  playbackContext,
+  matchesPlayback,
+  movePractice,
+  recordPlayback,
+  type PlaybackContext,
   type ActivePractice,
   type PracticePreferences,
 } from "../../core/practiceQueue";
@@ -38,6 +37,9 @@ import type { YouTubeObservation } from "../../components/youtubeBridge";
 export default function Practice() {
   const { library, update } = useLibrary(),
     t = useTheme();
+  const [queueSeed, setQueueSeed] = useState(() =>
+    Math.floor(Math.random() * 4294967296),
+  );
   const [preferences, setPreferences] = useState(() =>
     practiceDefaults(library),
   );
@@ -58,12 +60,11 @@ export default function Practice() {
     lastTick = useRef(0),
     lastPersist = useRef(0),
     focused = useRef(true);
-  useLayoutEffect(() => {
-    live.current = active;
-  }, [active]);
+  // The event handlers own live.current. Copying render snapshots back here can
+  // resurrect pre-pause or pre-navigation state while native events are queued.
   const preview = useMemo(
-    () => practiceQueue(library, preferences),
-    [library, preferences],
+    () => practiceQueue(library, preferences, practiceRandom(queueSeed)),
+    [library, preferences, queueSeed],
   );
   const persist = useCallback(
     (state: ActivePractice | undefined) =>
@@ -130,31 +131,37 @@ export default function Practice() {
     }, 500);
     return () => clearInterval(timer);
   }, [accrue, persist, update]);
-  function requestPlaying(run: boolean) {
+  function requestPlaying(run: boolean, source?: PlaybackContext) {
+    if (source && !matchesPlayback(live.current, source)) return;
     const state = accrue() ?? live.current;
     if (!state) return;
     lastTick.current = performance.now();
     if (!run) playing.current = false;
     write({ ...state, running: run }, true);
   }
-  function observation(state: YouTubeObservation) {
+  function observation(source: PlaybackContext, state: YouTubeObservation) {
+    if (!matchesPlayback(live.current, source)) return;
+    const wasPlaying = playing.current;
     accrue();
-    playing.current = state.phase === "playing";
+    const current = live.current;
+    if (!matchesPlayback(current, source)) return;
+    playing.current = current.running && state.phase === "playing";
     lastTick.current = performance.now();
     setPhase(state.phase);
-    const current = live.current;
-    if (!current) return;
     const id = current.queue[current.index];
-    let next = { ...current, position: state.position };
-    if (state.phase === "playing" && !current.visited.includes(id)) {
-      next = { ...next, visited: [...current.visited, id] };
+    const next = recordPlayback(
+      current,
+      source,
+      state.position,
+      state.phase === "playing",
+    );
+    if (playing.current && !wasPlaying)
       update((l) => ({
         ...l,
         videos: l.videos.map((v) =>
           v.id === id ? { ...v, lastPractisedAt: new Date().toISOString() } : v,
         ),
       }));
-    }
     write(next);
     if (state.phase === "error") {
       setError(
@@ -180,22 +187,16 @@ export default function Practice() {
         }));
     }
   }
-  function advance(delta: number) {
+  function advance(delta: number, source?: PlaybackContext) {
+    if (source && !matchesPlayback(live.current, source)) return;
     const state = accrue() ?? live.current;
     if (!state) return;
-    const index = state.index + delta;
-    if (index < 0) return;
-    if (index >= state.queue.length) {
-      playing.current = false;
-      setExhausted(true);
-      write({ ...state, running: false }, true);
-      return;
-    }
+    const result = movePractice(state, delta);
     playing.current = false;
     setError("");
     setPhase("buffering");
-    setExhausted(false);
-    write({ ...state, index, position: 0 }, true);
+    setExhausted(result.exhausted);
+    write(result.state, true);
   }
   function repeat() {
     const state = live.current;
@@ -214,6 +215,7 @@ export default function Practice() {
         index: state.queue.length,
         position: 0,
         cycle: state.cycle + 1,
+        playbackEpoch: (state.playbackEpoch ?? 0) + 1,
         running: true,
       },
       true,
@@ -230,10 +232,12 @@ export default function Practice() {
     setExhausted(false);
     setError("");
     setEditing(false);
+    setQueueSeed(Math.floor(Math.random() * 4294967296));
   }
   function change(changes: Partial<PracticePreferences>) {
     setPreferences((p) => ({ ...p, ...changes }));
   }
+  const source = active ? playbackContext(active) : undefined;
   const current =
     active && library.videos.find((v) => v.id === active.queue[active.index]);
   return (
@@ -256,7 +260,12 @@ export default function Practice() {
           </Txt>
           <Row>
             {active.remainingMs > 0 ? (
-              <Button onPress={() => requestPlaying(!active.running)}>
+              <Button
+                onPress={() => {
+                  const state = live.current;
+                  if (state) requestPlaying(!state.running);
+                }}
+              >
                 {active.running ? "Pause practice" : "Resume practice"}
               </Button>
             ) : (
@@ -318,7 +327,7 @@ export default function Practice() {
             {current.style} · video {active.index + 1} of {active.queue.length}
           </Txt>
           <PracticeVideo
-            key={`${active.id}:${active.index}:${current.id}`}
+            key={`${active.id}:${active.playbackEpoch ?? 0}:${active.index}:${current.id}`}
             video={current}
             playing={
               active.running &&
@@ -331,20 +340,26 @@ export default function Practice() {
             mirror={mirror}
             onRate={setRateState}
             onMirror={() => setMirror((x) => !x)}
-            onPlayingRequest={requestPlaying}
-            onState={observation}
-            onEnd={() => advance(1)}
+            onPlayingRequest={(run) => requestPlaying(run, source!)}
+            onState={(state) => observation(source!, state)}
+            onEnd={() => {
+              if (
+                matchesPlayback(live.current, source!) &&
+                live.current.running
+              )
+                advance(1, source!);
+            }}
             onDragging={setDragging}
           />
           <Row>
             <Button
               variant="soft"
               disabled={active.index === 0}
-              onPress={() => advance(-1)}
+              onPress={() => advance(-1, source!)}
             >
               Previous video
             </Button>
-            <Button onPress={() => advance(1)}>Next video</Button>
+            <Button onPress={() => advance(1, source!)}>Next video</Button>
             <Button
               variant="ghost"
               onPress={() => {
@@ -371,7 +386,9 @@ export default function Practice() {
             This queued video is no longer available. Your practice time is
             kept.
           </Txt>
-          <Button onPress={() => advance(1)}>Skip missing video</Button>
+          <Button onPress={() => advance(1, source!)}>
+            Skip missing video
+          </Button>
           <Button variant="soft" onPress={finish}>
             Finish & save
           </Button>
