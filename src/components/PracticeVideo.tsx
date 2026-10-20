@@ -2,7 +2,7 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { Linking, Modal, View } from "react-native";
 import { useVideoPlayer, VideoView, type VideoSource } from "expo-video";
 import { useLibrary } from "../services/store";
-import { resolveVideo } from "../services/cloud/playback";
+import { resolveVideo, RevokedAccess } from "../services/cloud/playback";
 import { formatTime } from "../core/practice";
 import type { Segment, Video } from "../core/types";
 import { useTheme } from "./theme";
@@ -28,7 +28,7 @@ export type PracticeVideoProps = {
   onDragging?: (dragging: boolean) => void;
 };
 export function PracticeVideo(props: PracticeVideoProps) {
-  const { library } = useLibrary();
+  const { library, updateVideo } = useLibrary();
   const [source, setSource] = useState<VideoSource>(),
     [error, setError] = useState(""),
     [retry, setRetry] = useState(0);
@@ -54,6 +54,13 @@ export function PracticeVideo(props: PracticeVideoProps) {
       })
       .catch((e) => {
         if (alive) {
+          if (e instanceof RevokedAccess)
+            updateVideo(video.id, {
+              offlineUri: undefined,
+              thumbnail: undefined,
+              storagePreference: "online",
+              available: false,
+            });
           setError((e as Error).message);
           latest.current({
             phase: "error",

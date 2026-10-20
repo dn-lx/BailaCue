@@ -1,4 +1,4 @@
-# Verification · BailaCue0.2.14/build19
+# Verification · BailaCue0.2.15/build20
 
 Full approved requirements are implemented in the preview source. Acceptance must
 remain separate from implementation:178 unit/database tests in17 suites, TypeScript,
@@ -29,3 +29,5 @@ implementation matrix in IMPLEMENTATION-TRACKER.md. Optional renaming stays off.
 Prior brand-only preview: [build17](VERIFICATION-0.2.12.md).
 
 Unpublished build18/tag v0.2.13-preview.18/run39429970323 was cancelled before publication to fix unselected dances entering total-count Daily Picks. Immutable tag/source retained.
+
+Build19/tag v0.2.14-preview.19/run39431016837 was cancelled before publication for final YouTube import, full-screen contrast and revoked-copy UI corrections.

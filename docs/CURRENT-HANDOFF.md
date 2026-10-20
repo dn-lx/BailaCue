@@ -1,4 +1,4 @@
-# Current handoff · full requirements ·0.2.14/build19
+# Current handoff · full requirements ·0.2.15/build20
 
 The owner authorized all22 issues, superseding the earlier review-only gate.
 See PRODUCT-REQUIREMENTS.md, IMPLEMENTATION-TRACKER.md, YOUTUBE.md and VERIFICATION.md.
@@ -195,3 +195,5 @@ accessibility/large-file hardening and iOS compilation/signing remain unverified
 Automatic metadata merge/sync, new-video push and WebDAV/S3 adapters remain pending.
 
 Unpublished build18/tag v0.2.13-preview.18/run39429970323 was cancelled before publication to fix unselected dances entering total-count Daily Picks. Immutable tag/source retained.
+
+Build19/tag v0.2.14-preview.19/run39431016837 was cancelled before publication for final YouTube import, full-screen contrast and revoked-copy UI corrections.

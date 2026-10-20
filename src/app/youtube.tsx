@@ -320,7 +320,11 @@ export default function YouTubeSources() {
           >
             Open in YouTube
           </Button>
-          <Field label="Library name" value={title} onChangeText={setTitle} />
+          {link.kind === "playlist" ? (
+            <Field label="Library name" value={title} onChangeText={setTitle} />
+          ) : (
+            <Txt weight="bold">{title}</Txt>
+          )}
           <DancePicker value={style} onChange={setStyle} />
           <LabelPicker
             value={labels}

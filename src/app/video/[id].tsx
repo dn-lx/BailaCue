@@ -682,7 +682,7 @@ function Player({ video, uri }: { video: Video; uri: VideoSource }) {
             nativeControls={false}
             contentFit="contain"
           />
-          <View style={{ padding: 12, gap: 8 }}>
+          <View style={{ padding: 12, gap: 8, backgroundColor: t.surface }}>
             <Timeline
               duration={video.duration}
               position={time}

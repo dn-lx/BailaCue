@@ -1,4 +1,4 @@
-# Full-document implementation · preview19
+# Full-document implementation · preview20
 
 The owner authorized all22 issues on20 October2026. The organized specification
 is mirrored in [PRODUCT-REQUIREMENTS.md](PRODUCT-REQUIREMENTS.md). Earlier review-only
@@ -28,7 +28,9 @@ No automatic source renaming. Original video bytes and destination selection ret
 their existing upload/trim safeguards. No new production tables are required: the
 existing private metadata snapshot holds catalog IDs and YouTube memberships.
 
-Build17 (`v0.2.12-preview.17`) is the earlier brand-only build. Build19 includes the
+Build17 (`v0.2.12-preview.17`) is the earlier brand-only build. Build20 includes the
 full-document source; do not attribute these features to build17.
 
 Unpublished build18/tag v0.2.13-preview.18/run39429970323 was cancelled before publication to fix unselected dances entering total-count Daily Picks. Immutable tag/source retained.
+
+Build19/tag v0.2.14-preview.19/run39431016837 was cancelled before publication for final YouTube import, full-screen contrast and revoked-copy UI corrections.
