@@ -288,7 +288,11 @@ async def main():
             screen=await controller.get_screen_data()
             await controller.swipe_coords(screen.width//2,int(screen.height*.30),screen.width//2,int(screen.height*.80),250)
         await locate("Remove label ARTEMIS Artist",scrolls=6)
-        await locate("Choose labels",scrolls=2)
+        await observe("label-removed")
+        # Removing a chip can adjust the nested scroll offset. Start from a known
+        # position because Details now precedes all expanded editing tools.
+        await top()
+        await locate("Choose labels",scrolls=6)
         await field("Search labels","artemis artist")
         elements = await observe("label-existing")
         if any("Create “artemis artist”" in label(e) for e in elements):
