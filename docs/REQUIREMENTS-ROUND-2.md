@@ -1,6 +1,6 @@
 # BailaCue · new requirements · round 2
 
-Status: the owner authorized all five round-2 issues. Implemented in 0.2.19/build24 source; native acceptance and publication are pending.
+Status: the owner authorized all five round-2 issues. Implemented in 0.2.20/build25 source; native acceptance and publication are pending.
 
 This is a new list of feedback on Android preview 0.2.17/build22. It is separate
 from the earlier 22-issue requirements and uses a new `R2` numbering sequence.
@@ -163,3 +163,5 @@ actual Android/iOS player checks; record untested platforms explicitly.
 Implementation scope is this round-2 list. Existing libraries, originals, source choices and optional numbering are preserved. See VERIFICATION.md for the current build and the distinction between automated, native and live-provider evidence.
 
 Build23/tag v0.2.18-preview.23 was withheld before publication for the final transparent lock-screen mark and landscape full-screen-action placement corrections.
+
+Build24 was withheld before publication after the launcher-mask check found clipping in the adaptive foreground. Build25 pads only the adaptive layers to preserve the complete symbol under Android masks.

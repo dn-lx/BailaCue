@@ -59,16 +59,38 @@ await exportSvg(
 );
 await save(
   "assets/adaptive-icon.png",
-  await sharp(Buffer.from(svg(1024, 1024, symbol("brand"))))
+  // Android expands a 108dp foreground behind its 72dp launcher mask.
+  // Keep the complete mark inside the central 66dp safe zone, including
+  // themed/circular masks. The unpadded transparent master stays unchanged.
+  await sharp(Buffer.from(svg(1024, 1024, symbol("brand", 212, 212, 600))))
     .png()
     .toBuffer(),
 );
 await save(
   "assets/adaptive-monochrome.png",
-  await sharp(Buffer.from(svg(1024, 1024, symbol("#000000"))))
+  await sharp(Buffer.from(svg(1024, 1024, symbol("#000000", 212, 212, 600))))
     .png()
     .toBuffer(),
 );
+for (const path of [
+  "assets/adaptive-icon.png",
+  "assets/adaptive-monochrome.png",
+]) {
+  const { data, info } = await sharp(path)
+    .ensureAlpha()
+    .raw()
+    .toBuffer({ resolveWithObject: true });
+  const safeRadius = (info.width * 33) / 108;
+  for (let y = 0; y < info.height; y++)
+    for (let x = 0; x < info.width; x++) {
+      if (
+        data[(y * info.width + x) * 4 + 3] > 0 &&
+        Math.hypot(x - info.width / 2, y - info.height / 2) > safeRadius
+      ) {
+        throw new Error(`${path} extends beyond Android's 66dp safe zone`);
+      }
+    }
+}
 await save(
   "assets/splash-icon.png",
   await sharp(Buffer.from(svg(512, 512, symbol("brand-dark", 0, 0, 512))))

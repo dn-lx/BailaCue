@@ -50,3 +50,5 @@ provenance, not used as the runtime icon or as an SVG raster container.
 Store artwork is prepared in Git; publishing store listings or taking store-specific
 marketing screenshots is a separate distribution step. No app-store submission is
 implied by these exports.
+
+Android adaptive foregrounds use a separate padded placement (600px inside a1024px transparent canvas), preserving the whole symbol inside the central66dp safe zone of the108dp layer. The transparent master/in-app artwork is unchanged. See [Android adaptive icon guidance](https://developer.android.com/develop/ui/views/launch/icon_design_adaptive).

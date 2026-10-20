@@ -126,7 +126,7 @@
       "width": 1024,
       "height": 1024,
       "alpha": true,
-      "sha256": "916e0f7cc8615d907b46b3a90bc377f9f8b3dfb6ff38a7dda187b0aab4ffd727"
+      "sha256": "efeaa9f5bd5e51602a86e279f16ec688ff11ccb0e1d283bd8238cf6049409f4c"
     },
     {
       "path": "assets/adaptive-monochrome.png",
@@ -134,7 +134,7 @@
       "width": 1024,
       "height": 1024,
       "alpha": true,
-      "sha256": "9919ad303c5ee0a925f6922983ec60213b3631257948c6e8a9f0f3c77e8c970d"
+      "sha256": "8a28352f5b79f1dc854eaa6e708242fc54c630dd3e20bd6b24f9fe1506f2d4b6"
     },
     {
       "path": "assets/splash-icon.png",
