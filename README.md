@@ -105,7 +105,7 @@ npm run build:android
 ```
 
 The script generates Android from Expo config and builds a bundled release-mode APK
-at `artifacts/BailaCue-v0.2.11-build16-preview.apk` with SHA-256. Native media code is
+at `artifacts/BailaCue-v0.2.12-build17-preview.apk` with SHA-256. Native media code is
 committed under `modules/baila-media`; generated root `android/` and `ios/` are ignored.
 The generated internal debug certificate is used for previews; configure your own
 release signing before store publication. Never commit signing keys.

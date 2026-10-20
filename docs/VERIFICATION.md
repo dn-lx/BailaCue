@@ -1,4 +1,4 @@
-# Verification · BailaCue 0.2.11 (build16)
+# Verification · BailaCue 0.2.12 (build17)
 
 The owner selected concept03 (BC + play) and a blue-and-black identity. Source now
 uses the chosen icon, matching splash/favicon/wordmarks/badges and readable light
@@ -7,11 +7,12 @@ player surfaces, switch thumbs/tracks, selected chips and video placeholders mat
 Source naming, uploads, recommendations and editing behavior are preserved.
 
 153 unit/database tests in16 suites, TypeScript, ESLint, web export and all six
-browser journeys passed locally. Layout checks cover seven screens at320/360/412px.
+browser journeys passed locally after the SDK58 patch update. Expo Doctor passes
+20/20 (local invocation uses NODE_USE_ENV_PROXY=1 to preserve the inherited proxy). Layout checks cover seven screens at320/360/412px.
 Main text/secondary text, primary-action, accent, badge and hero foreground pairs
 exceed4.5:1 in both palettes (minimum checked ratio4.84:1). This is a targeted colour
 check, not a full accessibility certification. Current screenshots are in
-[brand](brand/README.md) and [browser evidence](verification/browser-build16/).
+[brand](brand/README.md) and [browser evidence](verification/browser-build17/).
 
 `npm run brand` packages20 approved assets. Icon/adaptive1024², splash512² and
 favicon64² are opaque PNGs. The manifest records generated paths, format, dimensions
@@ -24,7 +25,7 @@ readback verified the added requirement and all seven original screenshot object
 No private screenshots or notes were copied into this repository. The committed
 concept board contains only generated brand designs.
 
-Android native acceptance/publication is pending for build16. It remains gated on
+Android native acceptance/publication is pending for build17. It remains gated on
 all12 real Google ARTEMIS checks and checksum matching. iOS compilation/signing,
 physical-device hardening and live provider transfers remain unverified; browser
 provider journeys use mocks and synthetic videos. No database deployment or media

@@ -1,4 +1,4 @@
-# Current handoff · BailaCue 0.2.11 (build16)
+# Current handoff · BailaCue 0.2.12 (build17)
 
 Owner selected blue-and-black concept03, BC + embedded play triangle. Authorized
 icon/theme implementation and a requirement to keep the complete logo/icon family
@@ -15,10 +15,16 @@ and Android themed monochrome versions remain explicitly pending in BR-02.
 Reviewed starter design reference revision:2a2be2b54595ab67768b1f13cc2a0794f5787f64.
 No starter bootstrap, hooks, web runtime, analytics or dependencies were installed.
 
-153 tests/16 suites, type/lint, web export and six browser journeys pass. Targeted
-colour ratios exceed4.5:1; layouts cover7 screens at320/360/412px. Build16 native
+153 tests/16 suites, type/lint, web export and six browser journeys pass after the
+SDK patch update. Expo Doctor passes20/20 with the inherited proxy enabled. Targeted
+colour ratios exceed4.5:1; layouts cover7 screens at320/360/412px. Build17 native
 acceptance/publication pending; source pushes and Android prereleases authorized.
 No main merge, store submission, TinyFish, paid services or database/media changes.
+
+Build16/tag v0.2.11-preview.16/run39421291736 was cancelled before publication
+after Expo Doctor found six newly recommended SDK58 patch updates. Reviewed
+upstream changelogs and ran expo install --fix to align Expo58.0.16 and its
+file-system/font/media-library/router/video patch set. No validation was bypassed.
 
 Historical build15 handoff follows.
 
