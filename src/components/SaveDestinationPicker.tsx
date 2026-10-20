@@ -19,7 +19,7 @@ export function SaveDestinationPicker({
   return (
     <Card>
       <Txt weight="bold">{label}</Txt>
-      <Row style={{ flexWrap: "wrap" }}>
+      <Row style={{ flexWrap: "wrap", justifyContent: "center" }}>
         <Chip
           selected={value.mode === "device"}
           onPress={() => onChange({ ...value, mode: "device" })}

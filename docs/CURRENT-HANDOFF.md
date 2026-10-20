@@ -1,11 +1,11 @@
-# Current handoff · round 2 · 0.2.20/build25 in progress
+# Current handoff · round 2 · 0.2.21/build26 in progress
 
-The owner authorized all five issues in REQUIREMENTS-ROUND-2.md after approving
+The owner authorized all six issues in REQUIREMENTS-ROUND-2.md after approving
 the concept05 b/play preview. Source implements playlist cueing without playback,
 durable Add/Open Library and retry, compact YouTube titles, resize/full screen with
 a stable player instance, and clean transparent in-app/platform icon exports.
 App name and UI palette remain unchanged. Native publication is pending; see
-VERIFICATION.md. Build22 remains the previous public preview until build25 passes.
+VERIFICATION.md. Build22 remains the previous public preview until build26 passes.
 
 190 unit/database tests and the browser journeys pass; Doctor20/20 and iOS Hermes
 export pass. No new native dependency or production table is required. The selected

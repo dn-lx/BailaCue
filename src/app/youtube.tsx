@@ -486,7 +486,7 @@ export default function YouTubeSources() {
           ) : null}
           {items.length ? (
             <>
-              <Row>
+              <Row style={{ justifyContent: "center" }}>
                 <Chip
                   onPress={() =>
                     setSelected(

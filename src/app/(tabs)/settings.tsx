@@ -175,7 +175,7 @@ export default function Settings() {
             <Txt size={13} weight="bold">
               Videos per day
             </Txt>
-            <Row>
+            <Row style={{ justifyContent: "center" }}>
               {[1, 2, 3].map((count) => (
                 <Chip
                   key={count}
@@ -191,7 +191,7 @@ export default function Settings() {
         <Txt size={13} weight="bold">
           Minimum star rating for picks
         </Txt>
-        <Row style={{ flexWrap: "wrap" }}>
+        <Row style={{ flexWrap: "wrap", justifyContent: "center" }}>
           {[1, 2, 3, 4, 5].map((minPickRating) => (
             <Chip
               key={minPickRating}
@@ -222,7 +222,7 @@ export default function Settings() {
         <Txt size={21} weight="display">
           Your weekly goal
         </Txt>
-        <Row style={{ flexWrap: "wrap" }}>
+        <Row style={{ flexWrap: "wrap", justifyContent: "center" }}>
           {[30, 60, 90, 120].map((n) => (
             <Chip
               key={n}
@@ -262,7 +262,7 @@ export default function Settings() {
           Choose local reminders. Quiet hours move reminders to the next allowed
           time.
         </Txt>
-        <Row style={{ flexWrap: "wrap" }}>
+        <Row style={{ flexWrap: "wrap", justifyContent: "center" }}>
           {["S", "M", "T", "W", "T", "F", "S"].map((day, index) => (
             <Chip
               key={index}
@@ -300,7 +300,7 @@ export default function Settings() {
             onChangeText={setQuietEnd}
           />
         </Row>
-        <Row>
+        <Row style={{ justifyContent: "center" }}>
           {(["practice", "picks"] as const).map((kind) => (
             <Chip
               key={kind}

@@ -1,6 +1,6 @@
 # BailaCue · new requirements · round 2
 
-Status: the owner authorized all five round-2 issues. Implemented in 0.2.20/build25 source; native acceptance and publication are pending.
+Status: the owner authorized all six round-2 issues. Implemented in 0.2.21/build26 source; native acceptance and publication are pending.
 
 This is a new list of feedback on Android preview 0.2.17/build22. It is separate
 from the earlier 22-issue requirements and uses a new `R2` numbering sequence.
@@ -145,6 +145,22 @@ must use the same working flow.
   invalid configuration, preview playback failure, retry, duplicate import and
   persistence cases. Distinguish mocked checks from live import evidence.
 - YouTube entries remain online links; adding them does not download video files.
+
+## R2-06 · Center chip groups across the page
+
+**Owner clarification:** Center the chips as a group across the screen, including
+wrapped rows. This request concerns group placement, rather than changing the text
+alignment within each chip.
+
+**Requirement:** Center each chip row within the available screen/card width,
+including the shorter last row when a group wraps. Apply this consistently to
+playback speeds, ratings, dance/source/label filters, Practice and Settings choices,
+import destinations, account modes and playlist-selection actions.
+
+**Acceptance:** Equal free space appears to the left and right of every wrapped
+row. Chips keep natural widths, readable labels, existing touch targets and selection
+behavior. Check narrow phone layouts and both themes. Page headings, form fields,
+playlist content and navigation retain their own alignment.
 
 ## Implementation order and evidence
 

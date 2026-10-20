@@ -198,7 +198,7 @@ export default function Upload() {
               Unrated videos count as 5★ until you choose a rating.
             </Txt>
           ) : null}
-          <Row>
+          <Row style={{ justifyContent: "center" }}>
             {[1, 2, 3, 4, 5].map((n) => (
               <Chip
                 key={n}

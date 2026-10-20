@@ -420,6 +420,12 @@ export function Empty({
   );
 }
 export const layout = StyleSheet.create({
-  wrap: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
+  wrap: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 8,
+  },
   section: { gap: 12 },
 });

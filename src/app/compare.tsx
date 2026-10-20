@@ -101,7 +101,7 @@ function ComparePlayers({
       </View>
       <Card>
         <Txt>{time.toFixed(1)} seconds · Manual alignment</Txt>
-        <Row style={{ flexWrap: "wrap" }}>
+        <Row style={{ flexWrap: "wrap", justifyContent: "center" }}>
           <Button
             onPress={() => {
               if (align()) {
@@ -148,7 +148,7 @@ function ComparePlayers({
         <Button variant="soft" onPress={align}>
           Align practice now
         </Button>
-        <Row style={{ flexWrap: "wrap" }}>
+        <Row style={{ flexWrap: "wrap", justifyContent: "center" }}>
           {[0.5, 0.75, 1].map((rate) => (
             <Chip
               key={rate}

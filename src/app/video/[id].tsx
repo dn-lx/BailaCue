@@ -303,7 +303,7 @@ function Player({ video, uri }: { video: Video; uri: VideoSource }) {
               seek(player, seconds);
             }}
           />
-          <Row style={{ flexWrap: "wrap" }}>
+          <Row style={{ flexWrap: "wrap", justifyContent: "center" }}>
             <Button
               variant={trimming ? "primary" : "soft"}
               disabled={busy}
@@ -375,7 +375,7 @@ function Player({ video, uri }: { video: Video; uri: VideoSource }) {
               +5 sec
             </Button>
           </Row>
-          <Row style={{ flexWrap: "wrap" }}>
+          <Row style={{ flexWrap: "wrap", justifyContent: "center" }}>
             {[0.5, 0.75, 1, 1.25].map((rate) => (
               <Chip
                 key={rate}
@@ -449,7 +449,7 @@ function Player({ video, uri }: { video: Video; uri: VideoSource }) {
                   }}
                 />
               </Row>
-              <Row style={{ flexWrap: "wrap" }}>
+              <Row style={{ flexWrap: "wrap", justifyContent: "center" }}>
                 <Button
                   variant="soft"
                   onPress={() => {

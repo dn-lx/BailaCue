@@ -1,6 +1,6 @@
-# Verification · BailaCue 0.2.20 / build25 · pending native gate
+# Verification · BailaCue 0.2.21 / build26 · pending native gate
 
-Implements R2-01–R2-05 from [round 2](REQUIREMENTS-ROUND-2.md): playlist cue/import,
+Implements R2-01–R2-06 from [round 2](REQUIREMENTS-ROUND-2.md): playlist cue/import,
 durable saves and Open Library, compact titles, resize/full screen with one player,
 and the approved transparent b/play identity. Android publication is pending.
 
@@ -23,7 +23,7 @@ simulator compilation runs separately. Live transfers, physical iPhone playback,
 phone-call interruptions and full TalkBack/VoiceOver review remain manual.
 
 The earlier published [build22 verification](VERIFICATION-0.2.17.md) is historical.
-Do not attribute build25 changes to that APK. No new production database deployment,
+Do not attribute build26 changes to that APK. No new production database deployment,
 main merge or store submission is included.
 
 Build23/tag v0.2.18-preview.23 was withheld before publication for the final transparent lock-screen mark and landscape full-screen-action placement corrections.

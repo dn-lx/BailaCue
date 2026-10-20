@@ -95,7 +95,7 @@ export default function AccountScreen() {
       ) : null}
       {!account.session ? (
         <Card>
-          <Row>
+          <Row style={{ justifyContent: "center" }}>
             {(["login", "register", "recover"] as const).map((m) => (
               <Chip key={m} selected={mode === m} onPress={() => setMode(m)}>
                 {m === "login"
