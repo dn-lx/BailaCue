@@ -251,6 +251,12 @@ async def main():
         elements = await observe("loop-enabled")
         if not any("Loop on" in label(e) for e in elements): raise AssertionError("Loop did not enable")
         report["checks"].append({"check":"Native named section and loop control", "result":"passed"})
+        # Centered destination chips change the card's wrapped height. Bring the
+        # export action clear of Android's gesture edge before tapping; a clipped
+        # bottom-edge hit can launch Recents instead of completing this journey.
+        screen = await controller.get_screen_data()
+        await controller.swipe_coords(screen.width-24,int(screen.height*.78),screen.width-24,int(screen.height*.48),350)
+        await asyncio.sleep(0.8)
         await locate("Export new trimmed video",scrolls=3)
         for _ in range(90):
             elements = await observe("export")
