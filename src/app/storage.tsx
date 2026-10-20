@@ -265,7 +265,7 @@ export default function Storage() {
       }
     >
       <Card>
-        <Badge tone="lime">YOUR ACCOUNTS · YOUR FOLDERS</Badge>
+        <Badge tone="accent">YOUR ACCOUNTS · YOUR FOLDERS</Badge>
         <Txt size={23} weight="display">
           Connect a video home
         </Txt>
@@ -330,7 +330,7 @@ export default function Storage() {
       ) : null}
       {library.connections.map((connection) => (
         <Card key={connection.id}>
-          <Badge tone={connection.connected ? "lime" : "soft"}>
+          <Badge tone={connection.connected ? "accent" : "soft"}>
             {connection.provider === "google-drive"
               ? "GOOGLE DRIVE"
               : "DROPBOX"}
@@ -523,7 +523,7 @@ export default function Storage() {
                   (c) =>
                     c.id === source.connectionId && c.connected && c.writable,
                 )
-                  ? "lime"
+                  ? "accent"
                   : "soft"
               }
             >

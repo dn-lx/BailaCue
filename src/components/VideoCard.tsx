@@ -32,7 +32,7 @@ export function VideoCard({
       <View
         style={{
           height: featured ? 210 : 160,
-          backgroundColor: video.style === "Bachata" ? "#5B3C59" : "#894E45",
+          backgroundColor: video.style === "Bachata" ? t.videoBachata : t.videoSalsa,
           justifyContent: "center",
           alignItems: "center",
         }}
@@ -45,15 +45,15 @@ export function VideoCard({
         ) : null}
         <View
           style={{
-            backgroundColor: "#321D36DD",
+            backgroundColor: "#080D18DD",
             padding: 16,
             borderRadius: 40,
           }}
         >
-          <Icon name="play" color="#FFF6E8" size={26} />
+          <Icon name="play" color="#FFFFFF" size={26} />
         </View>
         <View style={{ position: "absolute", top: 14, left: 14 }}>
-          <Badge tone={video.style === "Bachata" ? "lime" : "coral"}>
+          <Badge tone={video.style === "Bachata" ? "accent" : "primary"}>
             {video.style.toUpperCase()}
           </Badge>
         </View>
@@ -62,13 +62,13 @@ export function VideoCard({
             position: "absolute",
             right: 12,
             bottom: 12,
-            backgroundColor: "#321D36E6",
+            backgroundColor: "#080D18E6",
             borderRadius: 7,
             paddingHorizontal: 8,
             paddingVertical: 4,
           }}
         >
-          <Txt size={12} color="#FFF6E8">
+          <Txt size={12} color="#FFFFFF">
             {formatTime(video.duration)}
           </Txt>
         </View>

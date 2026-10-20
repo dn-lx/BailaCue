@@ -3,7 +3,7 @@
 **Watch. Practise. Repeat.** A private Salsa and Bachata video library for Android
 and iOS, built with React Native, TypeScript and Expo SDK 58.
 
-<img src="assets/icon.png" alt="BailaCue modern dancing-partners icon" width="160" />
+<img src="assets/icon.png" alt="BailaCue blue BC monogram with embedded play button" width="160" />
 
 ## Install Android
 
@@ -28,7 +28,9 @@ live-provider/iOS setup. The release verification records the final native and p
 
 - [Optional numbered filenames](docs/SOURCE-NUMBERING.md): preview, explicitly apply, pause and retry per-file failures. Connecting/refreshing keeps actual filenames. New-upload numbering is off by default.
 - Preview an imported video before choosing its dance style and destination.
-- Modern dancing-partner icon, adaptive icon, splash, brand badges, light/dark themes and accessible controls.
+- Owner-selected blue BC/play icon, black alternate, wordmarks, adaptive icon, splash,
+  coordinated badges and blue/black light/dark themes. [Brand asset inventory](docs/brand/README.md)
+  distinguishes shipped raster artwork from pending vector/transparent/monochrome variants.
 - [Rating-led Daily Picks](docs/DAILY-PICKS.md): one video from each Salsa/Bachata source by default, with unrated videos counted as 5★,
   independent cooldowns, minimum stars and an explicit update-today action.
 - [Product/reliability audit PDF](docs/audits/BailaCue-Audit-2026-10-18.pdf) with prioritized improvements
@@ -103,7 +105,7 @@ npm run build:android
 ```
 
 The script generates Android from Expo config and builds a bundled release-mode APK
-at `artifacts/BailaCue-v0.2.10-build15-preview.apk` with SHA-256. Native media code is
+at `artifacts/BailaCue-v0.2.11-build16-preview.apk` with SHA-256. Native media code is
 committed under `modules/baila-media`; generated root `android/` and `ios/` are ignored.
 The generated internal debug certificate is used for previews; configure your own
 release signing before store publication. Never commit signing keys.

@@ -104,7 +104,7 @@ function TrimHandle({
           width: 12,
           height: 34,
           borderRadius: 4,
-          backgroundColor: t.lime,
+          backgroundColor: t.accent,
           borderWidth: 2,
           borderColor: t.ink,
         }}
@@ -184,7 +184,7 @@ export default function Timeline({
                 bottom: 0,
                 left: (trim.start / (duration || 1)) * width,
                 width: ((trim.end - trim.start) / (duration || 1)) * width,
-                backgroundColor: t.lime,
+                backgroundColor: t.accent,
                 opacity: 0.65,
               }}
             />

@@ -43,7 +43,7 @@ export function VideoArea({
     <View>
       <View
         testID="video-frame"
-        style={{ backgroundColor: "#140D19", height, overflow: "hidden" }}
+        style={{ backgroundColor: "#080D18", height, overflow: "hidden" }}
       >
         {children}
       </View>

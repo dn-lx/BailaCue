@@ -1,3 +1,29 @@
+# Current handoff · BailaCue 0.2.11 (build16)
+
+Owner selected blue-and-black concept03, BC + embedded play triangle. Authorized
+icon/theme implementation and a requirement to keep the complete logo/icon family
+in Git. Only brand work is implemented; the Google Doc's other product issues
+remain awaiting instructions. The Doc was updated and verified with all7 original
+screenshot objects preserved. Do not publish private notes/screenshots to GitHub.
+
+Semantic blue/black light/dark palettes, foreground contrast tokens, selected chips,
+controls, switches, player surfaces, video placeholders and icon/splash/favicon are
+updated. Brand packaging produces20 exports, light/dark wordmarks, badges and manifest
+with dimensions/checksums. Sources and generated concept board committed. SVG logo
+containers are raster-backed, not pure-vector masters. Clean transparent, pure-vector
+and Android themed monochrome versions remain explicitly pending in BR-02.
+Reviewed starter design reference revision:2a2be2b54595ab67768b1f13cc2a0794f5787f64.
+No starter bootstrap, hooks, web runtime, analytics or dependencies were installed.
+
+153 tests/16 suites, type/lint, web export and six browser journeys pass. Targeted
+colour ratios exceed4.5:1; layouts cover7 screens at320/360/412px. Build16 native
+acceptance/publication pending; source pushes and Android prereleases authorized.
+No main merge, store submission, TinyFish, paid services or database/media changes.
+
+Historical build15 handoff follows.
+
+---
+
 # Current handoff · BailaCue 0.2.10 (build15)
 
 Owner changed the requirement: renaming must be an app option, never default.

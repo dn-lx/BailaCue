@@ -48,7 +48,8 @@ export default function Settings() {
             accessibilityLabel="Daily Picks"
             value={p.picksEnabled}
             onValueChange={(picksEnabled) => set({ picksEnabled })}
-            trackColor={{ true: t.primary }}
+            trackColor={{ false: t.border, true: t.primary }}
+            thumbColor={t.onPrimary}
           />
         </Row>
         <Txt color={t.muted} size={13}>
@@ -93,7 +94,8 @@ export default function Settings() {
             accessibilityLabel="One video per dance source or style"
             value={p.onePerStyle !== false}
             onValueChange={(onePerStyle) => set({ onePerStyle })}
-            trackColor={{ true: t.primary }}
+            trackColor={{ false: t.border, true: t.primary }}
+            thumbColor={t.onPrimary}
           />
         </Row>
         <Txt size={13} color={t.muted}>
@@ -391,7 +393,13 @@ export default function Settings() {
         </Txt>
       </Card>
       <Row style={{ justifyContent: "center" }}>
-        <View style={{ backgroundColor: t.plum, borderRadius: 16, padding: 4 }}>
+        <View
+          style={{
+            backgroundColor: t.brandBlack,
+            borderRadius: 16,
+            padding: 4,
+          }}
+        >
           <Mark size={42} />
         </View>
         <View>

@@ -163,7 +163,7 @@ export default function Upload() {
         <View style={{ gap: 20 }}>
           <Card>
             <Row style={{ justifyContent: "space-between" }}>
-              <Badge tone="lime">READY TO ADD</Badge>
+              <Badge tone="accent">READY TO ADD</Badge>
               <Txt size={12} color={t.muted}>
                 {formatTime(media.duration)} ·{" "}
                 {(media.size / 1048576).toFixed(1)} MB

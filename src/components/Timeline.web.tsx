@@ -56,7 +56,7 @@ export default function Timeline({
             pointerEvents: "none",
           }}
         >
-          <style>{`.bailacue-trim::-webkit-slider-thumb { appearance: none; pointer-events: auto; cursor: ew-resize; width: 16px; height: 38px; border-radius: 4px; border: 2px solid ${t.ink}; background: ${t.lime}; } .bailacue-trim::-moz-range-thumb { pointer-events: auto; cursor: ew-resize; width: 16px; height: 38px; border-radius: 4px; border: 2px solid ${t.ink}; background: ${t.lime}; }`}</style>
+          <style>{`.bailacue-trim::-webkit-slider-thumb { appearance: none; pointer-events: auto; cursor: ew-resize; width: 16px; height: 38px; border-radius: 4px; border: 2px solid ${t.ink}; background: ${t.accent}; } .bailacue-trim::-moz-range-thumb { pointer-events: auto; cursor: ew-resize; width: 16px; height: 38px; border-radius: 4px; border: 2px solid ${t.ink}; background: ${t.accent}; }`}</style>
           <div
             style={{
               position: "absolute",
@@ -64,7 +64,7 @@ export default function Timeline({
               height: 6,
               left: `${(trim.start / (duration || 1)) * 100}%`,
               width: `${((trim.end - trim.start) / (duration || 1)) * 100}%`,
-              background: t.lime,
+              background: t.accent,
               opacity: 0.65,
             }}
           />

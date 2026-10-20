@@ -53,7 +53,7 @@ function PreviewPlayer({ uri }: { uri: string }) {
         style={{
           height: 240,
           width: "100%",
-          backgroundColor: "#140D19",
+          backgroundColor: "#080D18",
           borderRadius: 16,
         }}
       />

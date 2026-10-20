@@ -270,7 +270,7 @@ function Player({ video, uri }: { video: Video; uri: VideoSource }) {
             <Button variant="ghost" icon="back" onPress={() => router.back()}>
               Library
             </Button>
-            <Badge tone={video.style === "Bachata" ? "lime" : "coral"}>
+            <Badge tone={video.style === "Bachata" ? "accent" : "primary"}>
               {video.style.toUpperCase()}
             </Badge>
           </Row>
@@ -294,13 +294,13 @@ function Player({ video, uri }: { video: Video; uri: VideoSource }) {
                 position: "absolute",
                 bottom: 15,
                 left: 15,
-                backgroundColor: "#321D36DE",
+                backgroundColor: "#080D18DE",
                 borderRadius: 16,
                 paddingHorizontal: 20,
                 paddingVertical: 5,
               }}
             >
-              <Txt size={38} color="#D8F17D" weight="display">
+              <Txt size={38} color="#C7DCFF" weight="display">
                 {beat}
               </Txt>
             </View>
@@ -584,7 +584,7 @@ function Player({ video, uri }: { video: Video; uri: VideoSource }) {
             ) : null}
             {exported ? (
               <View style={{ gap: 12 }}>
-                <Badge tone="lime">NEW CLIP READY</Badge>
+                <Badge tone="accent">NEW CLIP READY</Badge>
                 <Txt size={13}>
                   Your new MP4 is saved in your library. You can also save a
                   copy to Photos or Files.
@@ -889,7 +889,7 @@ function Player({ video, uri }: { video: Video; uri: VideoSource }) {
         <View
           style={{
             flex: 1,
-            backgroundColor: "#140D19AA",
+            backgroundColor: "#080D18AA",
             justifyContent: "center",
             padding: 25,
           }}
@@ -917,7 +917,7 @@ function Player({ video, uri }: { video: Video; uri: VideoSource }) {
         <View
           style={{
             flex: 1,
-            backgroundColor: "#140D19",
+            backgroundColor: "#080D18",
             justifyContent: "center",
           }}
         >
@@ -940,11 +940,11 @@ function Player({ video, uri }: { video: Video; uri: VideoSource }) {
               top: 50,
               right: 20,
               padding: 16,
-              backgroundColor: "#321D36",
+              backgroundColor: "#080D18",
               borderRadius: 30,
             }}
           >
-            <Txt color="#FFF6E8">Close</Txt>
+            <Txt color="#FFFFFF">Close</Txt>
           </Pressable>
         </View>
       </Modal>

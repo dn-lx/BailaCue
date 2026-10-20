@@ -286,7 +286,7 @@ export default function Transfer() {
     >
       {confirmedId ? (
         <Card>
-          <Badge tone="lime">UPLOAD CONFIRMED</Badge>
+          <Badge tone="accent">UPLOAD CONFIRMED</Badge>
           <Txt>
             Your video is saved online in{" "}
             {

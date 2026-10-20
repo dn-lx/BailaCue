@@ -1,8 +1,36 @@
 # UI/UX and icon improvement requirements
 
-Status: owner-requested requirements, 2026-10-19; implementation pending. No redesign
-or icon change has been applied. App name remains **BailaCue**. The owner finds the current icon too
-generic and wants a more distinctive identity connected to dancing.
+Status: owner selected concept **03 — BC + play** on 2026-10-20 and authorized the
+icon and blue-and-black theme implementation. App name remains **BailaCue**.
+The remaining product/UX work is still pending separate implementation instructions.
+
+## Approved brand and Git asset requirement
+
+**BR-01:** Use concept 03's BC monogram with its embedded play triangle as the app
+icon and brand symbol. Use electric blue `#1465FF`, near-black `#080D18` and white;
+support readable light/dark UI palettes. Keep text contrast, source distinctions,
+button states and player controls clear throughout the app.
+
+**BR-02:** Commit all maintained logo/icon variants to this Git repository, including
+their source artwork, exports and regeneration instructions. The complete delivery
+inventory must include the primary symbol, light/dark and monochrome versions,
+horizontal/stacked wordmarks, transparent logos, Android launcher/adaptive/themed
+monochrome artwork, iOS/app-store artwork, splash, favicons and coordinated badges.
+Keep a manifest with paths, format, dimensions, checksums and implementation status.
+Never describe an SVG embedding PNG artwork as an editable vector master. A reviewed
+pure-vector master, clean transparent artwork and Android themed monochrome assets
+remain required follow-up until explicitly delivered and verified.
+
+Acceptance:
+
+- [ ] Every listed variant has a committed source/export or an explicitly recorded
+      pending status; no asset exists only in chat or on a local machine.
+- [ ] Regeneration preserves the approved mark and produces platform-compatible
+      sizes, opacity and safe margins. Changes to generated exports are reproducible.
+- [ ] The app icon, splash, in-app mark, badges and both themes use the chosen identity.
+- [ ] Existing app behavior, video editing/export and cloud destinations are preserved.
+
+Current files and remaining variants: [brand asset inventory](brand/README.md).
 
 ## Required use of Agent Project Starter
 
@@ -19,8 +47,8 @@ Acceptance:
 - [ ] Record the reviewed starter revision and the design guidance used.
 - [ ] Capture current screens, define visual acceptance criteria and document the
       improved shared tokens/components and key user journeys.
-- [ ] Develop three distinctive dance-icon concepts and deliver the selected icon's
-      editable master and platform assets.
+- [x] Present icon concepts and record the owner's choice: blue-and-black concept 03.
+- [ ] Complete the selected icon's full editable master and platform asset inventory.
 - [ ] Implement the UI improvements and verify alignment, large text, accessibility
       and important native video workflows with before/after evidence.
 
@@ -40,10 +68,8 @@ starter's full bootstrap or replace this application's architecture.
 4. Show why a Daily Pick was chosen and clearly distinguish daily recommendations
    from the Practice timer and its video list. Currently Practice shows the first
    five library videos; adopting recommendations there needs its own product decision.
-5. Explore three original icon concepts connected to partner dancing, rhythm and
-   the BailaCue identity. Prefer a distinct silhouette or monogram with motion over
-   a generic play button or stock dancer. Retain a clear shape at launcher size;
-   compare candidates on actual phone home screens, not only on a large design board.
+5. Preserve the selected concept 03 BC/play symbol and blue/black identity. Retain
+   a clear shape at launcher size and verify it on actual phone home screens.
 6. For the chosen concept, deliver an editable vector master plus Android adaptive
    and monochrome assets, iOS artwork, splash/favicon and coordinated brand badges.
    Check platform masks, safe areas, light/dark presentation and small-size legibility.
@@ -92,6 +118,6 @@ React Native components. None replaces product design judgment or device testing
 The upstream files were inspected as references only. No starter scripts, external
 design packs, hooks or dependencies have been installed or executed in BailaCue.
 
-The next design deliverable is a few representative screen mockups and three icon
-candidates, with a clear reason for each direction. These are pending deliverables,
-not completed assets or a request to replace the app's existing architecture.
+The owner has selected the icon. Remaining broader UX mockups, production vector
+artwork and verification are tracked separately; choosing the mark is not a request
+to replace the existing application architecture.

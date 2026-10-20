@@ -183,7 +183,7 @@ export function Button({
 }: React.PropsWithChildren<{
   onPress: () => void;
   icon?: IconName;
-  variant?: "primary" | "soft" | "ghost" | "lime";
+  variant?: "primary" | "soft" | "ghost" | "accent";
   disabled?: boolean;
   loading?: boolean;
   style?: ViewStyle;
@@ -193,18 +193,16 @@ export function Button({
   const bg =
     variant === "primary"
       ? t.primary
-      : variant === "lime"
-        ? t.lime
+      : variant === "accent"
+        ? t.accent
         : variant === "soft"
           ? t.soft
           : "transparent";
   const color =
     variant === "primary"
-      ? t.dark
-        ? t.plum
-        : "#FFFFFF"
-      : variant === "lime"
-        ? t.plum
+      ? t.onPrimary
+      : variant === "accent"
+        ? t.onAccent
         : t.ink;
   return (
     <Pressable
@@ -264,12 +262,12 @@ export function Chip({
         paddingHorizontal: 15,
         paddingVertical: 11,
         borderRadius: 24,
-        backgroundColor: selected ? t.ink : t.soft,
+        backgroundColor: selected ? t.primary : t.soft,
         borderWidth: 1,
-        borderColor: selected ? t.ink : t.border,
+        borderColor: selected ? t.primary : t.border,
       }}
     >
-      <Txt size={13} weight="medium" color={selected ? t.background : t.ink}>
+      <Txt size={13} weight="medium" color={selected ? t.onPrimary : t.ink}>
         {children}
       </Txt>
     </Pressable>
@@ -277,8 +275,8 @@ export function Chip({
 }
 export function Badge({
   children,
-  tone = "coral",
-}: React.PropsWithChildren<{ tone?: "coral" | "lime" | "soft" }>) {
+  tone = "primary",
+}: React.PropsWithChildren<{ tone?: "primary" | "accent" | "soft" }>) {
   const t = useTheme();
   return (
     <View
@@ -288,13 +286,20 @@ export function Badge({
         borderRadius: 8,
         paddingHorizontal: 9,
         paddingVertical: 5,
-        backgroundColor: tone === "soft" ? t.soft : t[tone],
+        backgroundColor:
+          tone === "soft"
+            ? t.soft
+            : tone === "primary"
+              ? t.brandBlue
+              : t.accent,
       }}
     >
       <Txt
         size={10}
         weight="bold"
-        color={tone === "soft" ? t.ink : t.plum}
+        color={
+          tone === "soft" ? t.ink : tone === "primary" ? t.onBrand : t.onAccent
+        }
         style={{ letterSpacing: 1.2 }}
       >
         {children}

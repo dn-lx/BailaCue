@@ -80,7 +80,7 @@ export function CloudVideoControls({
   }
   return (
     <Card>
-      <Badge tone={video.offlineUri || !video.remote ? "lime" : "soft"}>
+      <Badge tone={video.offlineUri || !video.remote ? "accent" : "soft"}>
         {video.remote
           ? video.offlineUri && video.storagePreference === "offline"
             ? "PHONE COPY"

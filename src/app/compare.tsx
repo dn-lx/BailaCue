@@ -62,7 +62,7 @@ function ComparePlayers({
           <Txt weight="bold">Reference</Txt>
           <VideoView
             player={a}
-            style={{ height: 230, width: "100%", backgroundColor: "#140D19" }}
+            style={{ height: 230, width: "100%", backgroundColor: "#080D18" }}
             contentFit="contain"
             nativeControls={false}
           />
@@ -72,7 +72,7 @@ function ComparePlayers({
           <View style={{ transform: [{ scaleX: mirror ? -1 : 1 }] }}>
             <VideoView
               player={b}
-              style={{ height: 230, width: "100%", backgroundColor: "#140D19" }}
+              style={{ height: 230, width: "100%", backgroundColor: "#080D18" }}
               contentFit="contain"
               nativeControls={false}
             />

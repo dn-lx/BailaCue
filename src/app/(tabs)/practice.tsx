@@ -139,7 +139,7 @@ export default function Practice() {
             height: 230,
             borderRadius: 120,
             borderWidth: 9,
-            borderColor: t.coral,
+            borderColor: t.brandBlue,
             alignItems: "center",
             justifyContent: "center",
           }}

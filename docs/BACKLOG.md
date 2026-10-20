@@ -112,6 +112,11 @@ server-generated picks and remote new-video push remain implementation work.
 - [ ] **UX-01:** Use the owner's [Agent Project Starter](https://github.com/dn-lx/agent-project-starter)
       design workflow for a focused UI/UX audit, improved screens/components and a
       more distinctive dance icon, adapted to the existing Expo/React Native app.
+- [x] **BR-01 decision:** Owner chose blue/black concept 03 (BC + play) for the icon
+      and authorized the matching app theme on 2026-10-20.
+- [ ] **BR-02:** Maintain the complete logo/icon family in Git with source artwork,
+      platform exports, manifest and generation instructions; finish pure-vector,
+      clean transparent and Android themed monochrome assets. See [brand inventory](brand/README.md).
 
 Requirements and acceptance: [YOUTUBE-REQUIREMENTS.md](YOUTUBE-REQUIREMENTS.md).
 Required design process and acceptance: [UI-UX-DIRECTION.md](UI-UX-DIRECTION.md).

@@ -1,0 +1,156 @@
+{
+  "concept": "03 — BC + play",
+  "sources": [
+    "assets/brand/bc-play-blue-source.png",
+    "assets/brand/bc-play-black-source.png"
+  ],
+  "formatNote": "Image-generated PNG masters. Logo SVGs embed raster artwork plus editable wordmark text; they are not pure-vector masters.",
+  "assets": [
+    {
+      "path": "assets/icon.png",
+      "format": "png",
+      "width": 1024,
+      "height": 1024,
+      "sha256": "25f474a92c44fbe7c243af72c9e1ef0b6b66664a3632fe3449c41fe67487a6af"
+    },
+    {
+      "path": "assets/adaptive-icon.png",
+      "format": "png",
+      "width": 1024,
+      "height": 1024,
+      "sha256": "25f474a92c44fbe7c243af72c9e1ef0b6b66664a3632fe3449c41fe67487a6af"
+    },
+    {
+      "path": "assets/splash-icon.png",
+      "format": "png",
+      "width": 512,
+      "height": 512,
+      "sha256": "095cc1d58d76e8a1a35967e9cf9a7de37b1f772120fa2ccb6e97ba1f1016e00d"
+    },
+    {
+      "path": "assets/favicon.png",
+      "format": "png",
+      "width": 64,
+      "height": 64,
+      "sha256": "27ec9959c675ce9d78474a5337fa098dcbe38cfe3dd582697fa75123cd0c2fb3"
+    },
+    {
+      "path": "assets/brand/icon-black.png",
+      "format": "png",
+      "width": 1024,
+      "height": 1024,
+      "sha256": "f9506dd26d8bf395803ae5fabae62fb78fc6ca11955d2306e345cd50d2fdc23d"
+    },
+    {
+      "path": "assets/icon.svg",
+      "format": "svg",
+      "width": 1024,
+      "height": 1024,
+      "sha256": "861346b16bc54326da11f6524f3cec774a09fdea01940fcfa06af4c5bbf42ae0"
+    },
+    {
+      "path": "assets/brand/logo-horizontal-light.svg",
+      "format": "svg",
+      "width": 1024,
+      "height": 256,
+      "sha256": "d3a764cb7b62c210b7dbf5a4e2e900548f7bce33167aa4e54e5dfed1c8bd94cd"
+    },
+    {
+      "path": "assets/brand/logo-horizontal-light.png",
+      "format": "png",
+      "width": 1024,
+      "height": 256,
+      "sha256": "4c193713908305cd86fa5473bc9c6bf659e1400f435a3ba3adcf90a46529d9ea"
+    },
+    {
+      "path": "assets/brand/logo-stacked-light.svg",
+      "format": "svg",
+      "width": 640,
+      "height": 640,
+      "sha256": "6ea40d3c2512074b435824e5994a6f6abbdb1c7743d7eaf1bf09117f126cf08c"
+    },
+    {
+      "path": "assets/brand/logo-stacked-light.png",
+      "format": "png",
+      "width": 640,
+      "height": 640,
+      "sha256": "463904bde68d3435be9d55c6bba63a199aac494f033bef1a428780556d376be3"
+    },
+    {
+      "path": "assets/brand/logo-horizontal-dark.svg",
+      "format": "svg",
+      "width": 1024,
+      "height": 256,
+      "sha256": "1a76421886d9f5a2ae64edc30af08c50669e31ad84e95f088120d07b65211a18"
+    },
+    {
+      "path": "assets/brand/logo-horizontal-dark.png",
+      "format": "png",
+      "width": 1024,
+      "height": 256,
+      "sha256": "9ed188d710f5486cd13f7c134a6f73bb4301be3e71a3294763d90a80dc09513b"
+    },
+    {
+      "path": "assets/brand/logo-stacked-dark.svg",
+      "format": "svg",
+      "width": 640,
+      "height": 640,
+      "sha256": "d3f1c6d4dd94398c7b4c3979d2427979896d3b8538eb8c5a647ed0545f93e32f"
+    },
+    {
+      "path": "assets/brand/logo-stacked-dark.png",
+      "format": "png",
+      "width": 640,
+      "height": 640,
+      "sha256": "5b8cec4fe6879af37b1c58e2ce43e2b746cdde9169fdd539c8e32639997c2c5f"
+    },
+    {
+      "path": "docs/brand/badge-salsa.svg",
+      "format": "svg",
+      "width": 200,
+      "height": 56,
+      "sha256": "c07d9c3dfb0dd69866b397cb24f0294487649e78621f90e5b978429499ebf76a"
+    },
+    {
+      "path": "docs/brand/badge-bachata.svg",
+      "format": "svg",
+      "width": 200,
+      "height": 56,
+      "sha256": "2aef619774a89cf0a022aab1b43f9d8acfc2daf7df854478bb1f28f8dd16ea26"
+    },
+    {
+      "path": "docs/brand/badge-practising.svg",
+      "format": "svg",
+      "width": 200,
+      "height": 56,
+      "sha256": "fbea87656ab799d73578d4eaceb0fae233d6392aa8a3851f19675f6c02ecb73a"
+    },
+    {
+      "path": "docs/brand/badge-learned.svg",
+      "format": "svg",
+      "width": 200,
+      "height": 56,
+      "sha256": "08bcebbf70f5db6627ee2dc63e2dfb5e8de68687f2a0c85d40bb1be0ec1e204c"
+    },
+    {
+      "path": "docs/brand/identity.svg",
+      "format": "svg",
+      "width": 1200,
+      "height": 720,
+      "sha256": "340b3adbbaae93d3ee4d3e832532c5d469372239273d62886716aacb7201c2fd"
+    },
+    {
+      "path": "docs/brand/identity.png",
+      "format": "png",
+      "width": 1200,
+      "height": 720,
+      "sha256": "409c776896b03dba95bc893b2e1caac60ef87c61874f1adcdad15cfe0399da46"
+    }
+  ],
+  "pending": [
+    "Pure-vector symbol and wordmark masters",
+    "Clean transparent logo family",
+    "Monochrome logo and Android themed-icon artwork",
+    "Store-listing and social exports at confirmed distribution sizes"
+  ]
+}

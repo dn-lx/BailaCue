@@ -162,7 +162,7 @@ export default function AccountScreen() {
       ) : (
         <>
           <Card>
-            <Badge tone="lime">SIGNED IN</Badge>
+            <Badge tone="accent">SIGNED IN</Badge>
             <Txt size={21} weight="display">
               Sync your video library
             </Txt>

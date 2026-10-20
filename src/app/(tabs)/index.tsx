@@ -50,13 +50,19 @@ export default function Today() {
       title="BailaCue."
       subtitle="Watch. Practise. Repeat."
       action={
-        <View style={{ padding: 6, backgroundColor: t.plum, borderRadius: 18 }}>
+        <View
+          style={{
+            padding: 6,
+            backgroundColor: t.brandBlack,
+            borderRadius: 18,
+          }}
+        >
           <Mark />
         </View>
       }
     >
       <LinearGradient
-        colors={["#43263F", "#321D36"]}
+        colors={[t.heroStart, t.brandBlack]}
         style={{ padding: 25, borderRadius: 28, overflow: "hidden", gap: 17 }}
       >
         <View
@@ -70,21 +76,21 @@ export default function Today() {
         >
           <Mark size={240} />
         </View>
-        <Badge tone="lime">A LITTLE EVERY DAY</Badge>
+        <Badge tone="accent">A LITTLE EVERY DAY</Badge>
         <Txt
           size={35}
-          color="#FFF6E8"
+          color="#FFFFFF"
           weight="display"
           style={{ maxWidth: 270, lineHeight: 40 }}
         >
           Find your rhythm.{"\n"}Make it yours.
         </Txt>
-        <Txt color="#E5D3DF" style={{ maxWidth: 290 }}>
+        <Txt color={t.heroMuted} style={{ maxWidth: 290 }}>
           Your moves, your music, your own pace. Turn a moment from class into a
           little daily progress.
         </Txt>
         <Button
-          variant="lime"
+          variant="accent"
           icon={library.videos.length ? "play" : "plus"}
           style={{ alignSelf: "flex-start" }}
           onPress={() =>
