@@ -1,19 +1,35 @@
 import { effectiveRating, isUnrated } from "./ratings";
 import { sourceStyle } from "./numbering";
+import { matchesLabels } from "./labels";
 import { localDay } from "./practice";
 import type { Library, Video } from "./types";
 const DAY = 86400000;
 export const minimumPickRating = (library: Library) =>
   Math.max(1, Math.min(5, library.preferences.minPickRating ?? 1));
 const eligible = (library: Library, video: Video) =>
-  video.available && effectiveRating(video) >= minimumPickRating(library);
+  video.available &&
+  (!video.youtube ||
+    (library.preferences.includeYouTube && video.youtube.embedAllowed)) &&
+  effectiveRating(video) >= minimumPickRating(library) &&
+  (!library.preferences.requirePickLabels ||
+    matchesLabels(
+      video.labels,
+      library.preferences.labels,
+      library.preferences.labelMatch,
+    )) &&
+  (!library.preferences.pickSourceIds?.length ||
+    library.preferences.pickSourceIds.some(
+      (id) =>
+        video.remote?.sourceIds.includes(id) ||
+        video.youtube?.sourceIds.includes(id),
+    ));
 const selectionKey = (library: Library) => {
   const p = library.preferences;
   const sources = dailySlots(library)
     .map((s) => `${s.key}:${s.style}`)
     .sort()
     .join(",");
-  return `source-rating-v2:${p.onePerStyle !== false ? [...new Set(p.styles)].sort().join(",") : `total-${p.count}`}:${minimumPickRating(library)}:${sources}`;
+  return `dance-rating-v3:${p.onePerStyle !== false ? [...new Set(p.styles)].sort().join(",") : `total-${p.count}`}:${minimumPickRating(library)}:${sources}:${p.pickMix ?? "dance"}:${(p.pickSourceIds ?? []).slice().sort().join(",")}:${p.labels.slice().sort().join(",")}:${p.labelMatch ?? "any"}:${!!p.requirePickLabels}:${!!p.includeYouTube}`;
 };
 export function rankCandidates(
   library: Library,
@@ -50,18 +66,12 @@ export function rankCandidates(
       const score =
         matches.length * 12 +
         (styleMatch ? 8 : 0) +
-        (video.status === "To learn"
-          ? 8
-          : video.status === "Practising"
-            ? 6
-            : -8) +
         (!video.lastPractisedAt ? 6 : 0) +
-        Math.min(daysSince, 30) / 3 +
-        (library.feedback[video.id] ?? 0) * 6;
+        Math.min(daysSince, 30) / 3;
       return {
         video,
         score,
-        reason: `${isUnrated(video) ? "Unrated (counts as 5-star)" : `${video.importance}-star`} ${video.style} · ${matches.length ? `Matches your ${matches[0].toLowerCase()} preference.` : video.status === "Learned" ? "A familiar move for review." : "Chosen for your practice mix."}`,
+        reason: `${isUnrated(video) ? "Unrated (counts as 5-star)" : `${video.importance}-star`} ${video.style} · ${matches.length ? `Matches your ${matches[0].toLowerCase()} preference.` : "Chosen for your practice mix and recency."}`,
       };
     })
     .sort(
@@ -80,7 +90,20 @@ export type DailySlot = {
 export function dailySlots(library: Library): DailySlot[] {
   return [...new Set(library.preferences.styles)].flatMap<DailySlot>(
     (style) => {
-      const sources = library.sources.filter((s) => sourceStyle(s) === style);
+      if (library.preferences.pickMix !== "source")
+        return [{ key: `style:${style}`, name: style, style }];
+      const sources = [
+        ...library.sources.map((s) => ({ ...s, style: sourceStyle(s) })),
+        ...(library.youtubeSources ?? []).map((s) => ({
+          ...s,
+          style: s.defaultStyle,
+        })),
+      ].filter(
+        (s) =>
+          s.style === style &&
+          (!library.preferences.pickSourceIds?.length ||
+            library.preferences.pickSourceIds.includes(s.id)),
+      );
       return sources.length
         ? sources.map((source) => ({
             key: `source:${source.id}`,
@@ -94,7 +117,8 @@ export function dailySlots(library: Library): DailySlot[] {
 }
 export const belongsToSlot = (video: Video, slot: DailySlot) =>
   slot.sourceId
-    ? !!video.remote?.sourceIds.includes(slot.sourceId)
+    ? !!video.remote?.sourceIds.includes(slot.sourceId) ||
+      !!video.youtube?.sourceIds.includes(slot.sourceId)
     : video.style === slot.style;
 export function choosePicks(library: Library, now = new Date()): string[] {
   let candidates = rankCandidates(library, now);

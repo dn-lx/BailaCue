@@ -1,3 +1,4 @@
+import { RatingStars } from "../../components/VideoDetails";
 import { useEffect } from "react";
 import { View, AppState } from "react-native";
 import { router } from "expo-router";
@@ -145,7 +146,9 @@ export default function Today() {
           </Txt>
           <Txt size={13} color={t.muted}>
             {library.preferences.onePerStyle !== false
-              ? "One from each dance source · unrated counts as 5★"
+              ? library.preferences.pickMix === "source"
+                ? "One per selected source · unrated counts as 5★"
+                : "One per dance · unrated counts as 5★"
               : "Your highest-rated eligible videos"}
           </Txt>
         </View>
@@ -204,49 +207,7 @@ export default function Today() {
                 )?.reason
               }
             </Txt>
-            <Row style={{ flexWrap: "wrap" }}>
-              <Button
-                variant="soft"
-                onPress={() =>
-                  update((l) => ({
-                    ...l,
-                    feedback: {
-                      ...l.feedback,
-                      [video.id]: Math.min(3, (l.feedback[video.id] ?? 0) + 1),
-                    },
-                  }))
-                }
-              >
-                More like this
-              </Button>
-              <Button
-                variant="ghost"
-                onPress={() =>
-                  update((l) => ({
-                    ...l,
-                    feedback: {
-                      ...l.feedback,
-                      [video.id]: Math.max(-3, (l.feedback[video.id] ?? 0) - 1),
-                    },
-                  }))
-                }
-              >
-                Less like this
-              </Button>
-              <Button
-                variant="ghost"
-                onPress={() =>
-                  update((l) => ({
-                    ...l,
-                    videos: l.videos.map((v) =>
-                      v.id === video.id ? { ...v, status: "Learned" } : v,
-                    ),
-                  }))
-                }
-              >
-                Already learned
-              </Button>
-            </Row>
+            <RatingStars video={video} />
           </View>
         ))
       ) : (

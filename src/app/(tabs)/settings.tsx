@@ -1,3 +1,6 @@
+import { danceTypes } from "../../core/dances";
+import { LabelPicker } from "../../components/LabelPicker";
+import { libraryLabels } from "../../core/labels";
 import { router } from "expo-router";
 import { useState } from "react";
 import { View, Switch } from "react-native";
@@ -23,7 +26,7 @@ import {
 import { reminderSchedule } from "../../core/reminders";
 import { unlock } from "../../services/lock";
 import { refreshDailyPicks } from "../../core/recommendations";
-import type { Preferences, DanceStyle } from "../../core/types";
+import type { Preferences } from "../../core/types";
 export default function Settings() {
   const { library, update } = useLibrary();
   const t = useTheme();
@@ -32,7 +35,6 @@ export default function Settings() {
   const [reminderTime, setReminderTime] = useState(library.reminders.time);
   const [quietStart, setQuietStart] = useState(library.reminders.quietStart);
   const [quietEnd, setQuietEnd] = useState(library.reminders.quietEnd);
-  const [labels, setLabels] = useState(p.labels.join(", "));
   function set(changes: Partial<Preferences>) {
     update((l) => ({ ...l, preferences: { ...l.preferences, ...changes } }));
   }
@@ -53,45 +55,110 @@ export default function Settings() {
           />
         </Row>
         <Txt color={t.muted} size={13}>
-          Your star ratings lead each new selection. Labels, learning status and
-          recency break ties. Recent picks get a rest when another video is
-          available.
+          Your star ratings lead each new selection. Labels and recency break
+          ties. Recent picks get a rest when another video is available.
         </Txt>
         <View style={layout.wrap}>
-          {(["Bachata", "Salsa", "Other"] as DanceStyle[]).map((s) => (
+          {danceTypes(library)
+            .map((d) => d.name)
+            .map((s) => (
+              <Chip
+                key={s}
+                selected={p.styles.includes(s)}
+                onPress={() =>
+                  set({
+                    styles: p.styles.includes(s)
+                      ? p.styles.filter((x) => x !== s)
+                      : [...p.styles, s],
+                  })
+                }
+              >
+                {s}
+              </Chip>
+            ))}
+        </View>
+        <Row>
+          <Txt style={{ flex: 1 }}>Include YouTube in Daily Picks</Txt>
+          <Switch
+            accessibilityLabel="Include YouTube in Daily Picks"
+            value={!!p.includeYouTube}
+            onValueChange={(includeYouTube) => set({ includeYouTube })}
+            trackColor={{ true: t.primary, false: t.border }}
+            thumbColor={t.onPrimary}
+          />
+        </Row>
+        <LabelPicker
+          label="Favourite labels"
+          value={p.labels}
+          options={libraryLabels(library)}
+          onChange={(labels) => set({ labels })}
+        />
+        <Row>
+          <Txt>Require selected labels</Txt>
+          <Switch
+            accessibilityLabel="Require selected labels"
+            value={!!p.requirePickLabels}
+            onValueChange={(requirePickLabels) => set({ requirePickLabels })}
+            trackColor={{ true: t.primary }}
+            thumbColor={t.onPrimary}
+          />
+        </Row>
+        <View style={layout.wrap}>
+          {(["any", "all"] as const).map((labelMatch) => (
             <Chip
-              key={s}
-              selected={p.styles.includes(s)}
-              onPress={() =>
-                set({
-                  styles: p.styles.includes(s)
-                    ? p.styles.filter((x) => x !== s)
-                    : [...p.styles, s],
-                })
-              }
+              key={labelMatch}
+              selected={(p.labelMatch ?? "any") === labelMatch}
+              onPress={() => set({ labelMatch })}
             >
-              {s}
+              Match {labelMatch} label
             </Chip>
           ))}
         </View>
-        <Field
-          label="Favourite labels"
-          placeholder="Footwork, Musicality"
-          value={labels}
-          onChangeText={setLabels}
-          onBlur={() =>
-            set({
-              labels: labels
-                .split(",")
-                .map((x) => x.trim())
-                .filter(Boolean),
-            })
-          }
-        />
+        <Txt size={13} weight="bold">
+          Daily mix
+        </Txt>
+        <View style={layout.wrap}>
+          {(["dance", "source"] as const).map((pickMix) => (
+            <Chip
+              key={pickMix}
+              selected={(p.pickMix ?? "dance") === pickMix}
+              onPress={() => set({ pickMix })}
+            >
+              {pickMix === "dance"
+                ? "One per dance"
+                : "One per selected source"}
+            </Chip>
+          ))}
+        </View>
+        <View style={layout.wrap}>
+          <Chip
+            selected={!p.pickSourceIds?.length}
+            onPress={() => set({ pickSourceIds: [] })}
+          >
+            All sources
+          </Chip>
+          {[...library.sources, ...(library.youtubeSources ?? [])].map(
+            (source) => (
+              <Chip
+                key={source.id}
+                selected={p.pickSourceIds?.includes(source.id)}
+                onPress={() =>
+                  set({
+                    pickSourceIds: p.pickSourceIds?.includes(source.id)
+                      ? p.pickSourceIds.filter((x) => x !== source.id)
+                      : [...(p.pickSourceIds ?? []), source.id],
+                  })
+                }
+              >
+                {source.name}
+              </Chip>
+            ),
+          )}
+        </View>
         <Row style={{ justifyContent: "space-between" }}>
-          <Txt style={{ flex: 1 }}>One video per dance source or style</Txt>
+          <Txt style={{ flex: 1 }}>One video per selected dance or source</Txt>
           <Switch
-            accessibilityLabel="One video per dance source or style"
+            accessibilityLabel="One video per selected dance or source"
             value={p.onePerStyle !== false}
             onValueChange={(onePerStyle) => set({ onePerStyle })}
             trackColor={{ false: t.border, true: t.primary }}
@@ -100,7 +167,7 @@ export default function Settings() {
         </Row>
         <Txt size={13} color={t.muted}>
           {p.onePerStyle !== false
-            ? "Select Salsa and Bachata for one video from each matching source. Without a source, phone videos use their dance style. Unrated videos count as 5★ until you rate them."
+            ? "Select your dances for one video each. Advanced source mode offers one per chosen folder or playlist. Unrated videos count as 5★ until you rate them."
             : "Choose the total number of videos for your daily selection."}
         </Txt>
         {p.onePerStyle === false ? (
@@ -366,6 +433,9 @@ export default function Settings() {
             {source.error ? <Txt size={12}>{source.error}</Txt> : null}
           </View>
         ))}
+        <Button variant="soft" onPress={() => router.push("/youtube")}>
+          Manage YouTube playlists
+        </Button>
         <Button icon="folder" onPress={() => router.push("/storage")}>
           Manage video storage
         </Button>

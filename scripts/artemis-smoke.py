@@ -178,16 +178,43 @@ async def main():
                 if b["bottom"] > b["top"] >= 0 and b["bottom"] <= controller.ctx.device.device_height:
                     return element, b
             raise AssertionError(f"Native control {text} is not visible")
-        await locate("Compact video",scrolls=2)
-        grip, b = await control("Resize video area", "player-compact")
-        if "170 pixels tall" not in label(grip): raise AssertionError("Compact video size was not applied")
-        await controller.swipe_coords((b["left"]+b["right"])//2,(b["top"]+b["bottom"])//2,(b["left"]+b["right"])//2,(b["top"]+b["bottom"])//2+90,600)
+        grip, b = await control("Resize video area", "player-original-size")
+        original_height = re.search(r"(\d+) pixels tall", label(grip))
+        if not original_height: raise AssertionError("Video grip did not expose its height")
+        original_height = int(original_height.group(1))
+        x,y = (b["left"]+b["right"])//2,(b["top"]+b["bottom"])//2
+        await controller.swipe_coords(x,y,x,y+60,600)
         await asyncio.sleep(1)
-        grip, _ = await control("Resize video area", "player-resized")
+        grip, b = await control("Resize video area", "player-resized")
         height = re.search(r"(\d+) pixels tall", label(grip))
-        if not height or int(height.group(1)) <= 170: raise AssertionError("Dragging the native video grip did not increase its height")
-        report["checks"].append({"check":"Native player size preset and drag resizing", "result":"passed", "dragged_height":int(height.group(1))})
-        await locate("Standard video",scrolls=2)
+        if not height or int(height.group(1)) <= original_height: raise AssertionError("Dragging the native video grip did not increase its height")
+        report["checks"].append({"check":"Native player drag resizing and accessible height", "result":"passed", "dragged_height":int(height.group(1))})
+        x,y=(b["left"]+b["right"])//2,(b["top"]+b["bottom"])//2
+        await controller.swipe_coords(x,y,x,y-60,600)
+        async def top():
+            for _ in range(5):
+                screen=await controller.get_screen_data()
+                await controller.swipe_coords(screen.width//2,int(screen.height*.28),screen.width//2,int(screen.height*.75),200)
+        await top()
+        grip, b=await control("Resize video area","mirror-normal")
+        from PIL import Image, ImageChops, ImageStat
+        normal=Image.open(OUT/"mirror-normal.png").convert("RGB")
+        density=float(subprocess.run(["adb","-s",os.environ.get("ARTEMIS_DEVICE_ID","emulator-5554"),"shell","wm","density"],check=True,capture_output=True,text=True).stdout.strip().split()[-1])/160
+        h=round(original_height*density)
+        box=(12,max(0,b["top"]-h)+12,normal.width-12,b["top"]-12)
+        normal=normal.crop(box)
+        await locate("Mirror",scrolls=3,exact=True)
+        await top();await observe("mirror-reversed")
+        mirrored=Image.open(OUT/"mirror-reversed.png").convert("RGB").crop(box)
+        reverse=mirrored.transpose(Image.Transpose.FLIP_LEFT_RIGHT)
+        error=lambda a,b:sum(ImageStat.Stat(ImageChops.difference(a,b)).mean)/3
+        same_error=error(normal,mirrored);mirror_error=error(normal,reverse)
+        if same_error<15 or mirror_error>same_error*.5: raise AssertionError(f"Mirror did not reverse native video pixels: normal={same_error:.2f}, reversed={mirror_error:.2f}")
+        await locate("Mirror",scrolls=3,exact=True)
+        await top();await observe("mirror-restored")
+        restored=Image.open(OUT/"mirror-restored.png").convert("RGB").crop(box)
+        if error(normal,restored)>10: raise AssertionError("Mirror did not restore the original native frame")
+        report["checks"].append({"check":"Native TextureView Mirror reverses asymmetric rendered pixels and restores original", "result":"passed", "unmirrored_error":same_error,"mirrored_error":mirror_error})
         await locate("Trim on timeline",scrolls=3)
         for edge, movement in (("start",90),("end",-90)):
             handle, b = await control(f"Trim {edge}", f"trim-{edge}-before")
@@ -202,8 +229,8 @@ async def main():
             if edge == "end" and seconds >= 5.9: raise AssertionError("Native end trim handle did not move")
         report["checks"].append({"check":"Native start and end trim handles dragged on playback timeline", "result":"passed"})
         await locate("Done trimming",scrolls=2)
-        # The title follows the player and local-storage controls below the fold.
-        await locate("ARTEMIS practice", scrolls=4)
+        await locate("Extra options",scrolls=7)
+        # Playback details precede the expanded editing tools.
         report["checks"].append({"check":"Native document import and video detail", "result":"passed"})
         def adb(*args):
             return subprocess.run(["adb","-s",os.environ.get("ARTEMIS_DEVICE_ID","emulator-5554"),*args],check=True,capture_output=True,text=True,timeout=30).stdout.strip()
@@ -253,7 +280,11 @@ async def main():
         # The confirmation is a native Alert, which must close before the
         # remaining label controls below the player become accessible.
         await locate("OK",attempts=3)
-        await locate("Remove label ARTEMIS Artist",scrolls=12)
+        # Return above editing tools to the primary details card.
+        for _ in range(8):
+            screen=await controller.get_screen_data()
+            await controller.swipe_coords(screen.width//2,int(screen.height*.30),screen.width//2,int(screen.height*.80),250)
+        await locate("Remove label ARTEMIS Artist",scrolls=6)
         await locate("Choose labels",scrolls=2)
         await field("Search labels","artemis artist")
         elements = await observe("label-existing")
@@ -302,6 +333,32 @@ async def main():
         await see("Play ARTEMIS Bachata pick","daily-bachata")
         await see("Play ARTEMIS Salsa pick","daily-salsa")
         report["checks"].append({"check":"Native rated imports produce one Bachata and one Salsa Daily Pick", "result":"passed"})
+
+        await locate("Practice",attempts=5,exact=True)
+        await locate("Start practice",scrolls=12,exact=True)
+        await asyncio.sleep(3)
+        # The setup was below the fold; bring timer and playback into view.
+        await top()
+        await locate("Pause practice",scrolls=2,exact=True)
+        elements=await observe("practice-paused")
+        def active_seconds(elements):
+            for e in elements:
+                match=re.search(r"(\d+) active seconds",label(e))
+                if match:return int(match.group(1))
+            raise AssertionError("Practice active-time counter is missing")
+        first=active_seconds(elements)
+        if first<1: raise AssertionError("Native Practice did not accrue playing time")
+        await asyncio.sleep(2)
+        if active_seconds(await observe("practice-pause-retained"))!=first: raise AssertionError("Paused Practice counted time")
+        await locate("Resume practice",exact=True)
+        await asyncio.sleep(1)
+        await controller.driver.execute_shell("input keyevent 3")
+        await asyncio.sleep(2)
+        await launch();await asyncio.sleep(1)
+        elements=await observe("practice-background-resume")
+        if not any("Resume practice" in label(e) for e in elements): raise AssertionError("Returning from background unexpectedly resumed Practice")
+        await locate("Finish & save",exact=True)
+        report["checks"].append({"check":"Native continuous Practice counts playback, excludes pause and returns from background paused", "result":"passed", "active_seconds_before_pause":first})
 
     report["status"] = "passed"
 

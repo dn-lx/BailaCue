@@ -1,8 +1,11 @@
 import { emptyLibrary, type Library } from "./types";
+import { migrateLibrary } from "./dances";
 // Explicitly allow fields: never send local paths, OAuth/session credentials or upload jobs.
 export function metadataSnapshot(library: Library) {
   return {
     version: 1,
+    danceTypes: library.danceTypes,
+    youtubeSources: library.youtubeSources,
     videos: library.videos.map((v) => ({
       id: v.id,
       title: v.title,
@@ -11,6 +14,8 @@ export function metadataSnapshot(library: Library) {
       size: v.size,
       style: v.style,
       styleSet: v.styleSet,
+      danceId: v.danceId,
+      youtube: v.youtube,
       labels: v.labels,
       importance: v.importance,
       ratingSet: v.ratingSet,
@@ -54,13 +59,19 @@ export function restoreSnapshot(
   snapshot: ReturnType<typeof metadataSnapshot>,
   local: Library,
 ): Library {
-  return {
+  return migrateLibrary({
     ...emptyLibrary(),
     ...snapshot,
     version: 1,
     cloudSettings: local.cloudSettings,
     deviceLock: local.deviceLock,
     reminders: local.reminders,
+    youtubeSettings: local.youtubeSettings,
+    libraryView: local.libraryView,
+    practicePreferences: local.practicePreferences,
+    activePractice: local.activePractice
+      ? { ...local.activePractice, running: false }
+      : undefined,
     connections: snapshot.connections.map((c) => ({
       ...c,
       connected: local.connections.some(
@@ -75,8 +86,8 @@ export function restoreSnapshot(
         offlineUri: own?.offlineUri,
         thumbnail: own?.thumbnail,
         storagePreference: own?.storagePreference ?? "online",
-        available: v.remote ? v.available : !!own?.uri,
+        available: v.youtube || v.remote ? v.available : !!own?.uri,
       };
     }),
-  };
+  });
 }

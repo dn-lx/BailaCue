@@ -55,7 +55,13 @@ test("import → label → loop → note → daily pick → persisted local vide
       .getByRole("textbox", { name: "Search labels", exact: true })
       .fill(label);
     await page
-      .getByRole("button", { name: `Create “${label}”`, exact: true })
+      .getByRole("button", {
+        name:
+          label === "Beginner" || label === "Partnerwork"
+            ? `Select ${label}`
+            : `Create “${label}”`,
+        exact: true,
+      })
       .click();
   }
   await page
@@ -63,10 +69,8 @@ test("import → label → loop → note → daily pick → persisted local vide
     .click();
   await page.getByRole("button", { name: "Add to my library" }).click();
   await expect(
-    page
-      .getByText("Bachata turn practice", { exact: true })
-      .filter({ visible: true }),
-  ).toBeVisible();
+    page.getByRole("textbox", { name: "Title", exact: true }),
+  ).toHaveValue("Bachata turn practice");
   await expect
     .poll(() =>
       page
@@ -95,16 +99,33 @@ test("import → label → loop → note → daily pick → persisted local vide
       .evaluate((v: HTMLVideoElement) => v.currentTime),
   ).toBeLessThan(2.1);
   const frame = page.getByTestId("video-frame");
-  await page
-    .getByRole("button", { name: "Compact video", exact: true })
-    .click();
-  await expect.poll(async () => (await frame.boundingBox())!.height).toBe(170);
-  await page.getByRole("button", { name: "Large video", exact: true }).click();
-  await expect.poll(async () => (await frame.boundingBox())!.height).toBe(480);
-  await page
-    .getByRole("button", { name: "Standard video", exact: true })
-    .click();
+  const grip = page.getByRole("slider", { name: "Resize video area" });
+  // React Native Web exposes adjustable as slider; keyboard and drag stay accessible.
+  await grip.focus();
+  await grip.press("ArrowRight");
+  await expect.poll(async () => (await frame.boundingBox())!.height).toBe(310);
+  await grip.press("ArrowLeft");
   await expect.poll(async () => (await frame.boundingBox())!.height).toBe(270);
+  await page.getByRole("button", { name: "Mirror", exact: true }).click();
+  await expect
+    .poll(() =>
+      page
+        .locator("video")
+        .first()
+        .evaluate((v) => {
+          let e: Element | null = v;
+          const transforms: string[] = [];
+          while (e) {
+            transforms.push(getComputedStyle(e).transform);
+            e = e.parentElement;
+          }
+          return transforms.join(" ");
+        }),
+    )
+    .toContain("-1");
+  await page
+    .getByRole("button", { name: "Extra options", exact: true })
+    .click();
   await page
     .getByRole("button", { name: "Trim on timeline", exact: true })
     .click();
@@ -192,16 +213,14 @@ test("import → label → loop → note → daily pick → persisted local vide
   ).toBeVisible();
   await page.getByRole("button", { name: "Pause", exact: true }).click();
   await page
-    .getByRole("textbox", { name: "Practice note" })
+    .getByRole("textbox", { name: "Note or moment" })
     .fill("Keep the steps small");
-  await page.getByRole("button", { name: "Save note", exact: true }).click();
-  await expect(
-    page.getByText("Keep the steps small", { exact: true }),
-  ).toBeVisible();
   await page
-    .getByRole("textbox", { name: "Bookmark name" })
-    .fill("Turn starts");
-  await page.getByRole("button", { name: /^Bookmark \d/ }).click();
+    .getByRole("button", { name: "Save note or moment", exact: true })
+    .click();
+  await expect(
+    page.getByRole("button", { name: /Keep the steps small/ }),
+  ).toBeVisible();
   await page
     .getByRole("button", { name: "Library", exact: true })
     .scrollIntoViewIfNeeded();
@@ -234,9 +253,12 @@ test("import → label → loop → note → daily pick → persisted local vide
   await page
     .getByRole("button", { name: "Play Bachata turn practice" })
     .click();
+  await page
+    .getByRole("button", { name: "Extra options", exact: true })
+    .click();
   await expect(page.getByText("The turn", { exact: true })).toBeVisible();
   await expect(
-    page.getByText("Keep the steps small", { exact: true }),
+    page.getByRole("button", { name: /Keep the steps small/ }),
   ).toBeVisible();
   expect(
     await page
@@ -303,7 +325,13 @@ test("artist and video-type labels can be created, reused, edited and retained a
       .getByRole("textbox", { name: "Search labels", exact: true })
       .fill(label);
     await page
-      .getByRole("button", { name: `Create “${label}”`, exact: true })
+      .getByRole("button", {
+        name:
+          label === "Beginner" || label === "Partnerwork"
+            ? `Select ${label}`
+            : `Create “${label}”`,
+        exact: true,
+      })
       .click();
   }
   await page
@@ -423,7 +451,7 @@ test("Daily Picks chooses one rated video per style, supports a minimum rating a
   await page.getByRole("tab", { name: "Settings", exact: true }).click();
   await expect(
     page.getByRole("switch", {
-      name: "One video per dance source or style",
+      name: "One video per selected dance or source",
       exact: true,
     }),
   ).toBeChecked();

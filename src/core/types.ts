@@ -1,6 +1,7 @@
 import type { SourceNumbering } from "./numbering";
 import { defaultReminders, type ReminderPreferences } from "./reminders";
-export type DanceStyle = "Bachata" | "Salsa" | "Other";
+export type DanceStyle = string;
+export type DanceType = { id: string; name: string };
 export type LearningStatus = "To learn" | "Practising" | "Learned";
 export type Segment = { id: string; name: string; start: number; end: number };
 export type Bookmark = { id: string; name: string; time: number };
@@ -9,6 +10,7 @@ export type Note = {
   text: string;
   time?: number;
   createdAt: string;
+  kind?: "note" | "moment";
 };
 export type Video = {
   id: string;
@@ -35,7 +37,16 @@ export type Video = {
   bookmarks: Bookmark[];
   notes: Note[];
   available: boolean;
-  source: "device" | "google-drive" | "dropbox";
+  source: "device" | "google-drive" | "dropbox" | "youtube";
+  danceId?: string;
+  youtube?: {
+    id: string;
+    channelId?: string;
+    channelTitle?: string;
+    sourceIds: string[];
+    embedAllowed: boolean;
+    unavailableReason?: string;
+  };
   remote?: {
     connectionId: string;
     fileId: string;
@@ -53,6 +64,7 @@ export type PracticeSession = {
   startedAt: string;
   seconds: number;
   videoId?: string;
+  videoIds?: string[];
 };
 export type Playlist = { id: string; name: string; videoIds: string[] };
 export type Pick = {
@@ -71,6 +83,11 @@ export type Preferences = {
   theme: "system" | "light" | "dark";
   cooldownDays: number;
   count: number;
+  pickMix?: "dance" | "source";
+  pickSourceIds?: string[];
+  labelMatch?: "any" | "all";
+  requirePickLabels?: boolean;
+  includeYouTube?: boolean;
 };
 export type Connection = {
   id: string;
@@ -88,6 +105,7 @@ export type CloudFolder = {
   folderId: string;
   name: string;
   defaultStyle: DanceStyle;
+  defaultDanceId?: string;
   defaultLabels: string[];
   writable: boolean;
   numbering?: SourceNumbering;
@@ -108,6 +126,13 @@ export type SourceRenameProgress = {
 };
 export type Library = {
   version: 1;
+  schemaRevision?: number;
+  danceTypes?: DanceType[];
+  youtubeSources?: YouTubeSource[];
+  youtubeSettings?: { apiKey: string };
+  libraryView?: import("./library").LibraryView;
+  practicePreferences?: import("./practiceQueue").PracticePreferences;
+  activePractice?: import("./practiceQueue").ActivePractice;
   deviceLock: boolean;
   reminders: ReminderPreferences;
   connections: Connection[];
@@ -119,6 +144,17 @@ export type Library = {
   picks: Pick[];
   feedback: Record<string, number>;
   preferences: Preferences;
+};
+export type YouTubeSource = {
+  id: string;
+  playlistId: string;
+  name: string;
+  defaultStyle: string;
+  defaultDanceId?: string;
+  defaultLabels: string[];
+  videoIds: string[];
+  lastSyncedAt?: string;
+  error?: string;
 };
 export const emptyLibrary = (): Library => ({
   version: 1,
@@ -137,7 +173,7 @@ export const emptyLibrary = (): Library => ({
   feedback: {},
   preferences: {
     styles: ["Bachata", "Salsa"],
-    labels: ["Footwork"],
+    labels: [],
     picksEnabled: true,
     onePerStyle: true,
     minPickRating: 1,
@@ -145,6 +181,7 @@ export const emptyLibrary = (): Library => ({
     theme: "system",
     cooldownDays: 3,
     count: 1,
+    pickMix: "dance",
   },
 });
 export const uid = () =>

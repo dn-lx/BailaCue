@@ -1,6 +1,6 @@
 import { useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { PanResponder, View, useWindowDimensions } from "react-native";
-import { Chip, Row, Txt } from "./ui";
+import { Txt } from "./ui";
 import { useTheme } from "./theme";
 import { videoAreaHeight } from "../core/editing";
 
@@ -49,6 +49,27 @@ export function VideoArea({
       </View>
       <View
         {...responder.panHandlers}
+        {...{
+          tabIndex: 0,
+          onKeyDown: (event: { key?: string; preventDefault: () => void }) => {
+            if (
+              ["ArrowUp", "ArrowRight", "ArrowDown", "ArrowLeft"].includes(
+                event.key ?? "",
+              )
+            ) {
+              event.preventDefault();
+              setRequested(
+                videoAreaHeight(
+                  height +
+                    (["ArrowUp", "ArrowRight"].includes(event.key ?? "")
+                      ? 40
+                      : -40),
+                  viewport,
+                ),
+              );
+            }
+          },
+        }}
         accessible
         accessibilityRole="adjustable"
         accessibilityLabel="Resize video area"
@@ -91,21 +112,6 @@ export function VideoArea({
           Drag to resize video
         </Txt>
       </View>
-      <Row style={{ paddingHorizontal: 20, flexWrap: "wrap" }}>
-        {[
-          { name: "Compact video", height: 170 },
-          { name: "Standard video", height: 270 },
-          { name: "Large video", height: 480 },
-        ].map((preset) => (
-          <Chip
-            key={preset.name}
-            selected={height === videoAreaHeight(preset.height, viewport)}
-            onPress={() => setRequested(preset.height)}
-          >
-            {preset.name}
-          </Chip>
-        ))}
-      </Row>
     </View>
   );
 }

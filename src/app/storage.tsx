@@ -1,3 +1,5 @@
+import { danceTypes } from "../core/dances";
+import { DancePicker } from "../components/DancePicker";
 import { LabelPicker } from "../components/LabelPicker";
 import { libraryLabels } from "../core/labels";
 import { useEffect, useRef, useState } from "react";
@@ -163,6 +165,7 @@ export default function Storage() {
       folderId,
       name: name.trim() || info.name,
       defaultStyle: style,
+      defaultDanceId: danceTypes(library).find((d) => d.name === style)?.id,
       defaultLabels: labels,
       writable: info.writable,
       numbering: editId
@@ -430,6 +433,9 @@ export default function Storage() {
                       sourceStyle({
                         name: f.name,
                         defaultStyle: style,
+                        defaultDanceId: danceTypes(library).find(
+                          (d) => d.name === style,
+                        )?.id,
                       } as CloudFolder),
                     );
                   }}
@@ -462,13 +468,7 @@ export default function Storage() {
             editable={!busy}
             onChangeText={setName}
           />
-          <View style={layout.wrap}>
-            {(["Bachata", "Salsa", "Other"] as DanceStyle[]).map((s) => (
-              <Chip key={s} selected={style === s} onPress={() => setStyle(s)}>
-                {s}
-              </Chip>
-            ))}
-          </View>
+          <DancePicker value={style} onChange={setStyle} />
           <LabelPicker
             label="Default labels for new videos"
             value={labels}

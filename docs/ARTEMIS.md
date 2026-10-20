@@ -1,3 +1,14 @@
+# Preview18 native acceptance in progress
+
+The updated harness removes preset assertions, tests the resize grip, opens Extra
+options before editing, and checks native Mirror by comparing asymmetric rendered
+pixels before/reversed/restored. It also verifies actual Practice time, paused time
+and background/foreground resume. The same Media3/Photos/original-checksum checks
+remain. Do not treat prior runs as evidence for this source. Result pending.
+
+Build17 brand-only acceptance passed12 checks in run39422105336; its report is in
+verification/android-build17/. The full-document features start at build18.
+
 # Current acceptance · BailaCue 0.2.10/build15
 
 All12 Google ARTEMIS native checks passed in

@@ -32,7 +32,8 @@ export function VideoCard({
       <View
         style={{
           height: featured ? 210 : 160,
-          backgroundColor: video.style === "Bachata" ? t.videoBachata : t.videoSalsa,
+          backgroundColor:
+            video.style === "Bachata" ? t.videoBachata : t.videoSalsa,
           justifyContent: "center",
           alignItems: "center",
         }}
@@ -82,8 +83,8 @@ export function VideoCard({
         </Txt>
         <Txt size={13} color={t.muted}>
           {[
-            video.status,
-            video.teacher ||
+            (video.youtube ? "YouTube · online" : "") ||
+              video.teacher ||
               (video.remote
                 ? video.offlineUri && video.storagePreference === "offline"
                   ? "Phone copy"
@@ -91,6 +92,7 @@ export function VideoCard({
                     ? "Dropbox · online"
                     : "Drive · online"
                 : "On this device"),
+            video.youtube?.channelTitle,
             video.labels.slice(0, 2).join(" · "),
           ]
             .filter(Boolean)

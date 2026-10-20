@@ -1,6 +1,12 @@
 import { useState } from "react";
 import { Pressable, ScrollView, View } from "react-native";
-import { cleanLabel, labelChoices, uniqueLabels } from "../core/labels";
+import {
+  cleanLabel,
+  labelChoices,
+  labelKey,
+  uniqueLabels,
+  suggestedLabelGroups,
+} from "../core/labels";
 import { useTheme } from "./theme";
 import { Button, Field, Txt, layout } from "./ui";
 
@@ -9,17 +15,25 @@ export function LabelPicker({
   options,
   onChange,
   label = "Labels",
+  suggestions = true,
 }: {
   value: string[];
   options: string[];
   onChange: (labels: string[]) => void;
   label?: string;
+  suggestions?: boolean;
 }) {
   const t = useTheme();
   const selected = uniqueLabels(value);
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
-  const { matches, create } = labelChoices(options, selected, query);
+  const { matches, create } = labelChoices(
+    suggestions
+      ? [...options, ...Object.values(suggestedLabelGroups).flat()]
+      : options,
+    selected,
+    query,
+  );
   const choose = (name: string) => {
     onChange(uniqueLabels([...selected, name]));
     setQuery("");
@@ -111,11 +125,46 @@ export function LabelPicker({
                 Create “{create}”
               </Button>
             ) : null}
-            {matches.map((name) => (
-              <Button key={name} variant="ghost" onPress={() => choose(name)}>
-                Select {name}
-              </Button>
-            ))}
+            {(suggestions
+              ? [
+                  ...Object.entries(suggestedLabelGroups).map(
+                    ([group, names]) =>
+                      [
+                        group,
+                        matches.filter((name) =>
+                          names.some((n) => labelKey(n) === labelKey(name)),
+                        ),
+                      ] as const,
+                  ),
+                  [
+                    "Your labels & artists",
+                    matches.filter(
+                      (name) =>
+                        !Object.values(suggestedLabelGroups)
+                          .flat()
+                          .some((n) => labelKey(n) === labelKey(name)),
+                    ),
+                  ] as const,
+                ]
+              : [["Your library", matches] as const]
+            )
+              .filter(([, names]) => names.length)
+              .map(([group, names]) => (
+                <View key={group} style={{ gap: 6 }}>
+                  <Txt size={12} weight="bold">
+                    {group}
+                  </Txt>
+                  {names.map((name) => (
+                    <Button
+                      key={name}
+                      variant="ghost"
+                      onPress={() => choose(name)}
+                    >
+                      Select {name}
+                    </Button>
+                  ))}
+                </View>
+              ))}
             {!matches.length && !create ? (
               <Txt size={13} color={t.muted}>
                 {query.trim()

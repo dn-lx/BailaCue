@@ -43,7 +43,7 @@ function PreviewPlayer({ uri }: { uri: string }) {
     <Card>
       <Txt weight="bold">Preview before saving</Txt>
       <Txt size={13}>
-        Watch the video, then choose Salsa, Bachata and its destination folder
+        Watch the video, then choose its dance type and destination folder
         below.
       </Txt>
       <VideoView

@@ -202,6 +202,7 @@ it("chooses one video from each dance source even when all legacy video styles s
     video("local", "Salsa", 5),
   ];
   l.preferences.minPickRating = 5;
+  l.preferences.pickMix = "source";
   expect(choosePicks(l, now)).toEqual(["bachata", "salsa"]);
   l.videos[0].ratingSet = true;
   expect(choosePicks(l, now)).toEqual(["bachata"]);

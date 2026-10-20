@@ -8,6 +8,7 @@ import React, {
 } from "react";
 import { emptyLibrary, type Library, type Video } from "../core/types";
 import { createLibraryWriter } from "./libraryWriter";
+import { migrateLibrary } from "../core/dances";
 const KEY = "bailacue:device-library:v1";
 type Store = {
   library: Library;
@@ -45,14 +46,23 @@ export function LibraryProvider({
           const parsed = JSON.parse(raw);
           if (parsed.version !== 1 || !Array.isArray(parsed.videos))
             throw new Error("Unrecognised library format.");
-          writer.hydrate({
-            ...emptyLibrary(),
-            ...parsed,
-            cloudSettings: {
-              ...emptyLibrary().cloudSettings,
-              ...parsed.cloudSettings,
-            },
-          });
+          writer.hydrate(
+            migrateLibrary({
+              ...emptyLibrary(),
+              ...parsed,
+              cloudSettings: {
+                ...emptyLibrary().cloudSettings,
+                ...parsed.cloudSettings,
+              },
+              preferences: {
+                ...emptyLibrary().preferences,
+                ...parsed.preferences,
+              },
+              activePractice: parsed.activePractice
+                ? { ...parsed.activePractice, running: false }
+                : undefined,
+            }),
+          );
         }
         setReady(true);
       })

@@ -1,6 +1,6 @@
-import { useEffect, useRef, useState } from "react";
-import { View } from "react-native";
-import { router, useLocalSearchParams } from "expo-router";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { AppState, View } from "react-native";
+import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
 import { useVideoPlayer, VideoView, type VideoSource } from "expo-video";
 import { useLibrary } from "../services/store";
 import { resolveVideo } from "../services/cloud/playback";
@@ -20,6 +20,24 @@ function ComparePlayers({
   const b = useVideoPlayer(right, (player) => {
     player.muted = true;
   });
+  useFocusEffect(
+    useCallback(
+      () => () => {
+        a.pause();
+        b.pause();
+      },
+      [a, b],
+    ),
+  );
+  useEffect(() => {
+    const sub = AppState.addEventListener("change", (state) => {
+      if (state !== "active") {
+        a.pause();
+        b.pause();
+      }
+    });
+    return () => sub.remove();
+  }, [a, b]);
   const [offset, setOffset] = useState("0");
   const [time, setTime] = useState(0);
   const [mirror, setMirror] = useState(false);
@@ -62,6 +80,7 @@ function ComparePlayers({
           <Txt weight="bold">Reference</Txt>
           <VideoView
             player={a}
+            surfaceType="textureView"
             style={{ height: 230, width: "100%", backgroundColor: "#080D18" }}
             contentFit="contain"
             nativeControls={false}
@@ -72,6 +91,7 @@ function ComparePlayers({
           <View style={{ transform: [{ scaleX: mirror ? -1 : 1 }] }}>
             <VideoView
               player={b}
+              surfaceType="textureView"
               style={{ height: 230, width: "100%", backgroundColor: "#080D18" }}
               contentFit="contain"
               nativeControls={false}
@@ -225,22 +245,24 @@ export default function Comparison() {
             <Txt size={21} weight="display">
               Choose a reference
             </Txt>
-            {library.videos.map((v) => (
-              <Chip
-                key={v.id}
-                selected={leftId === v.id}
-                onPress={() => setLeftId(v.id)}
-              >
-                {v.title}
-              </Chip>
-            ))}
+            {library.videos
+              .filter((v) => !v.youtube)
+              .map((v) => (
+                <Chip
+                  key={v.id}
+                  selected={leftId === v.id}
+                  onPress={() => setLeftId(v.id)}
+                >
+                  {v.title}
+                </Chip>
+              ))}
           </Card>
           <Card>
             <Txt size={21} weight="display">
               Choose your practice
             </Txt>
             {library.videos
-              .filter((v) => v.id !== leftId)
+              .filter((v) => v.id !== leftId && !v.youtube)
               .map((v) => (
                 <Chip
                   key={v.id}

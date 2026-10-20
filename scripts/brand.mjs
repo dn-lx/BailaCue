@@ -1,99 +1,173 @@
-// Package approved image-generated artwork; never retouch the selected mark here.
+// Package the approved, image-generated monochrome drawing as traced SVG geometry.
+// SVG masters and outlined typography are committed; normal exports need only sharp.
 import sharp from "sharp";
 import { createHash } from "node:crypto";
-import { writeFile, mkdir, readFile } from "node:fs/promises";
+import { readFile, writeFile, mkdir } from "node:fs/promises";
 await mkdir("assets/brand", { recursive: true });
 await mkdir("docs/brand", { recursive: true });
-const blue = await readFile("assets/brand/bc-play-blue-source.png");
-const black = await readFile("assets/brand/bc-play-black-source.png");
+const master = await readFile("assets/brand/symbol-master.svg", "utf8");
+const mark = master.match(/<g[\s\S]*<\/g>/)[0];
+const wordmark = await readFile("assets/brand/wordmark-master.svg", "utf8");
+const wordBox = wordmark.match(/viewBox="([^"]+)"/)[1],
+  wordPaths = wordmark.match(/<path[\s\S]*<\/svg>/)[0].replace("</svg>", "");
+const svg = (w, h, content) =>
+  `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">${content}</svg>`;
+const symbol = (color, x = 0, y = 0, w = 1024, h = w) =>
+  `<svg x="${x}" y="${y}" width="${w}" height="${h}" viewBox="0 0 1254 1254">${mark.replace('fill="#000000"', `fill="${color}"`)}</svg>`;
+const type = (mode, x, y, w, h) =>
+  `<svg x="${x}" y="${y}" width="${w}" height="${h}" viewBox="${wordBox}">${wordPaths.replaceAll("#080D18", mode === "dark" ? "#FFFFFF" : mode === "mono-white" ? "#FFFFFF" : "#080D18").replaceAll("#1465FF", mode === "mono-white" ? "#FFFFFF" : mode === "mono-black" ? "#080D18" : "#1465FF")}</svg>`;
 const generated = [];
 async function save(path, data) {
   await writeFile(path, data);
   generated.push(path);
 }
-for (const [path, source, size] of [
-  ["assets/icon.png", blue, 1024],
-  ["assets/adaptive-icon.png", blue, 1024],
-  ["assets/splash-icon.png", black, 512],
-  ["assets/favicon.png", blue, 64],
-  ["assets/brand/icon-black.png", black, 1024],
-]) {
-  await save(
-    path,
-    await sharp(source).resize(size, size).removeAlpha().png().toBuffer(),
-  );
+async function exportSvg(path, source) {
+  await save(path + ".svg", source);
+  await save(path + ".png", await sharp(Buffer.from(source)).png().toBuffer());
 }
-// SVG containers retain the approved raster mark. They are not vector masters.
-const image = (data, x, y, width, height) =>
-  `<image x="${x}" y="${y}" width="${width}" height="${height}" href="data:image/png;base64,${data.toString("base64")}"/>`;
-const svg = (width, height, content) =>
-  `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">${content}</svg>`;
-await save("assets/icon.svg", svg(1024, 1024, image(blue, 0, 0, 1024, 1024)));
-for (const [mode, background, foreground, source] of [
-  ["light", "#FFFFFF", "#080D18", blue],
-  ["dark", "#080D18", "#FFFFFF", black],
-]) {
-  const horizontal = svg(
+for (const [name, color] of [
+  ["white", "#FFFFFF"],
+  ["black", "#080D18"],
+  ["blue", "#1465FF"],
+])
+  await exportSvg(
+    `assets/brand/symbol-${name}-transparent`,
+    svg(1024, 1024, symbol(color)),
+  );
+await exportSvg(
+  "assets/icon",
+  svg(
     1024,
-    256,
-    `<rect width="1024" height="256" fill="${background}"/>` +
-      image(source, 24, 24, 208, 208) +
-      `<text x="270" y="163" font-family="Outfit, sans-serif" font-size="112" font-weight="600" fill="${foreground}">Baila<tspan fill="#1465FF">Cue</tspan></text>`,
+    1024,
+    '<rect width="1024" height="1024" fill="#1465FF"/>' + symbol("#FFFFFF"),
+  ),
+);
+await save(
+  "assets/adaptive-icon.png",
+  await sharp(Buffer.from(svg(1024, 1024, symbol("#FFFFFF"))))
+    .png()
+    .toBuffer(),
+);
+await save(
+  "assets/adaptive-monochrome.png",
+  await sharp(Buffer.from(svg(1024, 1024, symbol("#000000"))))
+    .png()
+    .toBuffer(),
+);
+await save(
+  "assets/splash-icon.png",
+  await sharp(Buffer.from(svg(512, 512, symbol("#FFFFFF", 0, 0, 512))))
+    .png()
+    .toBuffer(),
+);
+await exportSvg(
+  "assets/brand/icon-black",
+  svg(
+    1024,
+    1024,
+    '<rect width="1024" height="1024" fill="#080D18"/>' + symbol("#FFFFFF"),
+  ),
+);
+for (const [name, size] of [
+  ["favicon", 64],
+  ["brand/favicon-16", 16],
+  ["brand/favicon-32", 32],
+  ["brand/apple-touch-icon", 180],
+  ["brand/android-icon-192", 192],
+  ["brand/android-icon-512", 512],
+  ["brand/ios-app-store", 1024],
+])
+  await save(
+    `assets/${name}.png`,
+    await sharp("assets/icon.svg")
+      .resize(size, size)
+      .removeAlpha()
+      .png()
+      .toBuffer(),
   );
-  const stacked = svg(
-    640,
-    640,
-    `<rect width="640" height="640" fill="${background}"/>` +
-      image(source, 128, 48, 384, 384) +
-      `<text x="320" y="538" text-anchor="middle" font-family="Outfit, sans-serif" font-size="88" font-weight="600" fill="${foreground}">Baila<tspan fill="#1465FF">Cue</tspan></text>`,
-  );
-  for (const [name, content] of [
-    ["horizontal", horizontal],
-    ["stacked", stacked],
-  ]) {
-    await save(`assets/brand/logo-${name}-${mode}.svg`, content);
-    await save(
-      `assets/brand/logo-${name}-${mode}.png`,
-      await sharp(Buffer.from(content)).png().toBuffer(),
+for (const mode of ["light", "dark", "mono-white", "mono-black"]) {
+  const fg = mode === "light" || mode === "mono-black" ? "#080D18" : "#FFFFFF";
+  for (const transparent of [false, true]) {
+    const bg = transparent
+      ? ""
+      : `<rect width="1024" height="256" fill="${mode === "dark" || mode === "mono-white" ? "#080D18" : "#FFFFFF"}"/>`;
+    await exportSvg(
+      `assets/brand/logo-horizontal-${mode}${transparent ? "-transparent" : ""}`,
+      svg(
+        1024,
+        256,
+        bg +
+          symbol(mode === "light" ? "#1465FF" : fg, 0, 0, 256) +
+          type(mode, 270, 70, 710, 116),
+      ),
+    );
+    const stackbg = transparent
+      ? ""
+      : `<rect width="640" height="640" fill="${mode === "dark" || mode === "mono-white" ? "#080D18" : "#FFFFFF"}"/>`;
+    await exportSvg(
+      `assets/brand/logo-stacked-${mode}${transparent ? "-transparent" : ""}`,
+      svg(
+        640,
+        640,
+        stackbg +
+          symbol(mode === "light" ? "#1465FF" : fg, 80, 0, 480) +
+          type(mode, 90, 490, 460, 82),
+      ),
     );
   }
 }
-for (const [name, color, foreground, label] of [
-  ["salsa", "#1465FF", "#FFFFFF", "SALSA"],
-  ["bachata", "#C7DCFF", "#081A38", "BACHATA"],
-  ["practising", "#E8EFFA", "#080D18", "PRACTISING"],
-  ["learned", "#C7DCFF", "#081A38", "LEARNED"],
-]) {
-  await save(
-    `docs/brand/badge-${name}.svg`,
+for (const [name, color, label] of [
+  ["salsa", "#1465FF", "SALSA"],
+  ["bachata", "#080D18", "BACHATA"],
+  ["practice", "#1465FF", "PRACTICE"],
+  ["youtube", "#080D18", "YOUTUBE"],
+])
+  await exportSvg(
+    `docs/brand/badge-${name}`,
     svg(
-      200,
-      56,
-      `<rect width="200" height="56" rx="28" fill="${color}"/><text x="100" y="35" text-anchor="middle" font-family="sans-serif" font-size="17" font-weight="bold" letter-spacing="2" fill="${foreground}">${label}</text>`,
+      240,
+      64,
+      `<rect width="240" height="64" rx="32" fill="${color}"/><text x="120" y="41" text-anchor="middle" font-family="sans-serif" font-size="20" font-weight="bold" letter-spacing="2" fill="#FFFFFF">${label}</text>`,
     ),
   );
-}
-const identity = svg(
-  1200,
-  720,
-  `<rect width="1200" height="720" fill="#F4F7FC"/>` +
-    image(blue, 48, 48, 280, 280) +
-    image(black, 352, 48, 280, 280) +
-    `<text x="680" y="155" font-family="sans-serif" font-size="64" font-weight="bold" fill="#080D18">BailaCue</text>` +
-    `<text x="680" y="208" font-family="sans-serif" font-size="24" fill="#54647B">Concept 03 · BC + play</text>` +
-    `<text x="680" y="252" font-family="sans-serif" font-size="24" fill="#54647B">Watch. Practise. Repeat.</text>` +
-    ["#1465FF", "#080D18", "#FFFFFF", "#C7DCFF"]
-      .map(
-        (color, i) =>
-          `<rect x="${48 + i * 288}" y="400" width="264" height="144" rx="18" fill="${color}" stroke="#C4D0E0"/><text x="${48 + i * 288}" y="582" font-family="sans-serif" font-size="24" fill="#080D18">${color}</text>`,
-      )
-      .join("") +
-    `<text x="48" y="663" font-family="sans-serif" font-size="22" fill="#54647B">Approved blue-and-black identity · Outfit + DM Sans · Light and dark themes</text>`,
+await exportSvg(
+  "docs/brand/identity",
+  svg(
+    1200,
+    720,
+    '<rect width="1200" height="720" fill="#F4F7FC"/>' +
+      symbol("#1465FF", 0, 0, 400) +
+      symbol("#080D18", 400, 0, 400) +
+      type("light", 800, 140, 340, 70) +
+      ["#1465FF", "#080D18", "#FFFFFF", "#C7DCFF"]
+        .map(
+          (c, i) =>
+            `<rect x="${48 + i * 288}" y="420" width="264" height="144" rx="18" fill="${c}" stroke="#C4D0E0"/><text x="${48 + i * 288}" y="605" font-family="sans-serif" font-size="24" fill="#080D18">${c}</text>`,
+        )
+        .join("") +
+      '<text x="48" y="670" font-family="sans-serif" font-size="22" fill="#54647B">BC + play · Vector masters · Outfit + DM Sans · Blue / black / white</text>',
+  ),
 );
-await save("docs/brand/identity.svg", identity);
-await save(
-  "docs/brand/identity.png",
-  await sharp(Buffer.from(identity)).png().toBuffer(),
+await exportSvg(
+  "assets/brand/social-1200x630",
+  svg(
+    1200,
+    630,
+    '<rect width="1200" height="630" fill="#080D18"/>' +
+      symbol("#FFFFFF", 30, 30, 570) +
+      type("dark", 600, 220, 520, 98) +
+      '<text x="610" y="370" font-family="sans-serif" font-size="28" fill="#B5C3D9">Watch. Practise. Repeat.</text>',
+  ),
+);
+await exportSvg(
+  "assets/brand/play-feature-1024x500",
+  svg(
+    1024,
+    500,
+    '<rect width="1024" height="500" fill="#080D18"/>' +
+      symbol("#FFFFFF", 0, 0, 500) +
+      type("dark", 500, 180, 480, 90),
+  ),
 );
 await writeFile(
   "assets/brand/manifest.json",
@@ -103,31 +177,44 @@ await writeFile(
       sources: [
         "assets/brand/bc-play-blue-source.png",
         "assets/brand/bc-play-black-source.png",
+        "assets/brand/bc-play-monochrome-source.png",
       ],
+      masters: [
+        "assets/brand/symbol-master.svg",
+        "assets/brand/wordmark-master.svg",
+      ],
+      sourceChecksums: await Promise.all(
+        [
+          "assets/brand/symbol-master.svg",
+          "assets/brand/wordmark-master.svg",
+          "assets/brand/bc-play-monochrome-source.png",
+        ].map(async (path) => ({
+          path,
+          sha256: createHash("sha256")
+            .update(await readFile(path))
+            .digest("hex"),
+        })),
+      ),
       formatNote:
-        "Image-generated PNG masters. Logo SVGs embed raster artwork plus editable wordmark text; they are not pure-vector masters.",
+        "Symbols and logo lockups contain SVG paths, including outlined Outfit typography. PNG exports preserve alpha except opaque app/store tiles. Badge and social-tagline text is editable SVG text.",
       assets: await Promise.all(
         generated.map(async (path) => {
-          const data = await readFile(path);
-          const metadata = await sharp(data).metadata();
+          const data = await readFile(path),
+            m = await sharp(data).metadata();
           return {
             path,
-            format: metadata.format,
-            width: metadata.width,
-            height: metadata.height,
+            format: m.format,
+            width: m.width,
+            height: m.height,
+            alpha: m.hasAlpha,
             sha256: createHash("sha256").update(data).digest("hex"),
           };
         }),
       ),
-      pending: [
-        "Pure-vector symbol and wordmark masters",
-        "Clean transparent logo family",
-        "Monochrome logo and Android themed-icon artwork",
-        "Store-listing and social exports at confirmed distribution sizes",
-      ],
+      pending: [],
     },
     null,
     2,
   ) + "\n",
 );
-console.log(`Packaged ${generated.length} approved brand assets.`);
+console.log(`Packaged ${generated.length} brand assets from vector masters.`);

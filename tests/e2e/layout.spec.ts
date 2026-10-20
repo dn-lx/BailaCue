@@ -52,6 +52,7 @@ test("phone layouts contain long source/account labels and button rows at 320–
       "/upload",
       "/account",
       "/sharing",
+      "/youtube",
     ]) {
       await page.goto(route);
       await expect(page.getByRole("button").first()).toBeVisible();
@@ -71,6 +72,7 @@ test("phone layouts contain long source/account labels and button rows at 320–
       if (width === 320 && ["/storage", "/settings"].includes(route)) {
         await page
           .getByText(library.sources[0].name, { exact: true })
+          .last()
           .scrollIntoViewIfNeeded();
         await page.screenshot({
           path: `artifacts/screenshots/layout-${route.slice(1)}-320.png`,
@@ -78,5 +80,33 @@ test("phone layouts contain long source/account labels and button rows at 320–
         });
       }
     }
+  }
+});
+
+test("large text keeps Library and Settings controls inside a narrow screen", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 320, height: 900 });
+  for (const route of ["/library", "/settings", "/practice", "/youtube"]) {
+    await page.goto(route);
+    await expect(page.getByRole("button").first()).toBeVisible();
+    await page.evaluate(() => {
+      for (const e of document.querySelectorAll<HTMLElement>(
+        'div[dir="auto"]',
+      )) {
+        const style = getComputedStyle(e);
+        e.style.fontSize = parseFloat(style.fontSize) * 1.5 + "px";
+        e.style.lineHeight = "1.4";
+      }
+    });
+    const clipped = await page.evaluate(() =>
+      [...document.querySelectorAll<HTMLElement>('[role="button"]')]
+        .filter((e) => {
+          const b = e.getBoundingClientRect();
+          return b.width > 0 && (b.left < -1 || b.right > innerWidth + 1);
+        })
+        .map((e) => e.textContent),
+    );
+    expect(clipped, route).toEqual([]);
   }
 });

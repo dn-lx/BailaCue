@@ -199,7 +199,10 @@ test("user connects Salsa and Bachata folders → streams → edits → refresh 
     .getByRole("button", { name: "Connect Dropbox", exact: true })
     .click();
   await expect(
-    page.getByText("dancer@example.com", { exact: true }).first(),
+    page
+      .getByText("dancer@example.com", { exact: true })
+      .filter({ visible: true })
+      .first(),
   ).toBeVisible();
   await page
     .getByRole("button", { name: "Browse my folders", exact: true })
@@ -216,7 +219,7 @@ test("user connects Salsa and Bachata folders → streams → edits → refresh 
     .getByRole("textbox", { name: "Search labels", exact: true })
     .fill("Musicality");
   await page
-    .getByRole("button", { name: "Create “Musicality”", exact: true })
+    .getByRole("button", { name: "Select Musicality", exact: true })
     .click();
   await page
     .getByRole("button", { name: "Done choosing labels", exact: true })
@@ -245,7 +248,7 @@ test("user connects Salsa and Bachata folders → streams → edits → refresh 
     .getByRole("textbox", { name: "Search labels", exact: true })
     .fill("Sensual");
   await page
-    .getByRole("button", { name: "Create “Sensual”", exact: true })
+    .getByRole("button", { name: "Select Sensual", exact: true })
     .click();
   await page
     .getByRole("button", { name: "Done choosing labels", exact: true })
@@ -293,6 +296,9 @@ test("user connects Salsa and Bachata folders → streams → edits → refresh 
     page.getByRole("button", { name: "Play 0001", exact: true }),
   ).toHaveCount(0);
   await page
+    .getByRole("button", { name: "Filters & sort", exact: true })
+    .click();
+  await page
     .getByRole("button", { name: "Bachata class", exact: true })
     .click();
   await expect(
@@ -305,14 +311,18 @@ test("user connects Salsa and Bachata folders → streams → edits → refresh 
     .getByRole("button", { name: "Tuesday class", exact: true })
     .click();
   // Reconnect after this explicit full navigation; real phone credentials use SecureStore.
+  await page.getByRole("tab", { name: "Settings", exact: true }).click();
   await page
-    .getByRole("button", { name: "Connect storage", exact: true })
+    .getByRole("button", { name: "Manage video storage", exact: true })
     .click();
   await page
     .getByRole("button", { name: "Connect Dropbox", exact: true })
     .click();
   await expect(
-    page.getByText("dancer@example.com", { exact: true }).first(),
+    page
+      .getByText("dancer@example.com", { exact: true })
+      .filter({ visible: true })
+      .first(),
   ).toBeVisible();
   await expect(
     page.getByRole("button", { name: "Browse my folders", exact: true }),
@@ -373,7 +383,11 @@ test("user connects Salsa and Bachata folders → streams → edits → refresh 
   ).toBeVisible();
   expect(renames).toHaveLength(2);
   await page.getByRole("button", { name: "Done", exact: true }).click();
+  await page.getByRole("tab", { name: "Library", exact: true }).click();
   await page.getByRole("button", { name: "Play 0001", exact: true }).click();
+  await page
+    .getByRole("button", { name: "Extra options", exact: true })
+    .click();
   await expect(page.getByText("ONLINE VIDEO", { exact: true })).toBeVisible();
   await expect
     .poll(() =>
@@ -410,8 +424,9 @@ test("user connects Salsa and Bachata folders → streams → edits → refresh 
     .getByRole("button", { name: "Library", exact: true })
     .first()
     .click();
+  await page.getByRole("tab", { name: "Settings", exact: true }).click();
   await page
-    .getByRole("button", { name: "Connect storage", exact: true })
+    .getByRole("button", { name: "Manage video storage", exact: true })
     .click();
   outsideAdded = true;
   await page
@@ -453,6 +468,12 @@ test("user connects Salsa and Bachata folders → streams → edits → refresh 
     }),
   ).toBeVisible();
   await page.getByRole("button", { name: "Done", exact: true }).click();
+  await page.getByRole("tab", { name: "Library", exact: true }).click();
+  const filters = page.getByRole("button", {
+    name: "Filters & sort",
+    exact: true,
+  });
+  if (await filters.count()) await filters.click();
   await page.getByRole("button", { name: "All storage", exact: true }).click();
   await expect(
     page.getByRole("button", { name: "Play 0001", exact: true }),
@@ -485,11 +506,11 @@ test("user connects Salsa and Bachata folders → streams → edits → refresh 
     page.getByRole("button", { name: /^Play 000[12]$/ }),
   ).toHaveCount(2);
   await expect(
-    page.getByText("Bachata class · Daily Pick", { exact: false }),
+    page.getByText(/Unrated \(counts as 5-star\) Bachata/),
   ).toBeVisible();
   await expect(page.getByText("Unrated · treated as 5★").first()).toBeVisible();
   await page
-    .getByText("Bachata class · Daily Pick", { exact: false })
+    .getByText(/Unrated \(counts as 5-star\) Bachata/)
     .scrollIntoViewIfNeeded();
   await page.screenshot({
     path: "artifacts/screenshots/source-daily-picks.png",

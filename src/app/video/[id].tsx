@@ -1,16 +1,19 @@
-import { LabelPicker } from "../../components/LabelPicker";
-import { libraryLabels } from "../../core/labels";
-import { useEffect, useRef, useState } from "react";
+import { YouTubeDetail } from "../../components/YouTubeDetail";
+import { VideoDetails, VideoContext } from "../../components/VideoDetails";
+import { NotesMoments } from "../../components/NotesMoments";
+import { Disclosure } from "../../components/Disclosure";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useEvent } from "expo";
 import {
   View,
+  AppState,
   ScrollView,
   Alert,
   Platform,
   Modal,
   Pressable,
 } from "react-native";
-import { useLocalSearchParams, router } from "expo-router";
+import { useLocalSearchParams, useFocusEffect, router } from "expo-router";
 import { useVideoPlayer, VideoView, type VideoSource } from "expo-video";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { seek, setRate } from "../../services/playback";
@@ -31,7 +34,6 @@ import {
   Field,
   Badge,
   Icon,
-  layout,
 } from "../../components/ui";
 import { useTheme } from "../../components/theme";
 import { CloudVideoControls } from "../../components/CloudVideoControls";
@@ -39,7 +41,6 @@ import { resolveVideo, RevokedAccess } from "../../services/cloud/playback";
 import Timeline from "../../components/Timeline";
 import { VideoArea } from "../../components/VideoArea";
 import { SaveDestinationPicker } from "../../components/SaveDestinationPicker";
-import { isUnrated } from "../../core/ratings";
 import { clipDestination, uploadDestination } from "../../core/destination";
 import { trimRange } from "../../core/editing";
 import { formatTime, parseTime, validateSegment } from "../../core/practice";
@@ -61,20 +62,10 @@ function Player({ video, uri }: { video: Video; uri: VideoSource }) {
   const [end, setEnd] = useState(video.duration.toFixed(2));
   const [loop, setLoop] = useState(false);
   const [segmentName, setSegmentName] = useState("");
-  const [note, setNote] = useState("");
-  const [timestamp, setTimestamp] = useState(true);
-  const [bookmarkName, setBookmarkName] = useState("");
   const [busy, setBusy] = useState(false);
   const [exported, setExported] = useState<string>();
   const [exportedId, setExportedId] = useState<string>();
   const [deleteOpen, setDeleteOpen] = useState(false);
-  const [title, setTitle] = useState(video.title);
-  const [labels, setLabels] = useState(video.labels);
-  const [countOn, setCountOn] = useState(false);
-  const [bpm, setBpm] = useState("100");
-  const [offset, setOffset] = useState("0");
-  const [pattern, setPattern] = useState("1, 2, 3, 4, 5, 6, 7, 8");
-  const [beat, setBeat] = useState("1");
   const lastSaved = useRef(0);
   const current = useRef(video.resume);
   const resolved = useRef(
@@ -85,6 +76,13 @@ function Player({ video, uri }: { video: Video; uri: VideoSource }) {
     p.timeUpdateEventInterval = 0.1;
     p.preservesPitch = true;
   });
+  useFocusEffect(useCallback(() => () => player.pause(), [player]));
+  useEffect(() => {
+    const sub = AppState.addEventListener("change", (state) => {
+      if (state !== "active") player.pause();
+    });
+    return () => sub.remove();
+  }, [player]);
   const { status: playerStatus } = useEvent(player, "statusChange", {
     status: player.status,
   });
@@ -148,27 +146,6 @@ function Player({ video, uri }: { video: Video; uri: VideoSource }) {
     },
     [video.id, updateVideo],
   );
-  useEffect(() => {
-    if (!countOn) return;
-    const timer = setInterval(() => {
-      const tempo = Number(bpm);
-      const shift = Number(offset);
-      const counts = pattern
-        .split(",")
-        .map((s) => s.trim())
-        .filter(Boolean);
-      if (
-        tempo >= 30 &&
-        tempo <= 240 &&
-        Number.isFinite(shift) &&
-        counts.length
-      ) {
-        const index = Math.floor(((current.current - shift) * tempo) / 60);
-        setBeat(index < 0 ? "–" : counts[index % counts.length]);
-      }
-    }, 60);
-    return () => clearInterval(timer);
-  }, [countOn, bpm, offset, pattern]);
   function section() {
     const a = parseTime(start),
       b = parseTime(end);
@@ -280,6 +257,7 @@ function Player({ video, uri }: { video: Video; uri: VideoSource }) {
             {!fullscreen ? (
               <VideoView
                 player={player}
+                surfaceType="textureView"
                 style={{ width: "100%", height: "100%" }}
                 nativeControls={false}
                 contentFit="contain"
@@ -287,24 +265,6 @@ function Player({ video, uri }: { video: Video; uri: VideoSource }) {
               />
             ) : null}
           </View>
-          {countOn ? (
-            <View
-              pointerEvents="none"
-              style={{
-                position: "absolute",
-                bottom: 15,
-                left: 15,
-                backgroundColor: "#080D18DE",
-                borderRadius: 16,
-                paddingHorizontal: 20,
-                paddingVertical: 5,
-              }}
-            >
-              <Txt size={38} color="#C7DCFF" weight="display">
-                {beat}
-              </Txt>
-            </View>
-          ) : null}
         </VideoArea>
         <View style={{ padding: 20, gap: 22 }}>
           <Row style={{ justifyContent: "space-between" }}>
@@ -433,7 +393,7 @@ function Player({ video, uri }: { video: Video; uri: VideoSource }) {
             </Chip>
             <Chip onPress={() => setFullscreen(true)}>Full screen</Chip>
           </Row>
-          <CloudVideoControls video={video} />
+          <VideoDetails video={video} />
           {error ? (
             <Card>
               <Txt color={t.primary} accessibilityRole="alert">
@@ -444,440 +404,230 @@ function Player({ video, uri }: { video: Video; uri: VideoSource }) {
               </Button>
             </Card>
           ) : null}
-          <View style={{ gap: 8 }}>
-            <Txt size={29} weight="display">
-              {video.title}
-            </Txt>
-            <Txt color={t.muted}>
-              {[
-                video.teacher,
-                video.className,
-                video.location,
-                video.lessonDate,
-              ]
-                .filter(Boolean)
-                .join(" · ") || "Your personal dance library"}
-            </Txt>
-            <View style={layout.wrap}>
-              {(["To learn", "Practising", "Learned"] as const).map(
-                (status) => (
-                  <Chip
-                    key={status}
-                    selected={video.status === status}
-                    onPress={() => updateVideo(video.id, { status })}
-                  >
-                    {status}
-                  </Chip>
-                ),
-              )}
-            </View>
-          </View>
-          <Card>
-            <Row style={{ justifyContent: "space-between" }}>
-              <Txt size={23} weight="display">
-                Keep the good part
-              </Txt>
-              <Icon name="loop" color={t.primary} />
-            </Row>
-            <Txt size={13} color={t.muted}>
-              Choose your section. Loop it here, or export a separate MP4. The
-              original stays intact.
-            </Txt>
-            <Row style={{ alignItems: "flex-start" }}>
-              <Field
-                label="Start (m:ss or seconds)"
-                value={start}
-                onChangeText={(s) => {
-                  setStart(s);
-                  setLoop(false);
-                }}
-                style={{ width: "100%" }}
-              />
-              <Field
-                label="End (m:ss or seconds)"
-                value={end}
-                onChangeText={(s) => {
-                  setEnd(s);
-                  setLoop(false);
-                }}
-              />
-            </Row>
-            <Row style={{ flexWrap: "wrap" }}>
-              <Button
-                variant="soft"
-                onPress={() => {
-                  setStart(time.toFixed(2));
-                  setLoop(false);
-                }}
-              >
-                Set start here
-              </Button>
-              <Button
-                variant="soft"
-                onPress={() => {
-                  setEnd(time.toFixed(2));
-                  setLoop(false);
-                }}
-              >
-                Set end here
-              </Button>
-              <Button
-                variant={loop ? "primary" : "soft"}
-                icon="loop"
-                onPress={enableLoop}
-              >
-                {loop ? "Loop on" : "Loop section"}
-              </Button>
-            </Row>
-            <Field
-              label="Section name"
-              placeholder="That turn from class"
-              value={segmentName}
-              onChangeText={setSegmentName}
-            />
+          <Disclosure title="Extra options">
             <Button
               variant="soft"
-              disabled={!segmentName.trim()}
               onPress={() => {
-                try {
-                  const range = section();
-                  updateVideo(video.id, {
-                    segments: [
-                      ...video.segments,
-                      { id: uid(), name: segmentName.trim(), ...range },
-                    ],
-                  });
-                  setSegmentName("");
-                  setError("");
-                } catch (e) {
-                  setError((e as Error).message);
-                }
-              }}
-            >
-              Save practice section
-            </Button>
-            {!trimming ? (
-              <SaveDestinationPicker
-                value={destination}
-                onChange={setDestination}
-                label="Save trimmed clip to"
-              />
-            ) : null}
-            <Button icon="download" onPress={trim} loading={busy}>
-              Export new trimmed video
-            </Button>
-            {busy ? (
-              <>
-                <Txt size={12} color={t.muted}>
-                  Creating a new file on your device. Keep BailaCue open until
-                  export finishes.
-                </Txt>
-                {Platform.OS !== "web" ? (
-                  <Button
-                    variant="ghost"
-                    onPress={() => nativeMedia().cancelExport()}
-                  >
-                    Cancel export
-                  </Button>
-                ) : null}
-              </>
-            ) : null}
-            {exported ? (
-              <View style={{ gap: 12 }}>
-                <Badge tone="accent">NEW CLIP READY</Badge>
-                <Txt size={13}>
-                  Your new MP4 is saved in your library. You can also save a
-                  copy to Photos or Files.
-                </Txt>
-                <Button
-                  icon="download"
-                  onPress={() =>
-                    handle(
-                      () => saveToPhotos(exported),
-                      "Your new clip was saved to Photos.",
-                    )
-                  }
-                >
-                  Save new clip to Photos
-                </Button>
-                <Button
-                  variant="soft"
-                  onPress={() => handle(() => shareMedia(exported))}
-                >
-                  Share / Save file
-                </Button>
-                <Button
-                  variant="soft"
-                  onPress={() => {
-                    if (exportedId)
-                      router.push({
-                        pathname: "/video/[id]",
-                        params: { id: exportedId },
-                      });
-                  }}
-                >
-                  Open new clip in library
-                </Button>
-              </View>
-            ) : null}
-          </Card>
-          {video.segments.length ? (
-            <View style={{ gap: 10 }}>
-              <Txt size={22} weight="display">
-                Saved sections
-              </Txt>
-              {video.segments.map((s) => (
-                <Card key={s.id}>
-                  <Row style={{ justifyContent: "space-between" }}>
-                    <View style={{ flex: 1 }}>
-                      <Txt weight="bold">{s.name}</Txt>
-                      <Txt size={12} color={t.muted}>
-                        {formatTime(s.start)} → {formatTime(s.end)}
-                      </Txt>
-                    </View>
-                    <Button
-                      variant="soft"
-                      onPress={() => {
-                        setStart(String(s.start));
-                        setEnd(String(s.end));
-                        setLoop(true);
-                        seek(player, s.start);
-                        player.play();
-                      }}
-                    >
-                      Loop
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      onPress={() =>
-                        updateVideo(video.id, {
-                          segments: video.segments.filter((x) => x.id !== s.id),
-                        })
-                      }
-                    >
-                      ×
-                    </Button>
-                  </Row>
-                </Card>
-              ))}
-            </View>
-          ) : null}
-          <Card>
-            <Txt size={22} weight="display">
-              Count it out
-            </Txt>
-            <Txt size={13} color={t.muted}>
-              A count guide using your tempo and video time. Set the offset to
-              match the music; beats are not detected automatically.
-            </Txt>
-            <Row>
-              <Field
-                label="Tempo (30–240 BPM)"
-                value={bpm}
-                keyboardType="numeric"
-                onChangeText={setBpm}
-              />
-              <Field
-                label="Offset (seconds)"
-                value={offset}
-                keyboardType="numbers-and-punctuation"
-                onChangeText={setOffset}
-              />
-            </Row>
-            <Field
-              label="Count pattern"
-              value={pattern}
-              onChangeText={setPattern}
-            />
-            <Button variant="soft" onPress={() => setCountOn(!countOn)}>
-              {countOn ? "Hide count" : "Show count"}
-            </Button>
-          </Card>
-          <Card>
-            <Txt size={22} weight="display">
-              Make a note of it
-            </Txt>
-            <Field
-              label="Practice note"
-              placeholder="Keep the steps small on the turn…"
-              value={note}
-              onChangeText={setNote}
-              multiline
-            />
-            <Chip selected={timestamp} onPress={() => setTimestamp(!timestamp)}>
-              Attach {formatTime(time)}
-            </Chip>
-            <Button
-              variant="soft"
-              disabled={!note.trim()}
-              onPress={() => {
-                updateVideo(video.id, {
-                  notes: [
-                    ...video.notes,
-                    {
-                      id: uid(),
-                      text: note.trim(),
-                      time: timestamp ? time : undefined,
-                      createdAt: new Date().toISOString(),
-                    },
-                  ],
+                player.pause();
+                router.push({
+                  pathname: "/compare",
+                  params: { reference: video.id },
                 });
-                setNote("");
               }}
             >
-              Save note
+              Compare with another video
             </Button>
-            {video.notes.map((n) => (
-              <View
-                key={n.id}
-                style={{
-                  gap: 4,
-                  borderTopWidth: 1,
-                  borderColor: t.border,
-                  paddingTop: 10,
-                }}
-              >
-                {n.time !== undefined ? (
-                  <Button
-                    variant="ghost"
-                    style={{ alignSelf: "flex-start" }}
-                    onPress={() => {
-                      setLoop(false);
-                      seek(player, n.time!);
-                    }}
-                  >
-                    {formatTime(n.time)}
-                  </Button>
-                ) : null}
-                <Txt>{n.text}</Txt>
-                <Button
-                  variant="ghost"
-                  style={{ alignSelf: "flex-start" }}
-                  onPress={() =>
-                    updateVideo(video.id, {
-                      notes: video.notes.filter((x) => x.id !== n.id),
-                    })
-                  }
-                >
-                  Remove note
-                </Button>
-              </View>
-            ))}
-          </Card>
-          <Card>
-            <Txt size={22} weight="display">
-              Bookmark this moment
-            </Txt>
-            <Field
-              label="Bookmark name"
-              value={bookmarkName}
-              onChangeText={setBookmarkName}
-              placeholder="Start of the combination"
-            />
-            <Button
-              variant="soft"
-              disabled={!bookmarkName.trim()}
-              onPress={() => {
-                updateVideo(video.id, {
-                  bookmarks: [
-                    ...video.bookmarks,
-                    { id: uid(), name: bookmarkName.trim(), time },
-                  ],
-                });
-                setBookmarkName("");
-              }}
-            >
-              Bookmark {formatTime(time)}
-            </Button>
-            {video.bookmarks.map((b) => (
-              <Row key={b.id} style={{ flexWrap: "wrap" }}>
-                <Button
-                  variant="soft"
-                  onPress={() => {
+            <CloudVideoControls video={video} />
+
+            <Card>
+              <Row style={{ justifyContent: "space-between" }}>
+                <Txt size={23} weight="display">
+                  Keep the good part
+                </Txt>
+                <Icon name="loop" color={t.primary} />
+              </Row>
+              <Txt size={13} color={t.muted}>
+                Choose your section. Loop it here, or export a separate MP4. The
+                original stays intact.
+              </Txt>
+              <Row style={{ alignItems: "flex-start" }}>
+                <Field
+                  label="Start (m:ss or seconds)"
+                  value={start}
+                  onChangeText={(s) => {
+                    setStart(s);
                     setLoop(false);
-                    seek(player, b.time);
+                  }}
+                  style={{ width: "100%" }}
+                />
+                <Field
+                  label="End (m:ss or seconds)"
+                  value={end}
+                  onChangeText={(s) => {
+                    setEnd(s);
+                    setLoop(false);
+                  }}
+                />
+              </Row>
+              <Row style={{ flexWrap: "wrap" }}>
+                <Button
+                  variant="soft"
+                  onPress={() => {
+                    setStart(time.toFixed(2));
+                    setLoop(false);
                   }}
                 >
-                  {formatTime(b.time)} · {b.name}
+                  Set start here
                 </Button>
                 <Button
-                  variant="ghost"
-                  onPress={() =>
-                    updateVideo(video.id, {
-                      bookmarks: video.bookmarks.filter((x) => x.id !== b.id),
-                    })
-                  }
+                  variant="soft"
+                  onPress={() => {
+                    setEnd(time.toFixed(2));
+                    setLoop(false);
+                  }}
                 >
-                  Remove
+                  Set end here
+                </Button>
+                <Button
+                  variant={loop ? "primary" : "soft"}
+                  icon="loop"
+                  onPress={enableLoop}
+                >
+                  {loop ? "Loop on" : "Loop section"}
                 </Button>
               </Row>
-            ))}
-          </Card>
-          <Card>
-            <Txt size={22} weight="display">
-              The little details
-            </Txt>
-            {video.remote ? (
-              <Txt>Source title: {video.title}</Txt>
-            ) : (
-              <Field label="Title" value={title} onChangeText={setTitle} />
-            )}
-            <LabelPicker
-              value={labels}
-              options={libraryLabels(library)}
-              onChange={setLabels}
+              <Field
+                label="Section name"
+                placeholder="That turn from class"
+                value={segmentName}
+                onChangeText={setSegmentName}
+              />
+              <Button
+                variant="soft"
+                disabled={!segmentName.trim()}
+                onPress={() => {
+                  try {
+                    const range = section();
+                    updateVideo(video.id, {
+                      segments: [
+                        ...video.segments,
+                        { id: uid(), name: segmentName.trim(), ...range },
+                      ],
+                    });
+                    setSegmentName("");
+                    setError("");
+                  } catch (e) {
+                    setError((e as Error).message);
+                  }
+                }}
+              >
+                Save practice section
+              </Button>
+              {!trimming ? (
+                <SaveDestinationPicker
+                  value={destination}
+                  onChange={setDestination}
+                  label="Save trimmed clip to"
+                />
+              ) : null}
+              <Button icon="download" onPress={trim} loading={busy}>
+                Export new trimmed video
+              </Button>
+              {busy ? (
+                <>
+                  <Txt size={12} color={t.muted}>
+                    Creating a new file on your device. Keep BailaCue open until
+                    export finishes.
+                  </Txt>
+                  {Platform.OS !== "web" ? (
+                    <Button
+                      variant="ghost"
+                      onPress={() => nativeMedia().cancelExport()}
+                    >
+                      Cancel export
+                    </Button>
+                  ) : null}
+                </>
+              ) : null}
+              {exported ? (
+                <View style={{ gap: 12 }}>
+                  <Badge tone="accent">NEW CLIP READY</Badge>
+                  <Txt size={13}>
+                    Your new MP4 is saved in your library. You can also save a
+                    copy to Photos or Files.
+                  </Txt>
+                  <Button
+                    icon="download"
+                    onPress={() =>
+                      handle(
+                        () => saveToPhotos(exported),
+                        "Your new clip was saved to Photos.",
+                      )
+                    }
+                  >
+                    Save new clip to Photos
+                  </Button>
+                  <Button
+                    variant="soft"
+                    onPress={() => handle(() => shareMedia(exported))}
+                  >
+                    Share / Save file
+                  </Button>
+                  <Button
+                    variant="soft"
+                    onPress={() => {
+                      if (exportedId)
+                        router.push({
+                          pathname: "/video/[id]",
+                          params: { id: exportedId },
+                        });
+                    }}
+                  >
+                    Open new clip in library
+                  </Button>
+                </View>
+              ) : null}
+            </Card>
+            {video.segments.length ? (
+              <View style={{ gap: 10 }}>
+                <Txt size={22} weight="display">
+                  Saved sections
+                </Txt>
+                {video.segments.map((s) => (
+                  <Card key={s.id}>
+                    <Row style={{ justifyContent: "space-between" }}>
+                      <View style={{ flex: 1 }}>
+                        <Txt weight="bold">{s.name}</Txt>
+                        <Txt size={12} color={t.muted}>
+                          {formatTime(s.start)} → {formatTime(s.end)}
+                        </Txt>
+                      </View>
+                      <Button
+                        variant="soft"
+                        onPress={() => {
+                          setStart(String(s.start));
+                          setEnd(String(s.end));
+                          setLoop(true);
+                          seek(player, s.start);
+                          player.play();
+                        }}
+                      >
+                        Loop
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        onPress={() =>
+                          updateVideo(video.id, {
+                            segments: video.segments.filter(
+                              (x) => x.id !== s.id,
+                            ),
+                          })
+                        }
+                      >
+                        ×
+                      </Button>
+                    </Row>
+                  </Card>
+                ))}
+              </View>
+            ) : null}
+            <VideoContext video={video} />
+            <NotesMoments
+              video={video}
+              time={time}
+              onSeek={(seconds) => {
+                setLoop(false);
+                seek(player, seconds);
+              }}
             />
-            <Button
-              variant="soft"
-              disabled={!video.remote && !title.trim()}
-              onPress={() =>
-                updateVideo(video.id, {
-                  title: video.remote ? video.title : title.trim(),
-                  labels,
-                })
-              }
-            >
-              Save details
+            <Button variant="ghost" onPress={() => setDeleteOpen(true)}>
+              Remove this local video
             </Button>
-            <View style={layout.wrap}>
-              {(["Bachata", "Salsa", "Other"] as const).map((style) => (
-                <Chip
-                  key={style}
-                  selected={style === video.style}
-                  onPress={() =>
-                    updateVideo(video.id, { style, styleSet: true })
-                  }
-                >
-                  {style}
-                </Chip>
-              ))}
-            </View>
-            <Txt size={13} weight="bold">
-              Your rating · Daily Picks priority
+            <Txt size={12} color={t.muted}>
+              Only BailaCue’s copy and metadata are removed. Files in your
+              gallery or other storage are preserved.
             </Txt>
-            <Row>
-              {[1, 2, 3, 4, 5].map((importance) => (
-                <Chip
-                  key={importance}
-                  selected={
-                    !isUnrated(video) && importance === video.importance
-                  }
-                  onPress={() =>
-                    updateVideo(video.id, { importance, ratingSet: true })
-                  }
-                >
-                  {importance} ★
-                </Chip>
-              ))}
-            </Row>
-          </Card>
-          <Button variant="ghost" onPress={() => setDeleteOpen(true)}>
-            Remove this local video
-          </Button>
-          <Txt size={12} color={t.muted}>
-            Only BailaCue’s copy and metadata are removed. Files in your gallery
-            or other storage are preserved.
-          </Txt>
+          </Disclosure>
         </View>
       </ScrollView>
       <Modal
@@ -923,14 +673,45 @@ function Player({ video, uri }: { video: Video; uri: VideoSource }) {
         >
           <VideoView
             player={player}
+            surfaceType="textureView"
             style={{
               width: "100%",
-              height: "85%",
+              flex: 1,
               transform: [{ scaleX: mirror ? -1 : 1 }],
             }}
-            nativeControls
+            nativeControls={false}
             contentFit="contain"
           />
+          <View style={{ padding: 12, gap: 8 }}>
+            <Timeline
+              duration={video.duration}
+              position={time}
+              disabled={!playerReady}
+              onSeek={(seconds) => seek(player, seconds)}
+            />
+            <Row style={{ justifyContent: "center" }}>
+              <Button
+                variant="soft"
+                onPress={() => seek(player, Math.max(0, time - 5))}
+              >
+                −5 sec
+              </Button>
+              <Button
+                onPress={() => (playing ? player.pause() : player.play())}
+              >
+                {playing ? "Pause" : "Play"}
+              </Button>
+              <Button
+                variant="soft"
+                onPress={() => seek(player, Math.min(video.duration, time + 5))}
+              >
+                +5 sec
+              </Button>
+              <Button variant="soft" onPress={() => setMirror(!mirror)}>
+                Mirror {mirror ? "on" : "off"}
+              </Button>
+            </Row>
+          </View>
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="Close full screen"
@@ -972,7 +753,7 @@ export default function VideoDetail() {
   const error = failure?.key === playbackKey ? failure.message : "";
   useEffect(() => {
     let alive = true;
-    if (video && videoId)
+    if (video && videoId && !video.youtube)
       resolveVideo(video, library)
         .then((uri) => {
           if (alive) {
@@ -998,6 +779,7 @@ export default function VideoDetail() {
     // Metadata edits do not reopen a playing video.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [playbackKey]);
+  if (video?.youtube) return <YouTubeDetail key={video.id} video={video} />;
   if (!video || error)
     return (
       <SafeAreaView style={{ flex: 1, padding: 24, gap: 18 }}>

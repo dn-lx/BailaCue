@@ -1,3 +1,4 @@
+import { DancePicker } from "../../components/DancePicker";
 import { ImportPreview } from "../../components/ImportPreview";
 import { SaveDestinationPicker } from "../../components/SaveDestinationPicker";
 import { phoneDestination, uploadDestination } from "../../core/destination";
@@ -16,7 +17,6 @@ import {
   Chip,
   Badge,
   Icon,
-  layout,
 } from "../../components/ui";
 import { useTheme } from "../../components/theme";
 import { useLibrary } from "../../services/store";
@@ -84,6 +84,8 @@ export default function Upload() {
           title: title.trim(),
           ...media,
           style,
+          styleSet: true,
+          danceId: l.danceTypes?.find((d) => d.name === style)?.id,
           labels,
           importance,
           ratingSet,
@@ -152,6 +154,17 @@ export default function Upload() {
           </Button>
         </Row>
       </Card>
+      <Card>
+        <Txt size={22} weight="display">
+          YouTube videos & playlists
+        </Txt>
+        <Txt>
+          Preview a public link or choose an optional beginner playlist.
+        </Txt>
+        <Button variant="soft" onPress={() => router.push("/youtube")}>
+          Add from YouTube
+        </Button>
+      </Card>
       {error ? (
         <Card>
           <Txt color={t.primary} accessibilityRole="alert">
@@ -173,13 +186,7 @@ export default function Upload() {
           </Card>
           <ImportPreview key={media.uri} uri={media.uri} />
           <Field label="Video title" value={title} onChangeText={setTitle} />
-          <View style={layout.wrap}>
-            {(["Bachata", "Salsa", "Other"] as const).map((s) => (
-              <Chip key={s} selected={style === s} onPress={() => setStyle(s)}>
-                {s}
-              </Chip>
-            ))}
-          </View>
+          <DancePicker value={style} onChange={setStyle} />
           <LabelPicker
             value={labels}
             options={libraryLabels(library)}

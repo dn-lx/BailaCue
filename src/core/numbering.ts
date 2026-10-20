@@ -178,6 +178,7 @@ export function reserveUploadNumber(
   };
 }
 export function sourceStyle(source: CloudFolder) {
+  if (source.defaultDanceId) return source.defaultStyle;
   const salsa = /\bsalsa\b/i.test(source.name),
     bachata = /\bbachata\b/i.test(source.name);
   return salsa !== bachata

@@ -2,7 +2,7 @@
 
 Status: owner selected concept **03 — BC + play** on 2026-10-20 and authorized the
 icon and blue-and-black theme implementation. App name remains **BailaCue**.
-The remaining product/UX work is still pending separate implementation instructions.
+The owner subsequently authorized implementation of every issue in the review document. See IMPLEMENTATION-TRACKER.md for acceptance and platform limits.
 
 ## Approved brand and Git asset requirement
 
@@ -19,7 +19,7 @@ monochrome artwork, iOS/app-store artwork, splash, favicons and coordinated badg
 Keep a manifest with paths, format, dimensions, checksums and implementation status.
 Never describe an SVG embedding PNG artwork as an editable vector master. A reviewed
 pure-vector master, clean transparent artwork and Android themed monochrome assets
-remain required follow-up until explicitly delivered and verified.
+are delivered as traced symbol paths, outlined wordmark paths, transparent PNG/SVG families and Android themed artwork.
 
 Acceptance:
 
@@ -44,15 +44,15 @@ to Expo/React Native and preserve BailaCue's product behavior and project rules.
 
 Acceptance:
 
-- [ ] Record the reviewed starter revision and the design guidance used.
-- [ ] Capture current screens, define visual acceptance criteria and document the
+- [x] Record the reviewed starter revision and the design guidance used.
+- [x] Capture current screens, define visual acceptance criteria and document the
       improved shared tokens/components and key user journeys.
 - [x] Present icon concepts and record the owner's choice: blue-and-black concept 03.
-- [ ] Complete the selected icon's full editable master and platform asset inventory.
+- [x] Complete the selected icon's full editable master and platform asset inventory.
 - [ ] Implement the UI improvements and verify alignment, large text, accessibility
       and important native video workflows with before/after evidence.
 
-This is a requirement for the future design work, not an instruction to run the
+The workflow applies to this implementation; do not run the
 starter's full bootstrap or replace this application's architecture.
 
 ## Required work
@@ -66,8 +66,7 @@ starter's full bootstrap or replace this application's architecture.
 3. Make primary actions and transfer state easier to understand: selected destination,
    online/phone status, upload progress, retry and completion. Keep renaming optional.
 4. Show why a Daily Pick was chosen and clearly distinguish daily recommendations
-   from the Practice timer and its video list. Currently Practice shows the first
-   five library videos; adopting recommendations there needs its own product decision.
+   from the Practice timer and its video list. Practice uses a rating-weighted, dance-balanced queue without replacement, independent of Daily Picks.
 5. Preserve the selected concept 03 BC/play symbol and blue/black identity. Retain
    a clear shape at launcher size and verify it on actual phone home screens.
 6. For the chosen concept, deliver an editable vector master plus Android adaptive

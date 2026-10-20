@@ -342,10 +342,12 @@ export function Screen({
   title,
   subtitle,
   action,
+  scrollEnabled = true,
 }: React.PropsWithChildren<{
   title: string;
   subtitle?: string;
   action?: React.ReactNode;
+  scrollEnabled?: boolean;
 }>) {
   const t = useTheme();
   return (
@@ -354,6 +356,7 @@ export function Screen({
       style={{ flex: 1, backgroundColor: t.background }}
     >
       <ScrollView
+        scrollEnabled={scrollEnabled}
         keyboardShouldPersistTaps="handled"
         contentContainerStyle={{
           padding: 24,
