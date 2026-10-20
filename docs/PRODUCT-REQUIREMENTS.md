@@ -3,7 +3,7 @@
 Source: https://docs.google.com/document/d/14gHkXfuTIZxQUjV_kn7Ra1nsD7A_hjv8Mn3jILW0gWc
 
 BailaCue improvements — implementation requirements and order
-Updated 20 October 2026 · Owner authorized implementation of all requirements; work and acceptance checks in progress
+Updated 20 October 2026 · All 22 issues implemented; Android build22 published and verified; external manual acceptance remains in VERIFICATION.md
 This draft turns your screenshot notes into specific requirements and smaller implementation issues. It also incorporates the previously requested YouTube sources and use of your Agent Project Starter. “Owner request” means you asked for it; “Proposal” means a recommendation to review. The owner has now authorized implementation of the full backlog. Proposed defaults are the working decisions unless changed below; acceptance status is recorded separately from implementation.
 Read the product rules, implementation order and review decisions first. Your original wording and all seven screenshots remain unchanged in the appendix. Refer to an issue ID when requesting a correction or implementation.
 Approved brand update — 20 October 2026

@@ -1,6 +1,6 @@
 # Complete product scope and acceptance ledger
 
-The original [build brief](BUILD-BRIEF.md) remains authoritative. No item below is
+The original [build brief](BUILD-BRIEF.md) and subsequently approved [full-document requirements](PRODUCT-REQUIREMENTS.md) define current scope. The latest user decisions supersede older UI/default descriptions in this historical milestone ledger. See [current implementation](IMPLEMENTATION-TRACKER.md). No item below is
 a claim of native device validation. `[x]` means implemented with recorded local
 verification; `[ ]` means still pending, including implemented code awaiting its
 necessary integration/device validation. See VERIFICATION.md for exact evidence.

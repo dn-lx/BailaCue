@@ -1,6 +1,6 @@
 # Full-document implementation · preview22
 
-The owner authorized all22 issues on20 October2026. The organized specification
+The owner authorized all 22 issues on20 October2026. The organized specification
 is mirrored in [PRODUCT-REQUIREMENTS.md](PRODUCT-REQUIREMENTS.md). Earlier review-only
 wording is superseded. All original screenshots remain in the Google Doc.
 
@@ -18,7 +18,7 @@ wording is superseded. All original screenshots remain in the Google Doc.
 | BC16 / BC17        | Official YouTube player/oEmbed/Data API, combined-link choice, playlist pagination/preview/selection/refresh, dedupe and memberships            | Browser mock official endpoints; complete pagination requires device API key; keyless player list may be limited and is disclosed             |
 | BC18               | Versioned optional owner catalog: Bachata Tutorials by Roberto & Magdalena Bachata                                                              | Supplied playlistPL2E0b6twkkHkMemtovF3zHgo95pURUUmy; no invented Salsa links; language marked not specified; no automatic add                 |
 | BC19               | YouTube opt-in for Daily Picks/Practice, online-only, supported rates/fallback, no file actions                                                 | Domain/browser integration checks; live YouTube and iOS autoplay/embedding remain external acceptance                                         |
-| BC21               | 185 unit/database tests,10 browser journeys, type/lint, web export and Expo Doctor20/20; Android pipeline                                       | Native/public APK evidence recorded in VERIFICATION.md when gate finishes. Unsigned iOS simulator compile passed21; iPhone signing/runtime and live cloud transfers remain unverified |
+| BC21               | 185 unit/database tests, 10 browser journeys, type/lint, web export and Expo Doctor 20/20; Android pipeline                                       | All 14 native checks and public-byte verification pass; fresh iOS simulator compile passes; physical iPhone/live providers remain manual |
 
 Working defaults: shared dance types independent of storage; one Daily Pick per
 selected dance; exact Library ratings plus Unrated; newest-added sort; old learning
@@ -35,6 +35,6 @@ Unpublished build18/tag v0.2.13-preview.18/run39429970323 was cancelled before p
 
 Build19/tag v0.2.14-preview.19/run39431016837 was cancelled before publication for final YouTube import, full-screen contrast and revoked-copy UI corrections.
 
-Build20/tag v0.2.15-preview.20/run39432080504 built successfully but was blocked after5 native checks: the hidden full-screen VideoView stole the inline video surface. Source21 conditionally mounts it. Evidence is in verification/android-build20-initial/. No build20 release was published.
+Build20/tag v0.2.15-preview.20/run39432080504 built successfully but was blocked after 5 native checks: the hidden full-screen VideoView stole the inline video surface. Source21 conditionally mounts it. Evidence is in verification/android-build20-initial/. No build20 release was published.
 
-Build21 passed13 native checks, including real pixel Mirror reversal, export/original integrity, labels and Daily Picks, but was withheld for the final Practice pause check. Build22 rejects stale session/mount events and preserves explicit pause intent. Its native release gate is pending.
+Build21 passed 13 native checks, including real pixel Mirror reversal, export/original integrity, labels and Daily Picks, but was withheld for the final Practice pause check. Build22 rejects stale session/mount events and preserves explicit pause intent. Its rerun passed all 14 checks on the same APK, and the accepted bytes were published.

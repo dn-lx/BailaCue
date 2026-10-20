@@ -1,203 +1,32 @@
-# Current handoff · full requirements ·0.2.17/build22
+# Current handoff · BailaCue 0.2.17 / build22
 
-The owner authorized all22 issues, superseding the earlier review-only gate.
-See PRODUCT-REQUIREMENTS.md, IMPLEMENTATION-TRACKER.md, YOUTUBE.md and VERIFICATION.md.
-The source includes the simplified player, dynamic dances/labels/filters/sorts,
-rating-led Daily Picks, continuous timed Practice and optional YouTube sources.
-185 unit/database tests and10 browser journeys pass; Doctor20/20. The Android
-build/native/publication gate is in progress. Do not claim native acceptance yet.
-Name stays BailaCue; concept03 BC/play in blue/black.66 vector/PNG exports are in Git.
-No automatic renaming, production deployment or main merge. iOS/live-provider and
-physical-interruption acceptance remain separately documented.
+The owner authorized all 22 issues in the review document. They are implemented in
+`feat/bailacue-mobile-foundation`, draft PR#1. Main remains unmerged.
 
-# Current handoff · BailaCue 0.2.12 (build17)
+- App source/tag: `30bbe30b30c69e866d4d13118f99652fb29b35e0`, `v0.2.17-preview.22`.
+- Harness-only rerun: `6d1a870095afcadb5dc114974f79dab3b825564a`.
+- Build39444651211; acceptance39448344894: all 14 native ARTEMIS checks passed.
+- Recovery39449571245 published the exact accepted APK. Public bytes/signature verified.
+- 185 unit/database tests, 10 browser journeys, type/lint, web export and Doctor20/20 pass.
+- Fresh iOS simulator compile39444659378 and iOS-target Hermes export pass;
+  signed iPhone installation/runtime still require separate acceptance and Apple signing.
 
-Owner selected blue-and-black concept03, BC + embedded play triangle. Authorized
-icon/theme implementation and a requirement to keep the complete logo/icon family
-in Git. Only brand work is implemented; the Google Doc's other product issues
-remain awaiting instructions. The Doc was updated and verified with all7 original
-screenshot objects preserved. Do not publish private notes/screenshots to GitHub.
+Delivered: simpler player with real Mirror and resize; details before extra tools;
+unified notes/moments; custom dances and grouped labels; exact ratings and sorting;
+rating-led Daily Picks; continuous timed Practice with recovery/history; optional
+public YouTube videos/playlists and the supplied Bachata Tutorials suggestion.
+Name stays BailaCue. Blue/black concept03 BC/play and all 66 brand exports are in Git.
 
-Semantic blue/black light/dark palettes, foreground contrast tokens, selected chips,
-controls, switches, player surfaces, video placeholders and icon/splash/favicon are
-updated. Brand packaging produces20 exports, light/dark wordmarks, badges and manifest
-with dimensions/checksums. Sources and generated concept board committed. SVG logo
-containers are raster-backed, not pure-vector masters. Clean transparent, pure-vector
-and Android themed monochrome versions remain explicitly pending in BR-02.
-Reviewed starter design reference revision:2a2be2b54595ab67768b1f13cc2a0794f5787f64.
-No starter bootstrap, hooks, web runtime, analytics or dependencies were installed.
+Renaming remains optional/off by default. Preserve originals, exact destinations,
+recoverable uploads and existing account boundaries. No new production tables are
+needed: existing Me+ metadata snapshots carry new IDs/memberships. YouTube API keys
+and active device sessions are excluded from account sync.
 
-153 tests/16 suites, type/lint, web export and six browser journeys pass after the
-SDK patch update. Expo Doctor passes20/20 with the inherited proxy enabled. Targeted
-colour ratios exceed4.5:1; layouts cover7 screens at320/360/412px. Build17 native
-acceptance/publication pending; source pushes and Android prereleases authorized.
-No main merge, store submission, TinyFish, paid services or database/media changes.
+YouTube full pagination requires a device Data API key. Browser integration tests
+mock official endpoints; a live attempt was network-blocked. Live providers,
+creator/autoplay behavior, physical iOS playback/calls/accessibility remain explicitly
+unverified. See VERIFICATION.md, IMPLEMENTATION-TRACKER.md, PRACTICE.md and YOUTUBE.md.
 
-Build16/tag v0.2.11-preview.16/run39421291736 was cancelled before publication
-after Expo Doctor found six newly recommended SDK58 patch updates. Reviewed
-upstream changelogs and ran expo install --fix to align Expo58.0.16 and its
-file-system/font/media-library/router/video patch set. No validation was bypassed.
-
-Historical build15 handoff follows.
-
----
-
-# Current handoff · BailaCue 0.2.10 (build15)
-
-Owner changed the requirement: renaming must be an app option, never default.
-Connecting/refreshing/foreground discovery now only read metadata and never rename
-cloud or cached phone files. Source titles reflect actual filenames, including on
-partial failure. A manual Rename existing videos action previews approved file IDs,
-requires Apply, reports progress and per-file errors, supports pause after the
-current file and reviews remaining work on retry. New-upload numbering is a separate
-numberUploads source switch, off for missing/false flags in new and old libraries.
-Jobs capture numberedNames/originalName; legacy jobs without the choice default off.
-Stable numbering registries and old ID/session recovery are retained. Device-local
-renameResult is excluded from metadata snapshots, preventing phone paths in errors
-from syncing. No production database changes or connector rename writes.
-
-Owner-authorized Drive metadata reads confirmed an existing app rename pass was
-continuing and then completed in both sources. Private folder/file identifiers
-are deliberately absent from source and public evidence. User was told to close the
-old installed app if they wanted to stop its automatic pass before updating.
-
-153 unit/database tests, type/lint, web export and all six browser journeys passed. Published v0.2.10-preview.15 after build/native/publication run39214131930 passed. All12 ARTEMIS checks passed with helper1.2.0. Public APK equals the tested artifact:70,240,141bytes, SHA2560c4901c01f83f277ab08a5dee9a911a6d484b40efde26e5f60d51e19a6cf52d5. Public APKv2 signature/version and unchanged signer verified. Evidence is in verification/android-build15/.
-App source fe73e07156a279e6b607911a8bd3aece4142814a; tagv0.2.10-preview.15.
-Build run39214131930; source checks39214128650 passed.
-Source pushes and Android prereleases remain authorized; no main merge, stores,
-paid services, TinyFish or unrelated Me+ access. See SOURCE-NUMBERING.md and VERIFICATION.md.
-
-Historical build14 handoff follows.
-
----
-
-# Current handoff · BailaCue 0.2.9 (build14)
-
-Owner corrected the filename requirement: every source video must have a number-only
-name, with no original title. The library displays `0001`; source files and owned
-phone copies use `0001.mp4` (retaining the actual media extension). Each source has
-its own incremental sequence. Existing numbers are retained and descriptive suffixes
-removed on refresh. Stored titles normalize offline; source titles are read-only.
-Legacy saved upload sessions retain their paths and numbers; final confirmed files
-are renamed by stable ID. Both legacy and numeric staging names remain recognizable.
-Unverified numeric filenames cannot claim upload reservations. Finalization rechecks
-the confirmed ID and repairs legacy conflicts durably; saved Dropbox IDs allow retry
-after renaming without reuploading. Intended numeric filenames are used for phone
-downloads even if the provider rename needs retry. No production database changes. Source pushes and Android prereleases remain authorized.
-
-Local140 tests/16 suites, type/lint and six browser journeys passed. Published v0.2.9-preview.14. Build/native/publication run39172854949 passed; all12 ARTEMIS checks passed with helper1.2.0. The public APK matches the tested artifact:70,231,089bytes, SHA25618ade8ba0e623e9f8f871cecb2d39e9e9edee8f7634add7433d9b828389aa7bf. Public APKv2 signature/version and unchanged signer verified. Evidence is in verification/android-build14/. Build13/run39171131452 was also cancelled before publication for reservation collision and post-rename retry corrections. Build12/run39170414260 was cancelled before publication to fix outside numeric filenames skipping the sequence.
-App source f3885fa595b7802ad094de9e7cd70482b28e7831; tagv0.2.9-preview.14.
-Build run39172854949; source checks39172852220 passed.
-See SOURCE-NUMBERING.md, VERIFICATION.md and releases/v0.2.9-preview.14.md.
-
-Historical build11 handoff follows.
-
----
-
-# Current handoff · BailaCue 0.2.8 (build11)
-
-Owner requested upload Blob fix, preview before classification/destination,
-sequential numbering in actual Drive/Dropbox files and app-owned phone copies,
-external additions discovery, unrated=5★, one Daily Pick per Salsa/Bachata source,
-and alignment fixes across screens. Changes implemented and published as v0.2.8-preview.11 from app source
-`11c796165917e7b376a3591784cd2bdd0d04a4cb`. Android build run39164214724 succeeded; its initial native job passed11 checks then failed due a substring locator opening the title keyboard. Harness commit a41f549 uses exact style/star matches. Standalone acceptance run39166069113 passed all12 checks against the same APK. Recovery publication run39166585417 verified the native report hash before publishing. Public APK checksum/signature/version and byte equality were independently verified. SHA256 `b3db5adec0b0590bd87a79387c2e2b8bec21c8540294ec8837ed4f9826b5f2ba`,70,229,381bytes.
-Build10/tagv0.2.7-preview.10/run39163469949 was intentionally cancelled before publication; no release asset exists for it. Build11 fixes numbered Dropbox destination collisions by retaining unique staging paths and protecting pending paths during discovery.
-Name remains BailaCue. Source pushes and APK prereleases remain authorized, no merge,
-store submission, paid actions, TinyFish or unrelated Me+ production changes.
-
-See SOURCE-NUMBERING.md and DAILY-PICKS.md for exact policies. Numbering retains
-original descriptive filenames, reserves durably, uses stable IDs, and reports
-rename failures without overwriting content. Foreground discovery on open/resume
-and every five minutes; manual Refresh always scans. No closed-app discovery or
-central multi-device sequence lock. Old build9 upload sessions retain destination
-and identity on resume. Legacy automatically assigned cloud3★ is treated unrated;
-explicit new ratings have a separate marker. Upload saves wait for durable metadata
-before phone cleanup. Numbered phone copies are staged before reference changes.
-
-Local validation:130 tests /16 suites, six browser journeys, type/lint and web export.
-114.5MiB transfer regression uses mocked HTTP/native handles and rejects Blob buffers;
-real provider transfers/renames are not claimed. Layout checks include long labels
-across seven screens at320/360/412px. Native harness adds import-preview playback;
-ARTEMIS build11 passed all12 checks; public-byte verification passed. See VERIFICATION.md and verification/android-build11/.
-
-Historical build9 handoff follows; its source/test details are historical only.
-
----
-
-# Current handoff · BailaCue 0.2.6 (build9)
-
-Source `feat/bailacue-mobile-foundation`, draft PR#1. New release tag
-`v0.2.6-preview.9` is published from source commit
-`30a389b7f9e6d8db999b3aeaf0658473193003ec`. Release run39120175502 passed all11
-native checks. Public APK SHA256
-`1bbd27d402e047f1dfa0f677d239e17ae221837b4274a387ed7bb04792d78c66`
-(70,197,869 bytes) equals the built artifact and native report. APKv2 signature
-and version verified; signing identity remains the same as build8.
-See VERIFICATION.md and verification/android-build9/.
-
-## Latest owner requests
-
-The owner chose to **keep BailaCue**, requested a more modern dance app icon and
-rating-led daily viewing with one Salsa and one Bachata. New source implements
-one per selected style, strict minimum stars, independent cooldown fallback,
-rating-first tie policy, saved-day stability, explicit Update today’s picks and
-migration of older daily choices. See DAILY-PICKS.md. Ratings now have clearer labels.
-
-The icon is a modern abstract dancing-partner mark in coral/cream on plum.
-It updates launcher/adaptive/splash/favicon/in-app mark. The opaque selected master
-is assets/brand/dance-icon-source.png; scripts/brand.mjs packages sizes without
-redrawing it. Name, IDs, data,
-OAuth and backend are unchanged. No native dependency changes or generated-root edits.
-
-110 unit/database tests, five browser journeys, type/lint and web export passed
-after final asset integration. Android build9 passed ARTEMIS and published. The harness also imports rated Salsa
-and Bachata videos through UI and verifies both daily picks. Its root-bootstrap script
-handles adbd transport restarts with bounded checks rather than rebuilding the app.
-
-## Audit scope
-
-Source/UX audit in docs/audits/2026-10-18.html and .json. Highest open items: cloud
-restore drops local-only references; cleanup errors can prevent logout; online-only
-cleanup can precede durable metadata commit. First two behaviors were reproduced
-using real functions with synthetic metadata/injected errors, with no production or
-private media access. No broad fixes were authorized or silently implemented.
-Other findings cover snapshot validation, auth-expiry/cache behavior, scaling,
-thumbnails, onboarding, player density, labels, accessibility, timer recovery,
-app-switcher privacy, shared-identity reset revocation, lock/picker draft preservation
-and dependency triage. Actual npm audit reported29 affected
-entries rooted in three advisories, mostly propagated tooling; no exploit was run.
-Do not apply force downgrades that break Expo58 compatibility.
-
-## Google setup progress
-
-The owner manually created an Android OAuth client, reports Drive API enabled,
-Audience test users configured and read/write consent scopes saved. Exact preview
-package `app.bailacue.mobile`, SHA1
-`5E:8F:16:06:2E:A3:CD:2C:4A:0D:54:78:76:BA:A6:F3:8C:AB:F6:25`.
-Current correct Data Access console route is `/auth/scopes`, not `/auth/data-access`.
-Android native sign-in needs no bundled Android client ID. Optional web/iOS build
-identifiers must be of their matching OAuth client types. No Google Cloud credentials
-are available in the workspace. Actual real-account login/upload remains unverified.
-The user explicitly requested no TinyFish; do not invoke it or access browser profile
-files/cookies. No browser control runtime is available here.
-
-## Existing scope and authorization
-
-Branding, labels/artist dropdowns, account API, personal sources, offline copies,
-video practice, collections and native media module remain. Me+ shared production
-BailaCue APIv2 and three additive migrations were owner-approved and deployed already;
-do not re-ask approval or modify unrelated Me+ health/auth data. Source pushes and
-APK prerelease publication are authorized. Do not merge main or submit to stores.
-No paid actions. No subagents unless explicitly requested.
-
-Live provider transfers, real two-user Me+ acceptance, camera/notification/physical
-accessibility/large-file hardening and iOS compilation/signing remain unverified.
-Automatic metadata merge/sync, new-video push and WebDAV/S3 adapters remain pending.
-
-Unpublished build18/tag v0.2.13-preview.18/run39429970323 was cancelled before publication to fix unselected dances entering total-count Daily Picks. Immutable tag/source retained.
-
-Build19/tag v0.2.14-preview.19/run39431016837 was cancelled before publication for final YouTube import, full-screen contrast and revoked-copy UI corrections.
-
-Build20/tag v0.2.15-preview.20/run39432080504 built successfully but was blocked after5 native checks: the hidden full-screen VideoView stole the inline video surface. Source21 conditionally mounts it. Evidence is in verification/android-build20-initial/. No build20 release was published.
-
-Build21 passed13 native checks, including real pixel Mirror reversal, export/original integrity, labels and Daily Picks, but was withheld for the final Practice pause check. Build22 rejects stale session/mount events and preserves explicit pause intent. Its native release gate is pending.
+Source pushes and Android preview publication are authorized. No main merge, store
+submission, paid action, TinyFish or unrelated Me+ access. Do not invoke subagents
+without explicit authorization. Earlier handoffs remain in Git history.

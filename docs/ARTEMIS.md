@@ -1,13 +1,29 @@
-# Preview21 native acceptance in progress
+# Current acceptance · BailaCue 0.2.17 / build22
 
-The updated harness removes preset assertions, tests the resize grip, opens Extra
-options before editing, and checks native Mirror by comparing asymmetric rendered
-pixels before/reversed/restored. It also verifies actual Practice time, paused time
-and background/foreground resume. The same Media3/Photos/original-checksum checks
-remain. Do not treat prior runs as evidence for this source. Result pending.
+[Acceptance39448344894](https://github.com/dn-lx/BailaCue/actions/runs/39448344894)
+passed all **14 native checks** through Google's real pinned ARTEMIS controller and
+helper 1.2.0 on API35. No autonomous model, real account or private media was used.
 
-Build17 brand-only acceptance passed12 checks in run39422105336; its report is in
-verification/android-build17/. The full-document features start at build18.
+[Report](verification/android-build22/report.json) · [Media proof](verification/android-build22/media-proof.json) · [APK proof](verification/android-build22/apk-proof.json) · [Verification](VERIFICATION.md).
+
+Actual pixel Mirror reversal/restoration, drag resize, trim handles, native new-file
+export/original integrity, Photos, artist labels, rated Salsa/Bachata Daily Picks
+and active-time Practice pause/background resume all passed. The export measures
+3.017075s. Practice recorded nine active seconds before pause and returned paused.
+
+The first build22 run passed four checks then its scroll hit native preview seek
+controls. The harness-only rerun moved navigation into the page margin; all app
+assertions and actual resize/trim gestures remain unchanged. The APK was not rebuilt.
+Recovery publication39449571245 required the passing job/report and exact checksum.
+Public bytes equal the accepted artifact, SHA-256
+`5249c1458f2719fbb4bcdb45497d418e150c7f28e3e092af25b9b78b463e173d`.
+Public APKv2 signature/content/version and the unchanged preview signer were checked.
+
+The fresh unsigned iOS simulator compile passed separately; it does not establish
+iPhone runtime acceptance. Live provider/YouTube and physical-device boundaries
+remain in VERIFICATION.md. Historical acceptance records follow.
+
+---
 
 # Current acceptance · BailaCue 0.2.10/build15
 

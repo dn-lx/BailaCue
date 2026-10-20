@@ -20,7 +20,7 @@ remove a separately imported original from Photos/Files or another provider.
 1. Open a video and choose **Trim on timeline**.
 2. Drag the two handles to set start and end. The picture previews the selected edge.
    The selected times are shown beneath the line; precise numeric fields remain under
-   **Keep the good part**.
+   **Extra options → Keep the good part**.
 3. Choose where to save the new clip: phone storage or a particular cloud folder.
 4. Press **Save selected clip**. BailaCue creates a new MP4 without changing the original.
    An online destination starts its upload automatically after native export.
@@ -34,10 +34,9 @@ keyboard arrows. The minimum exportable section is 0.25 seconds.
 
 ## Resize the player
 
-Drag the grip immediately below the picture up or down, or select **Compact video**,
-**Standard video** or **Large video**. The frame changes height and the picture keeps
-its aspect ratio. Use **Full screen** for an immersive view. Resizing and the practice
-speed/mirror/count controls do not change the exported MP4.
+Drag the grip immediately below the picture up or down. Screen readers offer increment/decrement actions; browser keyboard arrows adjust height. The picture keeps its aspect ratio. Use **Full screen** for an immersive view. Mirror uses the native TextureView while control labels stay readable. Size presets and Count it out were removed. Resizing, speed and Mirror do not change the exported MP4.
+
+Video details, dance, labels and all star ratings appear directly after playback controls. **Extra options** holds downloads, class/artist context, comparison, sections and unified **Notes & moments**. A note can be untimed; attaching a timestamp creates a seekable moment. Existing notes/bookmarks migrate without duplicate records.
 
 Native exports, provider uploads and Photos saving require the Android/iOS app.
 The web preview reports these limits and retains phone-imported media after an upload

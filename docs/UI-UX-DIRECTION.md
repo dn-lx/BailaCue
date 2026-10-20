@@ -23,12 +23,12 @@ are delivered as traced symbol paths, outlined wordmark paths, transparent PNG/S
 
 Acceptance:
 
-- [ ] Every listed variant has a committed source/export or an explicitly recorded
+- [x] Every listed variant has a committed source/export or an explicitly recorded
       pending status; no asset exists only in chat or on a local machine.
-- [ ] Regeneration preserves the approved mark and produces platform-compatible
+- [x] Regeneration preserves the approved mark and produces platform-compatible
       sizes, opacity and safe margins. Changes to generated exports are reproducible.
-- [ ] The app icon, splash, in-app mark, badges and both themes use the chosen identity.
-- [ ] Existing app behavior, video editing/export and cloud destinations are preserved.
+- [x] The app icon, splash, in-app mark, badges and both themes use the chosen identity.
+- [x] Existing app behavior, video editing/export and cloud destinations are preserved.
 
 Current files and remaining variants: [brand asset inventory](brand/README.md).
 
@@ -49,7 +49,7 @@ Acceptance:
       improved shared tokens/components and key user journeys.
 - [x] Present icon concepts and record the owner's choice: blue-and-black concept 03.
 - [x] Complete the selected icon's full editable master and platform asset inventory.
-- [ ] Implement the UI improvements and verify alignment, large text, accessibility
+- [x] Implement the UI improvements and verify alignment, large text, accessibility
       and important native video workflows with before/after evidence.
 
 The workflow applies to this implementation; do not run the
@@ -87,12 +87,12 @@ not the unrelated Meir Labs project with a similar name.
 Its [Design Stack](https://github.com/dn-lx/agent-project-starter/blob/prod/docs/DESIGN-STACK.md)
 assigns clear responsibilities:
 
-| Need in BailaCue | Relevant workflow from the starter |
-| --- | --- |
-| Distinctive dance identity, hierarchy and visual direction | Taste Skill |
-| Consistent palette, typography, spacing and UX patterns | UI/UX Pro Max |
-| Critique, alignment, clarity and polish | Impeccable |
-| Verify real rendered flows and accessibility | Frontend Verification + Accessibility/Visual Regression |
+| Need in BailaCue                                           | Relevant workflow from the starter                      |
+| ---------------------------------------------------------- | ------------------------------------------------------- |
+| Distinctive dance identity, hierarchy and visual direction | Taste Skill                                             |
+| Consistent palette, typography, spacing and UX patterns    | UI/UX Pro Max                                           |
+| Critique, alignment, clarity and polish                    | Impeccable                                              |
+| Verify real rendered flows and accessibility               | Frontend Verification + Accessibility/Visual Regression |
 
 Its [Premium Redesign](https://github.com/dn-lx/agent-project-starter/blob/prod/.agents/skills/premium-redesign/SKILL.md)
 workflow starts from product requirements and current UI, defines visual acceptance
@@ -117,6 +117,6 @@ React Native components. None replaces product design judgment or device testing
 The upstream files were inspected as references only. No starter scripts, external
 design packs, hooks or dependencies have been installed or executed in BailaCue.
 
-The owner has selected the icon. Remaining broader UX mockups, production vector
-artwork and verification are tracked separately; choosing the mark is not a request
-to replace the existing application architecture.
+The full redesign now uses the selected icon, shared semantic components and outlined/vector production assets. Current screen and native evidence are tracked in VERIFICATION.md; the existing application architecture is retained.
+
+Acceptance scope: browser layout/large-text checks and all 14 Android native checks pass; fresh iOS simulator compilation passes. Live providers, physical iPhone runtime and full TalkBack/VoiceOver review remain manual, as recorded in VERIFICATION.md.
