@@ -1,0 +1,17 @@
+{
+  "version": "0.3.0",
+  "build": 27,
+  "domain_tests": 189,
+  "domain_suites": 20,
+  "browser_journeys": 17,
+  "typecheck": "passed",
+  "lint": "passed",
+  "web_export": "passed",
+  "sqlite_tests": "Actual Node24 SQLite engine: isolated migration, transactions, rollback, stale writer detection, recovery checkpoints",
+  "sheets_tests": "Controlled official endpoint replies: atomic owned-tab updates, complete history, UTF-8 uploads, retries, disjoint/conflicting edits, recovery validation",
+  "layout": "320/412px chip rows centered in both themes with reduced motion; 320/360/412px route overflow and large-text checks pass",
+  "migration_browser": "Old records retained, separate profiles, label removal and backup recovery persist across reloads; no Me+ requests",
+  "doctor_local": "18/20; two remote metadata checks could not reach Expo/React Native Directory. SDK package compatibility passes after SDK58 patch updates. CI check remains required.",
+  "live_private_provider_acceptance": "not performed",
+  "native_acceptance": "pending separate release gate"
+}

@@ -52,6 +52,7 @@ export function reconcileSource(
             ? sourceStyle(source)
             : v.style,
         available: true,
+        sharedGrantId: undefined,
         duration: file.duration || v.duration,
         size: file.size,
         mimeType: file.mimeType,

@@ -1,3 +1,5 @@
+> Historical first-round design. Concept03 was superseded by the owner-approved concept05 b/play icon in [round2](REQUIREMENTS-ROUND-2.md). Current layout and motion requirements: [local-first](LOCAL-FIRST-REQUIREMENTS.md).
+
 # UI/UX and icon improvement requirements
 
 Status: owner selected concept **03 — BC + play** on 2026-10-20 and authorized the

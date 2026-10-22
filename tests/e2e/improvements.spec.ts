@@ -165,6 +165,9 @@ test("Library supports custom dances, exact stars/Unrated and stable numeric sor
   await page
     .getByRole("button", { name: "Create dance type", exact: true })
     .click();
+  await expect(
+    page.getByRole("textbox", { name: "New dance type", exact: true }),
+  ).toHaveCount(0);
   await page.goto("/library");
   await expect(
     page.getByRole("button", { name: "Tango", exact: true }),

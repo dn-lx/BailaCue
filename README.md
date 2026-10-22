@@ -7,11 +7,11 @@ and iOS, built with React Native, TypeScript and Expo SDK 58.
 
 ## Install Android
 
-Download [BailaCue 0.2.21 for Android](https://github.com/dn-lx/BailaCue/releases/download/v0.2.21-preview.26/BailaCue-v0.2.21-build26-preview.apk)
-or open [release notes](https://github.com/dn-lx/BailaCue/releases/tag/v0.2.21-preview.26).
+Download [BailaCue 0.3.0 for Android](https://github.com/dn-lx/BailaCue/releases/download/v0.3.0-preview.27/BailaCue-v0.3.0-build27-preview.apk)
+or open [release notes](https://github.com/dn-lx/BailaCue/releases/tag/v0.3.0-preview.27).
 Open it on an Android phone and allow installation from your browser/files app when
 Android asks. This is an internal preview signed with a test certificate, not a
-Play Store release. Version **0.2.21 (26)**; minimum Android 7/API 24.
+Play Store release. Version **0.3.0 (27)**; minimum Android 7/API 24.
 
 No Metro server or Expo Go is needed for the APK. iOS needs a separate signed build
 with an Apple Developer account; an Android APK cannot be installed on an iPhone.
@@ -58,9 +58,11 @@ live-provider/iOS setup. The release verification records the final native and p
   and recoverable chunked uploads with stable destinations and no original overwrite.
 - Side-by-side reference/self comparison with manual offset, speed, mirror and mute;
   configurable local reminders/quiet hours and optional biometric/device lock.
-- Deployed Me+ username/password gateway, BailaCue-scoped sessions, recovery/password
-  change, owner-isolated manual metadata sync with revision conflicts, collection
-  grants and BailaCue-only account cleanup. Enabled on mobile in build 5.
+- Local SQLite libraries, migration of existing phone libraries, label management,
+  checksummed file/Drive/Dropbox metadata backups and optional two-way Google Sheets
+  sync with offline retry, conflict review and versioned recovery.
+- Refined compact layouts, denser Library cards and native press/entry motion that
+  honors reduced motion. The approved blue/black concept05 b/play icon is retained.
 
 Each user connects their own video repository. OAuth still requires the app's
 one-time Google/Dropbox registration: see [cloud setup](docs/CLOUD-STORAGE.md).
@@ -76,7 +78,7 @@ The [approved requirements](docs/PRODUCT-REQUIREMENTS.md), [implementation track
 and [UI/UX direction](docs/UI-UX-DIRECTION.md) describe the first delivery.
 The [round-2 requirements](docs/REQUIREMENTS-ROUND-2.md) add reliable playlist imports, compact YouTube titles, resize/full screen the transparent b/play identity and centered chip groups.
 Implemented source and mock tests do not imply live OAuth or physical-device validation.
-New-video server push, automatic sync/merge and WebDAV/S3 adapters remain pending.
+WebDAV/S3 adapters and store publication remain separate work.
 
 ## Develop and test
 
@@ -90,7 +92,7 @@ npm run ios                 # macOS/Xcode only
 npm run web
 npm run typecheck
 npm run lint
-npm test                    # domain, mock provider/gateway, actual PostgreSQL RLS
+npm test                    # domain, provider APIs, actual SQLite, recovery and Sheets
 npm run build:web -- --clear
 npx playwright install --with-deps chromium
 npm run test:e2e             # ffmpeg required; synthetic fixtures, no private videos
@@ -109,7 +111,7 @@ npm run build:android
 ```
 
 The script generates Android from Expo config and builds a bundled release-mode APK
-at `artifacts/BailaCue-v0.2.21-build26-preview.apk` with SHA-256. Native media code is
+at `artifacts/BailaCue-v0.3.0-build27-preview.apk` with SHA-256. Native media code is
 committed under `modules/baila-media`; generated root `android/` and `ios/` are ignored.
 The generated internal debug certificate is used for previews; configure your own
 release signing before store publication. Never commit signing keys.
@@ -118,20 +120,19 @@ EAS is supported by `eas.json`, but needs your Expo account/project and potentia
 paid build capacity. The unsigned iOS simulator compile passes on a macOS Actions runner;
 iOS device distribution still needs Apple signing/provisioning. No store submission is performed by CI.
 
-## Backend and configuration
+## Local storage and configuration
 
-The original additive BailaCue schema is already applied to the user-approved shared
-Me+ project. Existing Me+ health tables, functions and auth settings are untouched.
-The owner separately approved deployment; the additional private-table migrations
-and scoped Edge Function are now live. Mobile build 5 uses the scoped API. Real
-registration/confirmation and two-user acceptance still need verification.
+See [local storage and recovery](docs/LOCAL-STORAGE.md) and the
+[current requirements](docs/LOCAL-FIRST-REQUIREMENTS.md). The mobile app has no Me+
+endpoint or BailaCue account dependency. Historical gateway/migrations are archived;
+shared production data has not been deleted or modified.
 
-[Account API setup](docs/ACCOUNT-API.md) covers deployment, session boundaries, sync,
-sharing and cleanup. [.env.example](.env.example) lists public build configuration:
-`EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID`, `EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID`,
-`EXPO_PUBLIC_DROPBOX_APP_KEY`, `EXPO_PUBLIC_BAILACUE_API_URL`, and optional `EXPO_PUBLIC_YOUTUBE_API_KEY`.
-Full YouTube playlist pagination needs a Data API key, entered in-app or at build time. Without it, the visible-player list may be limited and the UI discloses that limit.
-Never put service/admin credentials, provider secrets or refresh tokens in public config.
+[Cloud setup](docs/CLOUD-STORAGE.md) and [.env.example](.env.example) list public
+Google/Dropbox app identifiers and optional YouTube API configuration. Google Sheets
+API must also be enabled in the OAuth app's Google Cloud project before spreadsheet
+sync works. Users choose their own storage accounts, folders and spreadsheet.
+Full YouTube pagination needs a Data API key; keyless discovery can be limited.
+Never put service/admin credentials, client secrets or refresh tokens in public config.
 
 ## Privacy
 
@@ -139,7 +140,7 @@ Phone files are app-private copies; Android backup is disabled and the native iO
 module protects/excludes owned media from backups. Original provider/gallery files
 are never removed by app deletion or trimming. Photos/external shares require their
 own deletion. Downloads cannot be remotely revoked while offline; permission is checked
-online. Disconnect/sign-out clears app copies and credentials. Keep originals in your
+online. Disconnecting a provider clears its app credentials; review the in-app choices for retained phone copies. Keep originals in your
 chosen storage. Local notification delivery depends on OS settings; no exact remote
 refresh or push-delivery guarantee is made.
 

@@ -1,3 +1,4 @@
+import Constants from "expo-constants";
 import { danceTypes } from "../../core/dances";
 import { LabelPicker } from "../../components/LabelPicker";
 import { libraryLabels } from "../../core/labels";
@@ -389,6 +390,9 @@ export default function Settings() {
         </Card>
       ) : null}
       <Card>
+        <Button variant="soft" onPress={() => router.push("/labels")}>
+          Manage labels
+        </Button>
         <Badge tone="soft">STORAGE & ACCOUNTS</Badge>
         <Txt size={21} weight="display">
           Connected when you’re ready
@@ -397,11 +401,11 @@ export default function Settings() {
           Connect your own Drive or Dropbox folders. Stream online or keep
           selected videos on your phone.
         </Txt>
-        <Button variant="soft" onPress={() => router.push("/account")}>
-          Account & metadata sync
+        <Button variant="soft" onPress={() => router.push("/backups")}>
+          Backups & recovery
         </Button>
         <Button variant="ghost" onPress={() => router.push("/sharing")}>
-          Shared collections
+          Share provider folders
         </Button>
         {library.sources.map((source) => (
           <View
@@ -459,7 +463,8 @@ export default function Settings() {
         </Txt>
         <Txt size={13} color={t.muted}>
           Uninstalling the mobile app removes its local library. Browser storage
-          can be cleared by your browser. This build has no cross-device backup.
+          can be cleared by your browser. Keep a recovery copy in your own
+          storage before uninstalling.
         </Txt>
       </Card>
       <Row style={{ justifyContent: "center" }}>
@@ -477,7 +482,7 @@ export default function Settings() {
             BailaCue.
           </Txt>
           <Txt size={12} color={t.muted}>
-            Watch. Practise. Repeat. · v0.2.1 (3)
+            Watch. Practise. Repeat. · v{Constants.expoConfig?.version}
           </Txt>
         </View>
       </Row>

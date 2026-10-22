@@ -192,18 +192,23 @@ test("failed Library write keeps the playlist selection for retry and never anno
 }) => {
   await player(context);
   await page.addInitScript(() => {
-    const save = Storage.prototype.setItem;
+    const put = IDBObjectStore.prototype.put;
     let failOnce = true;
-    Storage.prototype.setItem = function (key, value) {
+    IDBObjectStore.prototype.put = function (value, key) {
       if (
         failOnce &&
-        key.includes("bailacue:device-library") &&
-        value.includes('"source":"youtube"')
+        this.name === "libraries" &&
+        value.body?.includes('"source":"youtube"')
       ) {
         failOnce = false;
-        throw new Error("Synthetic disk-full failure");
+        throw new DOMException(
+          "Synthetic disk-full failure",
+          "QuotaExceededError",
+        );
       }
-      return save.call(this, key, value);
+      return key === undefined
+        ? put.call(this, value)
+        : put.call(this, value, key);
     };
   });
   await page.goto("/youtube");

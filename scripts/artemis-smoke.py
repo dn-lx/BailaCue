@@ -11,6 +11,7 @@ import json
 import os
 import subprocess
 import hashlib
+import sqlite3
 import re
 from pathlib import Path
 from artemis.mcp.adb_server import _get_controller
@@ -374,6 +375,37 @@ async def main():
         if not any("Resume practice" in label(e) for e in elements): raise AssertionError("Returning from background unexpectedly resumed Practice")
         await locate("Finish & save",exact=True)
         report["checks"].append({"check":"Native continuous Practice counts playback, excludes pause and returns from background paused", "result":"passed", "active_seconds_before_pause":first})
+
+        # New local-first acceptance: remove a reusable label everywhere through
+        # the app, restart, and inspect the actual native SQLite persistence.
+        await locate("Settings", attempts=5, exact=True)
+        await top()
+        await locate("Manage labels", scrolls=18, exact=True)
+        await locate("Remove label ARTEMIS Artist", scrolls=8, exact=True)
+        await locate("Confirm removal", scrolls=3, exact=True)
+        elements = await observe("global-label-removed")
+        if not any("Labels saved" in label(e) for e in elements):
+            raise AssertionError("Global label removal was not saved")
+        await controller.driver.execute_shell("am force-stop app.bailacue.mobile")
+        database_dir = "/data/user/0/app.bailacue.mobile/files/SQLite/"
+        for suffix in ("", "-wal", "-shm"):
+            path = database_dir + "bailacue-library.db" + suffix
+            subprocess.run(["adb", "-s", os.environ.get("ARTEMIS_DEVICE_ID", "emulator-5554"), "pull", path, str(OUT / ("native-library.db" + suffix))], capture_output=True, check=not suffix)
+        with sqlite3.connect(OUT / "native-library.db") as database:
+            rows = database.execute("SELECT body FROM library_records WHERE kind='videos'").fetchall()
+            saved_videos = [json.loads(row[0]) for row in rows]
+            if len(saved_videos) < 3:
+                raise AssertionError("Native SQLite did not retain the imported videos")
+            if any("artemis artist" in [s.lower() for s in video["labels"]] for video in saved_videos):
+                raise AssertionError("Global label removal was not persisted in SQLite")
+            if not any(video["segments"] for video in saved_videos):
+                raise AssertionError("Native SQLite lost the saved practice section")
+            if database.execute("PRAGMA integrity_check").fetchone()[0] != "ok":
+                raise AssertionError("Native SQLite integrity check failed")
+        report["checks"].append({"check":"Native SQLite persists imports, sections and global label removal with database integrity", "result":"passed", "saved_videos":len(saved_videos)})
+        await launch()
+        await asyncio.sleep(2)
+        await observe("sqlite-restart")
 
         # Supplemental public-network attempt: never count a blocked provider as a pass.
         # Once import succeeds, player/layout assertions below are normal release gates.

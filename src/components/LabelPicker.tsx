@@ -63,7 +63,7 @@ export function LabelPicker({
             }}
           >
             <Txt size={13} weight="medium">
-              {name} ×
+              {name} · Remove
             </Txt>
           </Pressable>
         ))}

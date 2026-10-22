@@ -126,6 +126,7 @@ export type SourceRenameProgress = {
 };
 export type Library = {
   version: 1;
+  labels?: string[];
   schemaRevision?: number;
   danceTypes?: DanceType[];
   youtubeSources?: YouTubeSource[];

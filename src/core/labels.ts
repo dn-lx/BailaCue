@@ -114,10 +114,55 @@ export function uniqueLabels(labels: string[]): string[] {
 
 export function libraryLabels(library: Library): string[] {
   return uniqueLabels([
+    ...(library.labels ?? []),
     ...library.videos.flatMap((video) => video.labels),
     ...library.sources.flatMap((source) => source.defaultLabels),
     ...(library.youtubeSources ?? []).flatMap((source) => source.defaultLabels),
   ]).sort((a, b) => a.localeCompare(b));
+}
+
+/** Delete a catalog label and all its assignments, retaining unrelated metadata. */
+export function removeLibraryLabel(library: Library, label: string): Library {
+  const without = (values: string[]) =>
+    values.filter((value) => key(value) !== key(label));
+  return {
+    ...library,
+    labels: without(libraryLabels(library)),
+    videos: library.videos.map((v) => ({ ...v, labels: without(v.labels) })),
+    sources: library.sources.map((s) => ({
+      ...s,
+      defaultLabels: without(s.defaultLabels),
+    })),
+    youtubeSources: library.youtubeSources?.map((s) => ({
+      ...s,
+      defaultLabels: without(s.defaultLabels),
+    })),
+    preferences: {
+      ...library.preferences,
+      labels: without(library.preferences.labels),
+    },
+    libraryView: library.libraryView
+      ? {
+          ...library.libraryView,
+          labels: without(library.libraryView.labels ?? []),
+        }
+      : undefined,
+    activePractice: library.activePractice
+      ? {
+          ...library.activePractice,
+          preferences: {
+            ...library.activePractice.preferences,
+            labels: without(library.activePractice.preferences.labels),
+          },
+        }
+      : undefined,
+    practicePreferences: library.practicePreferences
+      ? {
+          ...library.practicePreferences,
+          labels: without(library.practicePreferences.labels),
+        }
+      : undefined,
+  };
 }
 
 export function labelChoices(

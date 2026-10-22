@@ -1,22 +1,24 @@
-# Current handoff · published 0.2.21/build26
+# Current handoff · 0.3.0/build27 candidate
 
-All six owner-approved round-2 issues are implemented in source `9bc627d1c6aff5918938d506e1cbdf8a03ab2914`.
-[Direct Android download](https://github.com/dn-lx/BailaCue/releases/download/v0.2.21-preview.26/BailaCue-v0.2.21-build26-preview.apk) · [Verification](VERIFICATION.md) · [Requirements](REQUIREMENTS-ROUND-2.md).
+Local-first implementation is complete; native release gates are in progress.
+[Requirements](LOCAL-FIRST-REQUIREMENTS.md) · [Usage](LOCAL-STORAGE.md) · [Verification](VERIFICATION.md).
 
-190 tests/19 suites,14 browser journeys, type/lint/export/Doctor 20/20 pass.
-All 14 native ARTEMIS checks pass on the exact public APK; signature, digest,
-version and unchanged signer were independently verified. Fresh iOS simulator
-compilation passes; a signed iPhone build/runtime review remains separate.
+189 tests/20 suites and 17 browser journeys pass, plus typecheck/lint/web export.
+Android/iOS use SQLite; browser uses IndexedDB. Legacy on-device libraries migrate
+separately and old records are retained. No production Me+ action was taken.
+Supabase runtime, accounts and username sharing are retired; historical server
+code is archived. Provider-folder sharing guidance replaces the old account flow.
 
-The live public playlist attempt timed out without exposing addable contents. The app displayed its timeout and API-key setup guidance. Live import remains unverified and is not counted as a passed check. Playlist regression tests use controlled official-endpoint responses.
-Full YouTube pagination needs a device API key; the official player's keyless list
-can be limited and the UI explains setup/retry. No video downloads apply to YouTube.
+Personal backup import/export/Drive/Dropbox folders, optional Sheets two-way sync,
+editable metadata tabs/versioned recovery, offline retry/backoff/conflict review,
+visible label removal and global deletion are implemented. Sheets API needs owner
+setup; no live private-account acceptance is claimed. Public preview release waits
+for exact-byte native acceptance. iOS compile is distinct from signed device testing.
 
-Concept05 b/play uses a clean geometric SVG and 70 exports. In-app artwork is
-transparent; Android layers include safe-zone padding. OS launcher/iOS backgrounds
-are separate. Whole chip groups, including shorter wrapped rows, are centered;
-text alignment inside chips remains unchanged. App name/theme remain unchanged.
+Compact headers/cards, tab indicators and native press/entry/progress motion retain
+the approved concept05 b/play identity. Both themes, reduced motion, centered chip
+rows and narrow/large-text layouts are checked. Source docs record the starter
+workflow adaptation; no web animation library was introduced into the native app.
 
-PR#1 stays draft and main stays unmerged. No new production table or deployment
-was required. Do not use TinyFish, paid services, unrelated Me+ data or store
-submission. No subagents without explicit delegation. Earlier handoffs remain in Git.
+PR#1 remains draft and main unmerged. Do not use TinyFish, paid services, production
+DB deletion or store submission. Do not spawn agents without explicit delegation.

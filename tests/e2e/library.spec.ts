@@ -355,6 +355,7 @@ test("artist and video-type labels can be created, reused, edited and retained a
     .getByRole("button", { name: "Remove label Partnerwork", exact: true })
     .click();
   await page.getByRole("button", { name: "Save details", exact: true }).click();
+  await expect(page.getByText("Details saved", { exact: true })).toBeVisible();
   await page.reload();
   await expect(
     page.getByRole("button", {

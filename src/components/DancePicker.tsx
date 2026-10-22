@@ -13,7 +13,8 @@ export function DancePicker({
   onChange: (style: string) => void;
   label?: string;
 }) {
-  const { library, update } = useLibrary();
+  const { library, commit } = useLibrary();
+  const [saving, setSaving] = useState(false);
   const [creating, setCreating] = useState(false),
     [name, setName] = useState(""),
     [error, setError] = useState("");
@@ -45,16 +46,20 @@ export function DancePicker({
           <Button
             variant="soft"
             disabled={!name.trim()}
-            onPress={() => {
+            loading={saving}
+            onPress={async () => {
+              setSaving(true);
               try {
                 const result = addDanceType(library, name);
-                update((l) => addDanceType(l, name).library);
+                await commit((l) => addDanceType(l, name).library);
                 onChange(result.dance.name);
                 setName("");
                 setCreating(false);
                 setError("");
               } catch (e) {
                 setError((e as Error).message);
+              } finally {
+                setSaving(false);
               }
             }}
           >

@@ -1,3 +1,4 @@
+import { Entrance, MotionPressable } from "./motion";
 import React from "react";
 import {
   ActivityIndicator,
@@ -169,8 +170,8 @@ export function Card({
           backgroundColor: t.surface,
           minWidth: 0,
           maxWidth: "100%",
-          borderRadius: 24,
-          padding: 20,
+          borderRadius: 20,
+          padding: 18,
           borderWidth: 1,
           borderColor: t.border,
           gap: 12,
@@ -216,7 +217,7 @@ export function Button({
         ? t.onAccent
         : t.ink;
   return (
-    <Pressable
+    <MotionPressable
       testID={testID}
       accessibilityRole="button"
       accessibilityState={{ disabled: disabled || loading }}
@@ -252,7 +253,7 @@ export function Button({
       >
         {children}
       </Txt>
-    </Pressable>
+    </MotionPressable>
   );
 }
 export function Chip({
@@ -370,25 +371,30 @@ export function Screen({
         scrollEnabled={scrollEnabled}
         keyboardShouldPersistTaps="handled"
         contentContainerStyle={{
-          padding: 24,
+          padding: 20,
           paddingBottom: 40,
-          gap: 24,
+          gap: 20,
           width: "100%",
           maxWidth: 850,
           alignSelf: "center",
         }}
       >
-        <Row
-          style={{ justifyContent: "space-between", alignItems: "flex-start" }}
-        >
-          <View style={{ flex: 1, minWidth: 0, gap: 4 }}>
-            <Txt size={34} weight="display">
-              {title}
-            </Txt>
-            {subtitle ? <Txt color={t.muted}>{subtitle}</Txt> : null}
-          </View>
-          {action}
-        </Row>
+        <Entrance>
+          <Row
+            style={{
+              justifyContent: "space-between",
+              alignItems: "flex-start",
+            }}
+          >
+            <View style={{ flex: 1, minWidth: 0, gap: 4 }}>
+              <Txt size={28} weight="display">
+                {title}
+              </Txt>
+              {subtitle ? <Txt color={t.muted}>{subtitle}</Txt> : null}
+            </View>
+            {action}
+          </Row>
+        </Entrance>
         {children}
       </ScrollView>
     </SafeAreaView>

@@ -1,3 +1,5 @@
+import { MotionProvider } from "../components/motion";
+import { SheetSync } from "../components/SheetSync";
 import { CloudDiscovery } from "../components/CloudDiscovery";
 import React, { useEffect } from "react";
 import { Stack, router } from "expo-router";
@@ -10,12 +12,12 @@ import { DMSans_700Bold } from "@expo-google-fonts/dm-sans/700Bold";
 import { Outfit_600SemiBold } from "@expo-google-fonts/outfit/600SemiBold";
 import { LibraryProvider, useLibrary } from "../services/store";
 import { useTheme } from "../components/theme";
-import { AccountProvider, useAccount } from "../services/account";
 import { syncReminders, listenReminders } from "../services/reminders";
 import { PrivacyGate } from "../components/PrivacyGate";
-import { Txt } from "../components/ui";
+import { Txt, Button } from "../components/ui";
 function Shell() {
-  const { ready, error, library } = useLibrary();
+  const { ready, error, library, profileId, retryInitialization } =
+    useLibrary();
   useEffect(() => {
     if (!ready) return;
     const reconcile = () => {
@@ -37,17 +39,27 @@ function Shell() {
       <View
         style={{
           flex: 1,
+          padding: 24,
+          gap: 16,
           justifyContent: "center",
           alignItems: "center",
           backgroundColor: t.background,
         }}
       >
-        {error ? <Txt>{error}</Txt> : <ActivityIndicator color={t.primary} />}
+        {error ? (
+          <>
+            <Txt>{error}</Txt>
+            <Button onPress={retryInitialization}>Retry opening library</Button>
+          </>
+        ) : (
+          <ActivityIndicator color={t.primary} />
+        )}
       </View>
     );
   return (
-    <PrivacyGate>
+    <PrivacyGate key={profileId}>
       <CloudDiscovery />
+      <SheetSync />
       <StatusBar style={t.dark ? "light" : "dark"} />
       {error ? (
         <View style={{ backgroundColor: t.soft, padding: 12 }}>
@@ -67,18 +79,6 @@ function Shell() {
     </PrivacyGate>
   );
 }
-function ScopedLibrary() {
-  const { session, ready } = useAccount();
-  if (!ready) return null;
-  return (
-    <LibraryProvider
-      key={session?.user.id ?? "guest"}
-      userId={session?.user.id}
-    >
-      <Shell />
-    </LibraryProvider>
-  );
-}
 export default function RootLayout() {
   const [loaded, error] = useFonts({
     DMSans_400Regular,
@@ -88,8 +88,10 @@ export default function RootLayout() {
   });
   if (!loaded && !error) return null;
   return (
-    <AccountProvider>
-      <ScopedLibrary />
-    </AccountProvider>
+    <MotionProvider>
+      <LibraryProvider>
+        <Shell />
+      </LibraryProvider>
+    </MotionProvider>
   );
 }

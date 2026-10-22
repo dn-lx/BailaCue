@@ -4,7 +4,6 @@ import { Button, Card, Txt, Badge, Row } from "./ui";
 import { useTheme } from "./theme";
 import { useLibrary } from "../services/store";
 import type { Video } from "../core/types";
-import { verifyCollectionGrant } from "../services/account";
 import { provider } from "../services/cloud/provider";
 import { downloadVideo } from "../services/cloud/download";
 import { prepareNamedCopy } from "../services/phoneCopies";
@@ -43,7 +42,10 @@ export function CloudVideoControls({
     await act(async () => {
       if (!video.remote?.canDownload)
         throw new Error("The owner does not allow downloads.");
-      if (video.sharedGrantId) await verifyCollectionGrant(video.sharedGrantId);
+      if (video.sharedGrantId)
+        throw new Error(
+          "Reconnect this older shared video from its storage folder first.",
+        );
       const address = await provider(connection).playback(video.remote.fileId);
       const copy = await downloadVideo(
         address,

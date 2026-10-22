@@ -42,7 +42,9 @@ export function RatingStars({ video }: { video: Video }) {
   );
 }
 export function VideoDetails({ video }: { video: Video }) {
-  const { library, update, updateVideo } = useLibrary();
+  const { library, update, commit } = useLibrary();
+  const [saving, setSaving] = useState(false),
+    [error, setError] = useState("");
   const [title, setTitle] = useState(video.title),
     [labels, setLabels] = useState(video.labels),
     [saved, setSaved] = useState(false);
@@ -86,16 +88,38 @@ export function VideoDetails({ video }: { video: Video }) {
       <Button
         variant="soft"
         disabled={!title.trim()}
-        onPress={() => {
-          updateVideo(video.id, {
-            title: video.remote || video.youtube ? video.title : title.trim(),
-            labels,
-          });
-          setSaved(true);
+        loading={saving}
+        onPress={async () => {
+          setSaving(true);
+          setError("");
+          try {
+            await commit((l) => ({
+              ...l,
+              videos: l.videos.map((v) =>
+                v.id === video.id
+                  ? {
+                      ...v,
+                      title:
+                        video.remote || video.youtube ? v.title : title.trim(),
+                      labels,
+                    }
+                  : v,
+              ),
+            }));
+            setSaved(true);
+          } catch {
+            setSaved(false);
+            setError(
+              "Details could not be saved. Your edits are kept here; please retry.",
+            );
+          } finally {
+            setSaving(false);
+          }
         }}
       >
         Save details
       </Button>
+      {error ? <Txt accessibilityRole="alert">{error}</Txt> : null}
       {saved ? (
         <Txt size={12} accessibilityLiveRegion="polite">
           Details saved
@@ -106,7 +130,9 @@ export function VideoDetails({ video }: { video: Video }) {
 }
 
 export function VideoContext({ video }: { video: Video }) {
-  const { updateVideo } = useLibrary();
+  const { commit } = useLibrary();
+  const [saving, setSaving] = useState(false),
+    [error, setError] = useState("");
   const [teacher, setTeacher] = useState(video.teacher),
     [className, setClassName] = useState(video.className),
     [location, setLocation] = useState(video.location),
@@ -132,18 +158,37 @@ export function VideoContext({ video }: { video: Video }) {
       />
       <Button
         variant="soft"
-        onPress={() => {
-          updateVideo(video.id, {
-            teacher: teacher.trim(),
-            className: className.trim(),
-            location: location.trim(),
-            lessonDate,
-          });
-          setSaved(true);
+        loading={saving}
+        onPress={async () => {
+          setSaving(true);
+          setError("");
+          try {
+            await commit((l) => ({
+              ...l,
+              videos: l.videos.map((v) =>
+                v.id === video.id
+                  ? {
+                      ...v,
+                      teacher: teacher.trim(),
+                      className: className.trim(),
+                      location: location.trim(),
+                      lessonDate,
+                    }
+                  : v,
+              ),
+            }));
+            setSaved(true);
+          } catch {
+            setSaved(false);
+            setError("Context could not be saved. Please retry.");
+          } finally {
+            setSaving(false);
+          }
         }}
       >
         Save context
       </Button>
+      {error ? <Txt accessibilityRole="alert">{error}</Txt> : null}
       {saved ? <Txt accessibilityLiveRegion="polite">Context saved</Txt> : null}
     </Card>
   );

@@ -1,3 +1,4 @@
+import { ProgressBar } from "../../components/motion";
 import { RatingStars } from "../../components/VideoDetails";
 import { useEffect } from "react";
 import { View, AppState } from "react-native";
@@ -62,31 +63,32 @@ export default function Today() {
     >
       <LinearGradient
         colors={[t.heroStart, t.brandBlack]}
-        style={{ padding: 25, borderRadius: 28, overflow: "hidden", gap: 17 }}
+        style={{ padding: 22, borderRadius: 22, overflow: "hidden", gap: 14 }}
       >
         <View
           style={{
             position: "absolute",
-            right: -28,
-            top: 20,
-            opacity: 0.16,
+            right: -10,
+            top: 12,
+            opacity: 0.1,
             transform: [{ rotate: "-18deg" }],
           }}
         >
-          <Mark size={240} onDark />
+          <Mark size={190} onDark />
         </View>
         <Badge tone="accent">A LITTLE EVERY DAY</Badge>
         <Txt
-          size={35}
+          size={30}
           color="#FFFFFF"
           weight="display"
-          style={{ maxWidth: 270, lineHeight: 40 }}
+          style={{ maxWidth: 300, lineHeight: 36 }}
         >
-          Find your rhythm.{"\n"}Make it yours.
+          Find your rhythm.
         </Txt>
         <Txt color={t.heroMuted} style={{ maxWidth: 290 }}>
-          Your moves, your music, your own pace. Turn a moment from class into a
-          little daily progress.
+          {library.videos.length
+            ? `${library.videos.length} videos in your library. A little practice, every day.`
+            : "Keep your class videos, find your next move and make a little time to dance."}
         </Txt>
         <Button
           variant="accent"
@@ -98,9 +100,7 @@ export default function Today() {
               : router.push("/upload")
           }
         >
-          {library.videos.length
-            ? "Make time to dance"
-            : "Add your first video"}
+          {library.videos.length ? "Start practice" : "Add your first video"}
         </Button>
       </LinearGradient>
       <Card>
@@ -113,24 +113,12 @@ export default function Today() {
             {Math.floor(weekly)} / {library.preferences.weeklyMinutes} min
           </Txt>
         </Row>
-        <View
-          accessibilityLabel={`${Math.floor(weekly)} of ${library.preferences.weeklyMinutes} weekly minutes`}
-          style={{
-            height: 8,
-            backgroundColor: t.soft,
-            borderRadius: 8,
-            overflow: "hidden",
-          }}
-        >
-          <View
-            style={{
-              height: 8,
-              width: `${Math.min(100, (weekly / library.preferences.weeklyMinutes) * 100)}%`,
-              backgroundColor: t.primary,
-              borderRadius: 8,
-            }}
-          />
-        </View>
+        <ProgressBar
+          value={weekly / library.preferences.weeklyMinutes}
+          color={t.primary}
+          trackColor={t.soft}
+          label={`${Math.floor(weekly)} of ${library.preferences.weeklyMinutes} weekly minutes`}
+        />
         <Txt size={13} color={t.muted}>
           {weekly >= library.preferences.weeklyMinutes
             ? "Your goal is complete. Keep the good feeling going."

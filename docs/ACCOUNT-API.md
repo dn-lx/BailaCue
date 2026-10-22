@@ -1,3 +1,5 @@
+> Historical Me+ deployment documentation. Retired from the mobile app in the local-first release. See [current local storage](LOCAL-STORAGE.md). This document is not a deployment instruction or permission to change production.
+
 # Scoped Me+ integration
 
 The existing production Me+ project is the user-approved database target. The

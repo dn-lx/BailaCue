@@ -18,7 +18,6 @@ jobs:
       - run: npm run typecheck
       - run: npm run lint
       - run: npm test
-      - run: npx --yes deno check supabase/functions/bailacue-api/index.ts
       - run: npx expo-doctor
       - run: npm run build:web
       - run: npx playwright install --with-deps chromium

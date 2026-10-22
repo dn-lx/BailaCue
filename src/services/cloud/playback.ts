@@ -1,4 +1,3 @@
-import { verifyCollectionGrant, AccountError } from "../account";
 import * as Network from "expo-network";
 import type { VideoSource } from "expo-video";
 import type { Library, Video } from "../../core/types";
@@ -15,29 +14,10 @@ export async function resolveVideo(
   library: Library,
 ): Promise<VideoSource> {
   if (!video.remote) return resolveMedia(video.uri);
-  const network = await Network.getNetworkStateAsync();
-  if (
-    video.sharedGrantId &&
-    network.isConnected &&
-    network.isInternetReachable !== false
-  ) {
-    try {
-      await verifyCollectionGrant(video.sharedGrantId);
-    } catch (error) {
-      if (error instanceof AccountError && error.status === 403) {
-        await removeDownload(video);
-        throw new RevokedAccess(
-          "This collection share was revoked. BailaCue’s phone copy was removed.",
-        );
-      }
-      if (
-        !(error instanceof TypeError) ||
-        !video.offlineUri ||
-        video.storagePreference !== "offline"
-      )
-        throw error;
-    }
-  }
+  if (video.sharedGrantId)
+    throw new Error(
+      "Reconnect this older shared video from your Drive or Dropbox folder. Your notes and phone copy are kept.",
+    );
   const connection = library.connections.find(
     (c) => c.id === video.remote!.connectionId && c.connected,
   );

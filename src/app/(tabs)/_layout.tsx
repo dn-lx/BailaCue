@@ -1,8 +1,11 @@
+import { View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Tabs } from "expo-router";
 import { Icon, type IconName } from "../../components/ui";
 import { useTheme } from "../../components/theme";
 export default function TabLayout() {
   const t = useTheme();
+  const insets = useSafeAreaInsets();
   const tabs: { name: string; title: string; icon: IconName }[] = [
     { name: "index", title: "Today", icon: "sun" },
     { name: "library", title: "Library", icon: "library" },
@@ -19,9 +22,9 @@ export default function TabLayout() {
         tabBarStyle: {
           backgroundColor: t.surface,
           borderTopColor: t.border,
-          height: 84,
-          paddingTop: 9,
-          paddingBottom: 20,
+          height: 64 + Math.max(8, insets.bottom),
+          paddingTop: 7,
+          paddingBottom: Math.max(8, insets.bottom),
         },
         tabBarLabelStyle: { fontFamily: "DMSans_500Medium", fontSize: 11 },
       }}
@@ -32,11 +35,22 @@ export default function TabLayout() {
           name={tab.name}
           options={{
             title: tab.title,
-            tabBarIcon: ({ color }) => (
-              <Icon
-                name={tab.icon}
-                color={typeof color === "string" ? color : undefined}
-              />
+            tabBarIcon: ({ color, focused }) => (
+              <View
+                style={{
+                  width: 48,
+                  height: 32,
+                  borderRadius: 14,
+                  backgroundColor: focused ? t.soft : "transparent",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <Icon
+                  name={tab.icon}
+                  color={typeof color === "string" ? color : undefined}
+                />
+              </View>
             ),
           }}
         />

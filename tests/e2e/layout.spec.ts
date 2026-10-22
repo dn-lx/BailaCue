@@ -50,7 +50,9 @@ test("phone layouts contain long source/account labels and button rows at 320–
       "/library",
       "/practice",
       "/upload",
-      "/account",
+      "/backups",
+      "/sheets",
+      "/labels",
       "/sharing",
       "/youtube",
     ]) {
