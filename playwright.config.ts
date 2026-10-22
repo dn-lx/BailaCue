@@ -6,6 +6,7 @@ export default defineConfig({
     baseURL: "http://127.0.0.1:4173",
     ...devices["Pixel 7"],
     browserName: "chromium",
+    channel: process.env.BAILACUE_TEST_BROWSER === "chrome" ? "chrome" : undefined,
     screenshot: "only-on-failure",
   },
   webServer: {
