@@ -123,7 +123,12 @@ async def main():
             if not await asyncio.to_thread(client.clear_text):
                 raise AssertionError(f"ARTEMIS could not clear {text}")
             await asyncio.to_thread(client.send_text, value)
-            await controller.go_back()
+            # The helper can insert text without opening the IME. Back in that
+            # state pops the app route instead of dismissing a keyboard.
+            await asyncio.sleep(0.5)
+            ime = subprocess.run(["adb", "-s", os.environ.get("ARTEMIS_DEVICE_ID", "emulator-5554"), "shell", "dumpsys", "input_method"], check=True, capture_output=True, text=True, timeout=20).stdout
+            if re.search(r"(?:mInputShown|mIsInputViewShown|isInputViewShown)=true", ime):
+                await controller.go_back()
             # The IME can cover the focused field; inspect after it closes.
             for attempt in range(5):
                 elements = await observe("field-value")
