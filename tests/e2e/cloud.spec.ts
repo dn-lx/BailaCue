@@ -1,26 +1,6 @@
 import { test, expect } from "@playwright/test";
-import { execFileSync } from "node:child_process";
-const fixture = "/tmp/bailacue-cloud-test.mp4";
-test.beforeAll(() =>
-  execFileSync(
-    "ffmpeg",
-    [
-      "-y",
-      "-f",
-      "lavfi",
-      "-i",
-      "testsrc2=size=320x240:rate=24",
-      "-t",
-      "6",
-      "-c:v",
-      "libx264",
-      "-pix_fmt",
-      "yuv420p",
-      fixture,
-    ],
-    { stdio: "ignore" },
-  ),
-);
+import { resolve } from "node:path";
+const fixture = resolve("tests/fixtures/bailacue-cloud-test.mp4");
 test("user connects Salsa and Bachata folders → streams → edits → refresh preserves both sources (mock provider)", async ({
   page,
   context,

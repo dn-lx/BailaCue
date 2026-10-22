@@ -26,13 +26,6 @@ jobs:
       # GitHub's hosted Ubuntu image already supplies Chrome and its libraries.
       # Avoid a second browser/system-dependency installation and its network stalls.
       - run: google-chrome --version
-      - name: Ensure synthetic-video fixture tooling
-        run: |
-          if ! command -v ffmpeg; then
-            timeout 180s sudo apt-get -o Acquire::http::Timeout=20 -o Acquire::https::Timeout=20 -o Acquire::Retries=2 update
-            timeout 180s sudo apt-get -o Acquire::http::Timeout=20 -o Acquire::https::Timeout=20 -o Acquire::Retries=2 install -y ffmpeg
-          fi
-          ffmpeg -version
       - run: npm run test:e2e
       - uses: actions/upload-artifact@v4
         if: always()

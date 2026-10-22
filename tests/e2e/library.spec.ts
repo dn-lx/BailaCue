@@ -1,32 +1,8 @@
 import { test, expect } from "@playwright/test";
-import { execFileSync } from "node:child_process";
+import { resolve } from "node:path";
 import { existsSync, mkdirSync } from "node:fs";
-const fixture = "/tmp/bailacue-test-video.mp4";
+const fixture = resolve("tests/fixtures/bailacue-test-video.mp4");
 test.beforeAll(() => {
-  execFileSync(
-    "ffmpeg",
-    [
-      "-y",
-      "-f",
-      "lavfi",
-      "-i",
-      "testsrc2=size=320x240:rate=24",
-      "-f",
-      "lavfi",
-      "-i",
-      "sine=frequency=440",
-      "-t",
-      "6",
-      "-c:v",
-      "libx264",
-      "-pix_fmt",
-      "yuv420p",
-      "-c:a",
-      "aac",
-      fixture,
-    ],
-    { stdio: "ignore" },
-  );
   mkdirSync("artifacts/screenshots", { recursive: true });
 });
 test("import → label → loop → note → daily pick → persisted local video", async ({

@@ -1,27 +1,7 @@
 import { test, expect } from "@playwright/test";
-import { execFileSync } from "node:child_process";
+import { resolve } from "node:path";
 import { emptyLibrary, type Video } from "../../src/core/types";
-const fixture = "/tmp/bailacue-flow-test.mp4";
-test.beforeAll(() =>
-  execFileSync(
-    "ffmpeg",
-    [
-      "-y",
-      "-f",
-      "lavfi",
-      "-i",
-      "testsrc2=size=320x240:rate=24",
-      "-t",
-      "3",
-      "-c:v",
-      "libx264",
-      "-pix_fmt",
-      "yuv420p",
-      fixture,
-    ],
-    { stdio: "ignore" },
-  ),
-);
+const fixture = resolve("tests/fixtures/bailacue-flow-test.mp4");
 test("Practice plays a continuous queue, preserves Previous, pauses time and restores safely", async ({
   page,
 }) => {
@@ -269,6 +249,6 @@ test("YouTube beginner preview imports a paginated playlist without duplicates o
       exact: true,
     })
     .check();
-  await page.goto("/");
+  await page.getByRole("tab", { name: "Today", exact: true }).click();
   await expect(page.getByRole("button", { name: /^Play / })).toHaveCount(1);
 });
