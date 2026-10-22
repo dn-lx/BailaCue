@@ -24,3 +24,6 @@ test-results/
 
 # Python test-runner bytecode
 __pycache__/
+
+# Archived CLI cache is not application source
+/archive/meplus/supabase/.temp/

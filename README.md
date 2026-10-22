@@ -95,7 +95,7 @@ npm run lint
 npm test                    # domain, provider APIs, actual SQLite, recovery and Sheets
 npm run build:web -- --clear
 npx playwright install --with-deps chromium
-npm run test:e2e             # ffmpeg required; synthetic fixtures, no private videos
+npm run test:e2e             # owned MP4 fixtures in tests/fixtures; no private videos
 ```
 
 Browser previews support real local IndexedDB imports and compatible streaming;
