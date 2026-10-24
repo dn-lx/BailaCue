@@ -55,12 +55,16 @@ is available. No automatic playback or native trimming/export is claimed.
 ## Deployment
 
 Requested Netlify site: `bailacue`, ID `0aeef340-5366-454e-b379-14bfee4c1784`.
-The exact name was reserved and visitor SSO/password protection was removed as
-requested for account-free use. Connect `dn-lx/bailacue`, deploy only `develop`, enable
-branch deploys for `develop`; preserve `main`. Primary URL requested by owner:
-`https://bailacue.netlify.app`, with branch alias `https://develop--bailacue.netlify.app`.
-Treat both as pending until Netlify reports a ready deploy. If Netlify requires a
-production branch for the primary alias, use `develop`; that does not merge `main`.
+The site is linked to `dn-lx/bailacue`. Visitor access is public, without password or
+team SSO. The initial tested develop commit `062e2bd` was published successfully:
+deploy `6adc7349e0264e5eb4fc553b`, ready, primary `https://bailacue.netlify.app`.
+Netlify's production branch was then set back to `main`, with only `develop` enabled
+for branch deploys. New develop pushes update `https://develop--bailacue.netlify.app`.
+The primary site retains the initial tested web build; this does not merge main.
+Do not merge main or change production content without the owner's request.
+
+GitHub Actions passed the web lint, type checks, eight tests and build. Local
+Netlify state is ignored with `.netlify/` and is never committed.
 
 The Me+ spec router has no registered BailaCue canonical spec and there was no
 BailaCue interaction checkpoint in `interaction_sessions`. Current mobile handoff,

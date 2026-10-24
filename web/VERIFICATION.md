@@ -28,9 +28,18 @@ Cloud browser checks on the actual static build:
 
 Netlify project created with exact name bailacue and id
 0aeef340-5366-454e-b379-14bfee4c1784. Visitor access is public, no password or team
-SSO. Git connection/deploy requires dashboard login because the available connector
-has no Git-link, build-settings or deploy-create operation. Browser currently signed
-out. Do not report a live URL or a ready branch deploy until deployment is confirmed.
+SSO. The Netlify dashboard was signed in through the secure sign-in flow. Repository
+linking and branch settings were completed in its UI because the connector has no
+Git-link/build-settings/deploy-create operation. All GitHub writes used its MCP.
+
+Initial tested develop commit `062e2bd74d8617760f8d5f5c495dc041ec80e9f7` passed
+GitHub Actions and deployed successfully to `https://bailacue.netlify.app`:
+Netlify deploy `6adc7349e0264e5eb4fc553b`, state ready, context production, no
+secret-scan matches, no build or deploy errors. Netlify also returned the develop
+alias `https://develop--bailacue.netlify.app`. After this initial publish, production
+branch was changed to main and branch deploys limited to develop; visible settings
+confirm both. Main remains unchanged. Subsequent develop pushes use branch-deploy
+context and do not replace the primary site's initial tested build.
 
 Known product boundaries: browser-local personal data (backup import/export available),
 catalogue is a versioned snapshot, provider-owned playback controls, manual queue
