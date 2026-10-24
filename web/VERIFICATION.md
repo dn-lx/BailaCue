@@ -52,3 +52,16 @@ main, develop the only additional branch deployment. This update targets
 https://develop--bailacue.netlify.app. Primary 0.1 content is retained. No paid service,
 plan upgrade, production Me+ database change or BailaCue account system is introduced.
 Metadata remains browser-local with backup/export.
+
+## Release review
+
+Commit c4afc544387d01c566462d2506351b8496b7ed63 passed GitHub Actions
+run 40088119438. Netlify deploy 6adc8fb7543454a30a3fc6c5 is ready in
+branch-deploy context, branch develop, with that exact commit. Reloaded the live
+branch and visually confirmed the new Today interface with real thumbnails.
+
+Post-deploy review caught the round play button's press animation replacing its
+centering transform, moving the hit target before pointer-up. Preserving the
+centering transform fixes the click; verified directly in the browser. This small
+CSS correction follows the initial 0.2 release on develop. Upload destination,
+recording date and notes also survived navigating to Labels and back in the same tab.
