@@ -1,47 +1,54 @@
-# BailaCue web verification · 24 October 2026
+# BailaCue web 0.2 verification · 24 October 2026
 
-Built on develop, preserving all mobile source and main. Node 24 build with a pinned
-TypeScript 6.0.3 lockfile; clean npm install, syntax lint, JavaScript/declared-domain
-type checks, eight domain tests and static build pass.
+Only the separate web app and Netlify configuration change on develop. Native mobile
+source and main are preserved. Node 24 with pinned TypeScript 6.0.3. Local syntax
+lint, JavaScript/domain type check, 17 tests and static build pass.
 
-Actual Drive catalogue: 114 Salsa + 152 Bachata, unique identities and both fixed
-folder IDs validated. No OAuth/admin credentials, service endpoint or Me+ database
-access in client code. No copied video bytes. Public source folder permission was
-already anyone-with-link; no Drive permissions were changed.
+## Automated checks
 
-Cloud browser checks on the actual static build:
+Eight retained tests cover actual catalogue identities, YouTube validation, 1–10
+ratings, daily picks, queues, filters, safe backups and embeds. Nine new tests cover
+typed-label normalization/deletion, old-state migration, metadata/loop validation,
+label/artist filters, numbering/extensions, writable folder checks, resumable upload
+requests, acknowledged-byte resume and expired-session recovery without duplicates.
 
-- Today renders both real Drive thumbnails and provider preview, without sign-in.
-- Rating 10/10, practice note and explicitly marked practice survive a reload.
-- YouTube video form saves the supplied link and filters to the new source.
-  Privacy-enhanced embed loads the real provider title and play/settings/seek controls.
-  Removed the temporary verification source afterward. No claim of full-length
-  uninterrupted streaming or all-region/provider availability.
-- Generated practice mix opens its first Salsa cue. Next advances to a Bachata cue
-  at 2/10. Original URLs and per-video notes/ratings are separate.
-- 390px and 320px iframe viewports show mobile bottom navigation, cards and filters.
-  Measured body scrollWidth equals clientWidth: 375 and 305 after scrollbar widths.
-  No horizontal overflow. This is browser layout validation, not a physical phone test.
-- Approved source SVGs parse as valid XML. The preview host corrupts externally served
-  SVGs through HTML injection, so the approved logo is inlined into the page for
-  reliable rendering. Native app branding is untouched.
+Upload tests exercise real request code against controlled responses. They do not
+prove live consent, CORS, account permissions or streaming. Build validates actual
+114 Salsa + 152 Bachata identities. Explicit build inputs exclude QA harnesses,
+fixtures, documentation and node_modules. No copied original media or secrets.
 
-Netlify project created with exact name bailacue and id
-0aeef340-5366-454e-b379-14bfee4c1784. Visitor access is public, no password or team
-SSO. The Netlify dashboard was signed in through the secure sign-in flow. Repository
-linking and branch settings were completed in its UI because the connector has no
-Git-link/build-settings/deploy-create operation. All GitHub writes used its MCP.
+## Browser checks
 
-Initial tested develop commit `062e2bd74d8617760f8d5f5c495dc041ec80e9f7` passed
-GitHub Actions and deployed successfully to `https://bailacue.netlify.app`:
-Netlify deploy `6adc7349e0264e5eb4fc553b`, state ready, context production, no
-secret-scan matches, no build or deploy errors. Netlify also returned the develop
-alias `https://develop--bailacue.netlify.app`. After this initial publish, production
-branch was changed to main and branch deploys limited to develop; visible settings
-confirm both. Main remains unchanged. Subsequent develop pushes use branch-deploy
-context and do not replace the primary site's initial tested build.
+- Desktop Today and Library show real thumbnails and text-only branding.
+- Dropdown label assignment and a created artist persist after reload. Artist
+  filtering returns the one assigned video and its metadata appears on the card.
+- Real local chooser selects a generated 8-second MP4. Upload preparation shows
+  its original name, size and proposed numbered filename (0115.mp4 for Salsa).
+- HTML5 preview genuinely plays: DOM observation showed paused=false,
+  playbackRate=0.5 and mirrored=true. Seeking and A–B showed 0:00→0:05.
+- Official YouTube API embed shows real title/duration and working custom seek.
+  Saved a 0:00→0:05 practice loop and confirmed it in the saved loop list.
+- Compact size selection, theater expansion and full-window mode were exercised.
+  Full-window fills the viewport and exposes Exit full screen. Native fullscreen
+  did not reliably expand in this environment; the fallback handles that case.
+- 390px and 320px embedded browser layouts fit library/upload and bottom navigation.
+  Measured scrollWidth=clientWidth (375/305px with scrollbars).
+- Upload without Google authorization reports the requirement and sends nothing.
+  Missing client configuration reports setup, never a simulated success.
 
-Known product boundaries: browser-local personal data (backup import/export available),
-catalogue is a versioned snapshot, provider-owned playback controls, manual queue
-advance, no native trimming or automatic watch tracking. No mobile, production Me+
-or main-branch change and no paid service/plan upgrade.
+No real user file was uploaded, no Drive original renamed/deleted, and no Drive
+permission changed. Browser checks do not guarantee all devices, codecs, providers
+or full-length uninterrupted streaming.
+
+## Setup and deployment
+
+Netlify has no BAILACUE_GOOGLE_CLIENT_ID. Cloud Console was unavailable in the
+browser; no OAuth client was created. Live cloud upload and authorized Drive
+streaming remain unverified until public client configuration and Google consent.
+See GOOGLE-SETUP.md.
+
+GitHub writes use GitHub MCP. Netlify is linked to dn-lx/bailacue, production branch
+main, develop the only additional branch deployment. This update targets
+https://develop--bailacue.netlify.app. Primary 0.1 content is retained. No paid service,
+plan upgrade, production Me+ database change or BailaCue account system is introduced.
+Metadata remains browser-local with backup/export.

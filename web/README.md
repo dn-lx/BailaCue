@@ -1,73 +1,103 @@
-# BailaCue web
+# BailaCue web · 0.2.0
 
-Account-free browser companion to the BailaCue mobile app. All changes are on
-`develop`, based on mobile checkpoint `c80cbf2`; `main` and the mobile implementation
-are unchanged. The web app reuses the approved concept05 b/play identity.
+Account-free browser companion to BailaCue mobile. This update lives on `develop`;
+mobile implementation and `main` remain unchanged. The web interface uses text
+branding without the previous logo.
 
 ## Run and check
 
-Node 24; no npm dependencies or provider credentials are needed.
+Node 24; pinned TypeScript 6.0.3 is the only development dependency.
 
 ```sh
 cd web
+npm ci
 npm run lint
 npm run typecheck
 npm test
 npm run build
 ```
 
-Serve `web/dist` with any static server. Netlify reads the root `netlify.toml` and
-uses `web` as its base. Native Expo dependencies are outside this web build.
-`.netlify/` must stay ignored; never commit local Netlify identity or credentials.
+Serve `web/dist` with a static server. Netlify reads root `netlify.toml`, builds in
+`web` and publishes `dist`. Keep node_modules, dist, .netlify and local identity files
+out of Git. Native Expo dependencies are outside this web build.
 
-## Product contract · 24 October 2026
+## Collections and uploads
 
-- Exactly two fixed read-only sources inside the supplied Dancing folder:
-  Salsa `1lVR5Pc-6SupJOfLIhcRE-oo69FUDM5Sm` (114 videos), and
-  Bachata `17CFKIazhQJTGXvlHP5sa1mqlvu9p-2i1` (152 videos).
-- `catalogue.json` is a snapshot of actual Drive file metadata. No media is copied
-  into GitHub or Netlify. Drive originals and folder permissions are unchanged.
-  Update the catalogue and redeploy when the folder contents change; the Settings
-  refresh button reloads the latest *deployed* snapshot, not a live Drive sync.
-- No BailaCue accounts, OAuth, personal Me+ database access or runtime credentials.
-- Add validated HTTPS YouTube videos and playlists, assign Salsa/Bachata and a title,
-  deduplicate sources, play in a privacy-enhanced YouTube embed, remove additions.
-  Playlists are one source and one rating; there is no hidden keyless enumeration.
-- 1–10 and Unrated, favourites, personal titles/notes, learning status and explicit
-  practice history; everything saved locally to `bailacue:web:v1`.
-- Daily Picks: one per dance from Drive, highest ratings first; unrated has starting
-  weight 10. Stable local-day choices with explicit refresh excluding previous pair.
-- Practice: add/remove cues or make a 10-video balanced rating-weighted mix. Advance
-  with Previous/Next. Timer is user-controlled, pauses on hidden tab; recording a
-  practice is explicit, not inferred from an inaccessible cross-origin iframe.
-- Export/import validated JSON backups. Import merges and deduplicates; imported
-  metadata wins for matching IDs. Browser data does not sync between visitors.
-- Search, dance/source/exact-rating filters, numeric/title/rating/recent sorting,
-  paging, light/dark appearance, mobile navigation, keyboard-operable native dialogs.
+Parent folder: `1elTpDpgefwwlnrSEFc8vyREt3HUpDS8P`.
 
-## Player boundaries
+| Dance | Fixed source and destination | Deployed catalogue |
+| --- | --- | --- |
+| Salsa | `1lVR5Pc-6SupJOfLIhcRE-oo69FUDM5Sm` | 114 videos |
+| Bachata | `17CFKIazhQJTGXvlHP5sa1mqlvu9p-2i1` | 152 videos |
 
-Use each provider's original embedded playback UI for speed/seek/full screen.
-Cross-origin Drive controls are not artificially emulated. If Drive processing,
-permissions, quota or YouTube embedding restrictions block a preview, Open original
-is available. No automatic playback or native trimming/export is claimed.
+`catalogue.json` holds actual Drive metadata; no video bytes are copied to GitHub or
+Netlify. Guests browse this versioned snapshot and add YouTube without signing in.
+The original folders and their permissions have not been changed.
+
+Add videos offers multi-file selection, local preview, a fixed dance destination,
+labels, artists, recording date and notes. Optional Google authorization enables
+live refresh and real resumable Drive upload. A public web OAuth client ID is still
+required: see [GOOGLE-SETUP.md](GOOGLE-SETUP.md). Missing configuration is reported
+honestly; upload success is reported only after Google's completion response.
+
+Uploads inspect current Drive names, reserve a generated file ID, and number new
+files above observed numeric names and locally reserved numbers, e.g. `0115.mp4`.
+Each dance has its own sequence and extensions are retained. Existing Drive files
+and local originals are never renamed or overwritten. Progress uses acknowledged
+bytes; Pause/Retry resumes the same session and ID while this tab stays open.
+Canceled allocations may leave gaps. Same-browser uploads use Web Locks where
+available. Cross-device numbering is checked but is not globally atomic; recheck
+on a collision. There is no shared sequence server.
+
+Connected refresh and confirmed uploads update this browser's library. Other guests
+see the deployed snapshot until refreshed/redeployed. This is not automatic public
+catalogue publishing or a shared metadata backend.
+
+## Metadata and discovery
+
+- Personal title, typed labels, artists/teachers, recording date, class/event,
+  location, BPM, notes, 1–10 rating, learning status, favourites and saved A–B loops.
+- Real Drive creation/modification dates, size, duration and resolution when known.
+  Artists and recording dates are user-entered; unknown values are not guessed.
+- Create, rename and delete labels across local videos. Types: Style, Technique,
+  Video type, Level, Artist. Optional Salsa/Bachata style suggestions are included.
+- Searchable label/artist dropdowns, dance/source/rating filters, text search,
+  numeric/title/rating/date sort and paging. Labels match together; artists match any.
+- Validated YouTube videos, Shorts and playlists, deduplicated and removable.
+  A playlist remains one library source and rating; it is not silently enumerated.
+- Daily Picks, balanced practice queues and explicit practice tracking are retained.
+  Queues advance manually so a move can be repeated as long as needed.
+
+Personal metadata uses browser storage (`bailacue:web:v1`) with backward-compatible
+migration. There is no BailaCue account or cross-device sync. Export/import merges
+validated backups including labels and uploaded entries. Google tokens stay in
+memory and never enter backups or playback URLs.
+
+## Player
+
+Every source offers Compact/Comfortable/Wide sizes, height adjustment, theater view
+and Full screen. A full-window layout and Exit button work when native fullscreen
+is unavailable. Escape exits that layout before closing the player.
+
+YouTube uses its official IFrame API. Local previews and authorized Drive streams
+use HTML5 video. Controls include play/pause, seek, speed, mute and A–B loops;
+native video also has mirror. Saved loops are metadata, not edited video files.
+A service worker forwards authorized Drive range streams without caching media or
+persisting tokens.
+
+Guest Drive retains Google's preview and its own controls. Its cross-origin iframe
+cannot use BailaCue's custom seek/speed/loops; Connect Google enables the HTML5 path.
+Drive processing/quota/permissions, provider restrictions, codecs or expired tokens
+can prevent playback. Open original remains available. No trimming, re-encoding or
+automatic watch tracking is claimed.
 
 ## Deployment
 
-Requested Netlify site: `bailacue`, ID `0aeef340-5366-454e-b379-14bfee4c1784`.
-The site is linked to `dn-lx/bailacue`. Visitor access is public, without password or
-team SSO. The initial tested develop commit `062e2bd` was published successfully:
-deploy `6adc7349e0264e5eb4fc553b`, ready, primary `https://bailacue.netlify.app`.
-Netlify's production branch was then set back to `main`, with only `develop` enabled
-for branch deploys. New develop pushes update `https://develop--bailacue.netlify.app`.
-The primary site retains the initial tested web build; this does not merge main.
-Do not merge main or change production content without the owner's request.
+Netlify `bailacue` (`0aeef340-5366-454e-b379-14bfee4c1784`) is linked to
+`dn-lx/bailacue`. Only develop is enabled as an additional branch deploy:
+`https://develop--bailacue.netlify.app`. Production branch remains `main`.
+The primary `https://bailacue.netlify.app` retains the initial tested 0.1 build;
+updating develop does not merge main or republish production.
 
-GitHub Actions passed the web lint, type checks, eight tests and build. Local
-Netlify state is ignored with `.netlify/` and is never committed.
-
-The Me+ spec router has no registered BailaCue canonical spec and there was no
-BailaCue interaction checkpoint in `interaction_sessions`. Current mobile handoff,
-repository requirements and the owner's newer web request determine this scope.
-Historical Supabase BailaCue tables were read only for schema discovery and are
-retired from the mobile runtime; this web app never queries or modifies them.
+See [VERIFICATION.md](VERIFICATION.md) and [DESIGN-REVIEW-0.2.md](DESIGN-REVIEW-0.2.md).
+No retired mobile Supabase table, Me+ database, paid service or plan upgrade is used.

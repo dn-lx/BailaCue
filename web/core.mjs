@@ -1,4 +1,5 @@
-/** BailaCue web domain logic. No provider credentials or account dependency. */
+/** BailaCue web domain logic. No BailaCue account dependency. */
+import { seedLabels, cleanLabels, cleanDetails } from './studio-model.mjs';
 export const STORAGE_KEY = 'bailacue:web:v1';
 export const SOURCES = Object.freeze([
   Object.freeze({ id: 'salsa', dance: 'Salsa', folderId: '1lVR5Pc-6SupJOfLIhcRE-oo69FUDM5Sm' }),
@@ -6,7 +7,7 @@ export const SOURCES = Object.freeze([
 ]);
 /** @returns {import('./types.js').State} */
 export function emptyState() {
-  return { version: 1, meta: {}, youtube: [], queue: [], history: [], daily: null, theme: 'light' };
+  return { version: 1, meta: {}, youtube: [], drive: [], labels: seedLabels(), numbering: { Salsa: 0, Bachata: 0 }, googleClientId: '', playerSize: 960, queue: [], history: [], daily: null, theme: 'light' };
 }
 export function rating(value) { return Number.isInteger(value) && value >= 1 && value <= 10 ? value : null; }
 export function parseYoutube(input) {
@@ -33,7 +34,7 @@ export function cleanState(input) {
   const out = emptyState();
   for (const [id, value] of Object.entries(input.meta || {}).slice(0, 10000)) {
     if (!/^(drive:|youtube:)/.test(id) || !value || typeof value !== 'object') continue;
-    out.meta[id] = { rating: rating(value.rating), favorite: value.favorite === true, notes: String(value.notes || '').slice(0, 10000), title: String(value.title || '').slice(0, 160), status: ['New', 'Practising', 'Learned'].includes(value.status) ? value.status : 'New', lastPractised: typeof value.lastPractised === 'string' ? value.lastPractised : null };
+    out.meta[id] = { ...cleanDetails(value), rating: rating(value.rating), favorite: value.favorite === true, notes: String(value.notes || '').slice(0, 10000), title: String(value.title || '').slice(0, 160), status: ['New', 'Practising', 'Learned'].includes(value.status) ? value.status : 'New', lastPractised: typeof value.lastPractised === 'string' ? value.lastPractised : null };
   }
   const seen = new Set();
   for (const v of input.youtube.slice(0, 1000)) {
@@ -47,6 +48,11 @@ export function cleanState(input) {
   out.queue = Array.isArray(input.queue) ? [...new Set(input.queue.filter(x => typeof x === 'string' && /^(drive:|youtube:)/.test(x)))].slice(0, 1000) : [];
   out.history = Array.isArray(input.history) ? input.history.filter(x => x && typeof x.id === 'string' && typeof x.at === 'string').slice(-1000).map(x => ({ id: x.id, at: x.at })) : [];
   out.theme = input.theme === 'dark' ? 'dark' : 'light';
+  out.labels = cleanLabels(input.labels);
+  out.googleClientId = /^[a-zA-Z0-9_-]+\.apps\.googleusercontent\.com$/.test(input.googleClientId || '') ? input.googleClientId : '';
+  out.playerSize = [680, 960, 1280].includes(input.playerSize) ? input.playerSize : 960;
+  for (const dance of ['Salsa', 'Bachata']) out.numbering[dance] = Number.isSafeInteger(input.numbering?.[dance]) && input.numbering[dance] >= 0 ? input.numbering[dance] : 0;
+  out.drive = Array.isArray(input.drive) ? input.drive.filter(v => v && v.provider === 'drive' && /^[A-Za-z0-9_-]{10,100}$/.test(v.providerId) && v.id === `drive:${v.providerId}` && SOURCES.some(s => s.dance === v.dance && s.folderId === v.folderId)).slice(0, 5000).map(v => ({ id: v.id, provider: 'drive', providerId: v.providerId, folderId: v.folderId, dance: v.dance, title: String(v.title || '').slice(0, 160), filename: String(v.filename || '').slice(0, 160), addedAt: String(v.addedAt || ''), updatedAt: String(v.updatedAt || ''), size: Number(v.size) || 0, duration: Number(v.duration) || null, width: Number(v.width) || null, height: Number(v.height) || null, mimeType: String(v.mimeType || 'video/mp4').slice(0, 60) })) : [];
   if (input.daily && typeof input.daily.day === 'string' && Array.isArray(input.daily.ids)) out.daily = { day: input.daily.day, ids: input.daily.ids.filter(x => typeof x === 'string').slice(0, 2) };
   return out;
 }
@@ -75,16 +81,18 @@ export function practiceQueue(videos, meta, random = Math.random) {
   while (byDance.some(x => x.length)) for (const pool of byDance) if (pool.length) out.push(pool.shift().id);
   return out;
 }
-/** @param {import('./types.js').Video[]} videos @param {Record<string, import('./types.js').Metadata>} meta @param {import('./types.js').Filters} filters */
-export function filterVideos(videos, meta, filters) {
+/** @param {import('./types.js').Video[]} videos @param {Record<string, import('./types.js').Metadata>} meta @param {import('./types.js').Filters} filters @param {import('./types.js').Label[]} labels */
+export function filterVideos(videos, meta, filters, labels = []) {
   const query = (filters.query || '').toLocaleLowerCase().trim();
   const out = videos.filter(v => {
     const m = meta[v.id] || {};
     return (!filters.dance || filters.dance === 'All' || v.dance === filters.dance)
       && (!filters.provider || filters.provider === 'all' || v.provider === filters.provider)
       && (!filters.favorite || m.favorite)
+      && (!filters.labelIds?.length || filters.labelIds.every(id => m.labelIds?.includes(id)))
+      && (!filters.artistIds?.length || filters.artistIds.some(id => m.artistIds?.includes(id)))
       && (!filters.rating || (filters.rating === 'unrated' ? !m.rating : m.rating === Number(filters.rating)))
-      && (!query || `${displayTitle(v, meta)} ${v.filename || ''} ${m.notes || ''}`.toLocaleLowerCase().includes(query));
+      && (!query || `${displayTitle(v, meta)} ${v.filename || ''} ${m.notes || ''} ${m.event || ''} ${m.location || ''} ${labels.filter(l => [...(m.labelIds || []), ...(m.artistIds || [])].includes(l.id)).map(l => l.name).join(' ')}`.toLocaleLowerCase().includes(query));
   });
   return out.sort((a, b) => {
     if (filters.sort === 'rating') return (meta[b.id]?.rating ?? 0) - (meta[a.id]?.rating ?? 0) || displayTitle(a, meta).localeCompare(displayTitle(b, meta), undefined, { numeric: true });
