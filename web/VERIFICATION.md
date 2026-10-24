@@ -65,3 +65,31 @@ centering transform, moving the hit target before pointer-up. Preserving the
 centering transform fixes the click; verified directly in the browser. This small
 CSS correction follows the initial 0.2 release on develop. Upload destination,
 recording date and notes also survived navigating to Labels and back in the same tab.
+
+
+## Playback copies · 0.3
+
+Syntax lint, frontend/domain type check, 30 tests and the static build pass. The 13
+new streaming checks cover provider URL validation, two-folder public-index filtering,
+private checkpoint/token exclusion, stable Drive identities, stale-copy rejection,
+read-only/setup-required responses, generic provider failures, cumulative storage
+limits, real tus request construction, acknowledged-byte resume, lost-response
+recovery, owner read access and rejecting ignored Drive ranges. Tests use controlled
+responses and never create billable copies.
+
+The actual cloud browser played Cloudflare's public documentation sample inside the
+HTML5 video element, with no player iframe. Read-only DOM showed paused=false,
+readyState=4, playbackRate=0.5, mirror=true and duration about 30 seconds. The MSE/HLS
+path used a blob media source and displayed Auto/240p/360p/480p/720p/1080p; 720p was
+selected. Set A/B showed 0:24→0:29. Native HLS also played during the initial test.
+The QA sample is excluded from the library, Git and explicit build inputs.
+
+Cloudflare currently shows sign-in. There is no configured Stream account token or
+owner Google sync credential in Netlify. No Stream activation, original copy, paid
+plan, Worker deployment or live schedule is claimed. Default sync is disabled and
+requires owner account/budget activation. Drive fallback stays available. Main and
+mobile remain unchanged. Setup and operational limits are in STREAMING-SETUP.md.
+
+The adaptive controls also fit 390px and 320px browser frames: measured document
+scroll widths equalled client widths (390/320px); player widths were 376/306px.
+Quality controls were visible. This is layout validation, not a physical phone test.

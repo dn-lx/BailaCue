@@ -1,3 +1,4 @@
+declare global { interface Window { Hls?: any; } }
 export interface Video {
   id: string;
   provider: string;
@@ -15,6 +16,7 @@ export interface Video {
   width?: number;
   height?: number;
   mimeType?: string;
+  streaming?: { uid: string; status: string; hls: string; version?: string };
 }
 export interface Metadata {
   rating?: number | null;
@@ -56,3 +58,5 @@ export interface Filters {
   labelIds?: string[];
   artistIds?: string[];
 }
+
+export {};

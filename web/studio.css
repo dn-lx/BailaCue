@@ -11,3 +11,5 @@
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important;scroll-behavior:auto!important}::view-transition-group(*),::view-transition-old(*),::view-transition-new(*){animation:none!important}}
 html:has(dialog[open]){overflow:hidden}#player.fullscreen-mode{width:100%!important}.fullscreen-exit{margin-right:10px}
 [hidden]{display:none!important}
+
+.transport .volume-label input{width:65px;min-width:45px;max-width:80px;accent-color:#aac5ff}.video-frame>video{background:#101723}
